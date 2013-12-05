@@ -854,6 +854,12 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        if (mVideoCallPanel!=null) {
+            mVideoCallPanel.onDestroy();
+            mVideoCallPanel = null;
+        }
+
         getActivity().unregisterReceiver(recorderStateReceiver);
     }
 
