@@ -259,6 +259,32 @@ public class CallCommandClient {
         }
     }
 
+    public void modifyCallInitiate(int callId, int callType) {
+        if (mCommandService == null) {
+            Log.e(this, "Cannot modifyCall(); CallCommandService == null");
+            return;
+        }
+        try {
+            Log.v(this, "modifyCall(), callId=" + callId + " callType=" + callType);
+            mCommandService.modifyCallInitiate(callId, callType);
+        } catch (RemoteException e) {
+            Log.e(this, "Error on modifyCall().");
+        }
+    }
+
+    public void modifyCallConfirm(boolean responseType, int callId) {
+        if (mCommandService == null) {
+            Log.e(this, "Cannot modifyCallConfirm(); CallCommandService == null" + responseType);
+            return;
+        }
+        try {
+            Log.v(this, "modifyCallConfirm() ");
+            mCommandService.modifyCallConfirm(responseType, callId);
+        } catch (RemoteException e) {
+            Log.e(this, "Error on modifyCallConfirm().");
+        }
+    }
+
     public void setSystemBarNavigationEnabled(boolean enable) {
         if (mCommandService == null) {
             Log.e(this, "Cannot setSystemBarNavigationEnabled(); CallCommandService == null");

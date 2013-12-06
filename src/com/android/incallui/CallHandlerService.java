@@ -49,8 +49,9 @@ public class CallHandlerService extends Service {
     private static final int ON_START = 9;
     private static final int ON_DESTROY = 10;
     private static final int ON_ACTIVE_SUB_CHANGE = 11;
+    private static final int ON_UNSOL_CALLMODIFY = 12;
 
-    private static final int LARGEST_MSG_ID = ON_DESTROY;
+    private static final int LARGEST_MSG_ID = ON_ACTIVE_SUB_CHANGE;
 
 
     private CallList mCallList;
@@ -189,6 +190,16 @@ public class CallHandlerService extends Service {
         }
 
         @Override
+        public void onModifyCall(Call call) {
+            try {
+                Log.i(TAG, "onModifyCallResponse: " + call);
+                mMainHandler.sendMessage(mMainHandler.obtainMessage(ON_UNSOL_CALLMODIFY, call));
+            } catch (Exception e) {
+                Log.e(TAG, "Error processing onDisconnect() call.", e);
+            }
+        }
+
+        @Override
         public void onActiveSubChanged(int activeSub) {
             mMainHandler.sendMessage(mMainHandler.obtainMessage(ON_ACTIVE_SUB_CHANGE, activeSub));
         }
@@ -234,6 +245,19 @@ public class CallHandlerService extends Service {
         mInCallPresenter.tearDown();
         mInCallPresenter = null;
         mAudioModeProvider = null;
+    }
+
+    public void doModifyCall(Call call) {
+        Log.d(TAG, "doModifyCall: Call:" + call);
+        if (call != null && mInCallPresenter != null && mCallList != null) {
+            Log.d(TAG, "doModifyCall: Updating CallList:" + mCallList.getCall(call.getCallId()));
+            mCallList.onUpdate(call);
+            mInCallPresenter.onModifyCallRequest(call);
+        } else {
+            Log.e(TAG, "doModifyCall: isCallValid=" + (call != null));
+            Log.e(TAG, "doModifyCall: isInCallPresenterValid=" + (mInCallPresenter != null));
+            Log.e(TAG, "doModifyCall: isCallListValid=" + (mCallList != null));
+        }
     }
 
     /**
@@ -310,6 +334,11 @@ public class CallHandlerService extends Service {
                 break;
             case ON_DESTROY:
                 doStop();
+                break;
+            case ON_UNSOL_CALLMODIFY:
+                Call call = (Call) msg.obj;
+                Log.i(TAG, "ON_UNSOL_CALLMODIFY: Call=" + call);
+                doModifyCall(call);
                 break;
             case ON_ACTIVE_SUB_CHANGE:
                 Log.i(TAG, "ON_ACTIVE_SUB_CHANGE: " + msg.obj);
