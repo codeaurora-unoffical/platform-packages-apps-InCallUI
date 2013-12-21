@@ -1543,4 +1543,8 @@
     <string name="sub_2">SUB 2</string>
     <!-- This can be used in any application wanting to disable the text "Emergency number" -->
     <string name="emergency_call_dialog_number_for_display">Emergency number</string>
+    <string name="volume_boost_notify_enabled">"Volume boost ON."</string>
+    <string name="volume_boost_notify_disabled">"Volume boost OFF."</string>
+    <string name="volume_boost_notify_unavailable">"Extra volume is not available when Wired/Blue tooth headset is used."</string>
+    <string name="volume_boost_toast_position">180</string>
 </resources>
