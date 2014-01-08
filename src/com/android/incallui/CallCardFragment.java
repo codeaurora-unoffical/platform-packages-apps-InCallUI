@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2013, The Linux Foundation. All rights reserved.
- * Not a Contribution, Apache license notifications and license are retained
- * for attribution purposes only.
+ * Not a Contribution.
  *
  * Copyright (C) 2013 The Android Open Source Project
  *
@@ -21,7 +20,10 @@
 package com.android.incallui;
 
 import android.animation.LayoutTransition;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -71,6 +73,8 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
     private AudioManager mAudioManager;
     private Toast mVBNotify;
     private int mVBToastPosition;
+    private TextView mRecordingTimeLabel;
+    private TextView mRecordingIcon;
 
     // Secondary caller info
     private ViewStub mSecondaryCallInfo;
@@ -91,6 +95,12 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
     private static final int IMS_AUDIO_OUTPUT_DISABLE_SPEAKER = 1;
 
     private static final String VOLUME_BOOST = "volume_boost";
+
+    private static final String ACTION_RECORD_TIME_CHANGED =
+            "com.android.action.RECORD_TIME_CHANGED";
+
+    private static final String ACTION_RECORD_STOP =
+            "com.android.action.RECORD_STOP";
 
     /**
      * Controls audio route for VT calls.
@@ -121,6 +131,11 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
 
         mAudioManager = (AudioManager) getActivity()
                 .getSystemService(Context.AUDIO_SERVICE);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_RECORD_STOP);
+        filter.addAction(ACTION_RECORD_TIME_CHANGED);
+        getActivity().registerReceiver(recorderStateReceiver, filter);
     }
 
 
@@ -166,6 +181,8 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         if (null != mVBButton) {
             mVBButton.setOnClickListener(mVBListener);
         }
+        mRecordingTimeLabel = (TextView) view.findViewById(R.id.recordingTime);
+        mRecordingIcon = (TextView) view.findViewById(R.id.recordingIcon);
     }
 
     @Override
@@ -833,4 +850,26 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             }
         }
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        getActivity().unregisterReceiver(recorderStateReceiver);
+    }
+
+    private BroadcastReceiver recorderStateReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (ACTION_RECORD_TIME_CHANGED.equals(intent.getAction())) {
+                mRecordingTimeLabel.setVisibility(View.VISIBLE);
+
+                mRecordingIcon.setVisibility(View.VISIBLE);
+            } else if (ACTION_RECORD_STOP.equals(intent.getAction())) {
+                mRecordingTimeLabel.setVisibility(View.GONE);
+
+                mRecordingIcon.setVisibility(View.GONE);
+            }
+        }
+    };
 }

@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2013, The Linux Foundation. All rights reserved.
- * Not a Contribution, Apache license notifications and license are retained
- * for attribution purposes only.
+ * Not a Contribution.
  *
  * Copyright (C) 2013 The Android Open Source Project
  *
@@ -20,6 +19,7 @@
 
 package com.android.incallui;
 
+import android.content.Context;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -54,6 +54,7 @@ public class CallButtonFragment
     private ImageButton mAddCallButton;
     private ImageButton mSwapButton;
     private ImageButton mAddParticipantButton;
+    private ImageButton mMoreMenuButton;
 
     private PopupMenu mAudioModePopup;
     private boolean mAudioModePopupVisible;
@@ -61,6 +62,7 @@ public class CallButtonFragment
     private View mExtraRowButton;
     private View mManageConferenceButton;
     private View mGenericMergeButton;
+    private PopupMenu mMoreMenu;
 
     private Button mModifyCallButton;
 
@@ -155,6 +157,17 @@ public class CallButtonFragment
         mModifyCallButton = (Button) parent.findViewById(R.id.modifyCallButton);
         mModifyCallButton.setOnClickListener(this);
 
+        mMoreMenuButton = (ImageButton) parent.findViewById(R.id.moreMenuButton);
+        if (mMoreMenuButton != null) {
+            mMoreMenuButton.setOnClickListener(this);
+            mMoreMenu = new MorePopupMenu(parent.getContext(), mMoreMenuButton);
+
+            mMoreMenu.inflate(R.menu.incall_more_menu);
+            mMoreMenu.setOnMenuItemClickListener(this);
+
+            mMoreMenuButton.setOnTouchListener(mMoreMenu.getDragToOpenListener());
+        }
+
         return parent;
     }
 
@@ -202,6 +215,9 @@ public class CallButtonFragment
             case R.id.modifyCallButton:
                 getPresenter().modifyCallButtonClicked();
                 break;
+            case R.id.moreMenuButton:
+                mMoreMenu.show();
+                break;
             default:
                 Log.wtf(this, "onClick: unexpected");
                 break;
@@ -227,6 +243,7 @@ public class CallButtonFragment
         mAddCallButton.setEnabled(isEnabled);
         mSwapButton.setEnabled(isEnabled);
         mAddParticipantButton.setEnabled(isEnabled);
+        mMoreMenuButton.setEnabled(isEnabled);
     }
 
     @Override
@@ -256,7 +273,10 @@ public class CallButtonFragment
 
     @Override
     public void showMerge(boolean show) {
-        mMergeButton.setVisibility(show ? View.VISIBLE : View.GONE);
+        final Menu menu = mMoreMenu.getMenu();
+        final MenuItem mergeCall = menu.findItem(R.id.menu_merge_call);
+
+        mergeCall.setVisible(show);
     }
 
     @Override
@@ -266,12 +286,18 @@ public class CallButtonFragment
 
     @Override
     public void showAddCall(boolean show) {
-        mAddCallButton.setVisibility(show ? View.VISIBLE : View.GONE);
+        final Menu menu = mMoreMenu.getMenu();
+        final MenuItem addCall = menu.findItem(R.id.menu_add_call);
+
+        addCall.setVisible(show);
     }
 
     @Override
     public void enableAddCall(boolean enabled) {
-        mAddCallButton.setEnabled(enabled);
+        final Menu menu = mMoreMenu.getMenu();
+        final MenuItem addCall = menu.findItem(R.id.menu_add_call);
+
+        addCall.setEnabled(enabled);
     }
 
     public void enableAddParticipant(boolean show) {
@@ -311,6 +337,29 @@ public class CallButtonFragment
             case R.id.audio_mode_bluetooth:
                 mode = AudioMode.BLUETOOTH;
                 break;
+
+            case R.id.menu_start_record:
+                if (getActivity() != null
+                        && getActivity() instanceof InCallActivity) {
+                    ((InCallActivity) getActivity()).startInCallRecorder();
+                }
+                return true;
+
+            case R.id.menu_stop_record:
+                if (getActivity() != null
+                        && getActivity() instanceof InCallActivity) {
+                    ((InCallActivity) getActivity()).stopInCallRecorder();
+                }
+                return true;
+
+            case R.id.menu_add_call:
+                getPresenter().addCallClicked();
+                return true;
+
+            case R.id.menu_merge_call:
+                getPresenter().mergeClicked();
+                return true;
+
             default:
                 Log.e(this, "onMenuItemClick:  unexpected View ID " + item.getItemId()
                         + " (MenuItem = '" + item + "')");
@@ -585,5 +634,31 @@ public class CallButtonFragment
     @Override
     public void hideExtraRow() {
        mExtraRowButton.setVisibility(View.GONE);
+    }
+
+    private class MorePopupMenu extends PopupMenu {
+        public MorePopupMenu(Context context, View anchor) {
+            super(context, anchor);
+        }
+
+        @Override
+        public void show() {
+            final Menu menu = getMenu();
+            final MenuItem startRecord = menu.findItem(R.id.menu_start_record);
+            final MenuItem stopRecord = menu.findItem(R.id.menu_stop_record);
+
+            if (getActivity() != null
+                    && getActivity() instanceof InCallActivity) {
+                boolean isRecording = ((InCallActivity)getActivity()).isInCallRecording();
+                boolean isRecordEnabled = ((InCallActivity)getActivity()).isInCallRecorderReady();
+
+                startRecord.setVisible(!isRecording && isRecordEnabled);
+                startRecord.setEnabled(!isRecording && isRecordEnabled);
+
+                stopRecord.setVisible(isRecording && isRecordEnabled);
+                stopRecord.setEnabled(isRecording && isRecordEnabled);
+            }
+            super.show();
+        }
     }
 }

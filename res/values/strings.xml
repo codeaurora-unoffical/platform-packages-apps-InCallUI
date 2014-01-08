@@ -1547,4 +1547,10 @@
     <string name="volume_boost_notify_disabled">"Volume boost OFF."</string>
     <string name="volume_boost_notify_unavailable">"Extra volume is not available when Wired/Blue tooth headset is used."</string>
     <string name="volume_boost_toast_position">180</string>
+    <string name="onscreenMoreMenuText">More menu</string>
+    <string name="menu_start_record">Call record</string>
+    <string name="menu_stop_record">End recording</string>
+    <string name="menu_add_call">Add call</string>
+    <string name="menu_merge_call">Merge call</string>
+    <string name="recording_time_text">Recording</string>
 </resources>

@@ -121,4 +121,7 @@
 
     <!-- Dimensions for Video Call Panel -->
     <dimen name="indicator_bar_width">38dp</dimen>
+
+    <!-- Padding at the top and right edges of the "call primary info". -->
+    <dimen name="call_recorder_top_right_padding">8dp</dimen>
 </resources>

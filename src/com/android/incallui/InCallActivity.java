@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2013, The Linux Foundation. All rights reserved.
- * Not a Contribution, Apache license notifications and license are retained
- * for attribution purposes only.
+ * Not a Contribution.
  *
  * Copyright (C) 2006 The Android Open Source Project
  *
@@ -23,19 +22,25 @@ package com.android.incallui;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
+import com.android.recorder.ICallRecorder;
 import com.android.services.telephony.common.Call;
 import com.android.services.telephony.common.Call.State;
 import com.android.services.telephony.common.CallDetails;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.telephony.MSimTelephonyManager;
 import android.view.KeyEvent;
 import android.view.View;
@@ -53,6 +58,12 @@ public class InCallActivity extends Activity {
 
     private static final int INVALID_RES_ID = -1;
 
+    private static final String CALL_RECORDER_ACTION
+        = "com.android.action.CALL_RECORD";
+
+    private static final boolean DBG = false;
+    private final String DBG_CALL_RECORD = "CallRecorder";
+
     protected CallButtonFragment mCallButtonFragment;
     protected CallCardFragment mCallCardFragment;
     private AnswerFragment mAnswerFragment;
@@ -65,11 +76,16 @@ public class InCallActivity extends Activity {
     /** Use to pass 'showDialpad' from {@link #onNewIntent} to {@link #onResume} */
     private boolean mShowDialpadRequested;
 
+    private ICallRecorder mCallRecorder;
+
     @Override
     protected void onCreate(Bundle icicle) {
         Log.d(this, "onCreate()...  this = " + this);
 
         super.onCreate(icicle);
+
+        // bind call record service when start up in call ui
+        bindRecorderService(this);
 
         if (MSimTelephonyManager.getDefault().getMultiSimConfiguration()
                 == MSimTelephonyManager.MultiSimVariants.DSDA) {
@@ -150,6 +166,7 @@ public class InCallActivity extends Activity {
 
         InCallPresenter.getInstance().setActivity(null);
 
+        unbindRecorderService(this);
         super.onDestroy();
     }
 
@@ -695,5 +712,98 @@ public class InCallActivity extends Activity {
 
     public void updateDsdaTab() {
         Log.e(this, "updateDsdaTab : Not supported ");
+    }
+
+    private void bindRecorderService(Context context) {
+        if (mCallRecorder == null) {
+            final Intent intent = new Intent(CALL_RECORDER_ACTION);
+            try {
+                context.bindService(intent, connection, BIND_AUTO_CREATE);
+            } catch (Exception e) {
+                logd(DBG_CALL_RECORD + " bind call recorder failed : " + e);
+            }
+        }
+    }
+
+    private void unbindRecorderService(Context context) {
+        if (mCallRecorder == null) {
+            try {
+                context.unbindService(connection);
+            } catch (Exception e) {
+                logd(DBG_CALL_RECORD + " unbind call recorder failed : " + e);
+            }
+        }
+    }
+
+    protected ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mCallRecorder = ICallRecorder.Stub.asInterface(service);
+            logd(DBG_CALL_RECORD + "bind call record service:" + mCallRecorder);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            logd(DBG_CALL_RECORD + "call record service is unbind");
+            mCallRecorder = null;
+        }
+    };
+
+    public boolean isInCallRecorderReady() {
+        if (mCallRecorder != null) {
+            try {
+                return mCallRecorder.isEnabled();
+            } catch (RemoteException e) {
+                mCallRecorder = null;
+
+                logd(DBG_CALL_RECORD + "Call recorder not ready, error:" + e);
+            }
+        }
+
+        return false;
+    }
+
+    public boolean isInCallRecording() {
+        if (mCallRecorder != null) {
+            try {
+                return mCallRecorder.isRecording();
+            } catch (RemoteException e) {
+                mCallRecorder = null;
+
+                logd(DBG_CALL_RECORD + "get recorder status error:" + e);
+            }
+        }
+
+        return false;
+    }
+
+    public void startInCallRecorder() {
+        if (mCallRecorder != null) {
+            try {
+                mCallRecorder.startInCallRecorder();
+            } catch (RemoteException e) {
+                mCallRecorder = null;
+
+                logd(DBG_CALL_RECORD + "start recorder error:" + e);
+            }
+        }
+    }
+
+    public void stopInCallRecorder() {
+        if (mCallRecorder != null) {
+            try {
+                mCallRecorder.stopInCallRecorder();
+            } catch (RemoteException e) {
+                mCallRecorder = null;
+
+                logd(DBG_CALL_RECORD + "start recorder error:" + e);
+            }
+        }
+    }
+
+    public void logd(String msg) {
+        if (DBG) {
+            Log.w(this, msg);
+        }
     }
 }
