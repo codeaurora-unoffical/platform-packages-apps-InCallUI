@@ -99,6 +99,8 @@ public class InCallPresenter implements CallList.Listener {
 
     private boolean isImsMediaInitialized = false;
 
+    private Call.DisconnectCause mLastDisconnectCause = Call.DisconnectCause.UNKNOWN;
+
     public static synchronized InCallPresenter getInstance() {
         if (sInCallPresenter == null) {
             sInCallPresenter = new InCallPresenter();
@@ -170,9 +172,11 @@ public class InCallPresenter implements CallList.Listener {
         final boolean doFinish = (mInCallActivity != null && isActivityStarted());
         Log.i(this, "Hide in call UI: " + doFinish);
 
-        if ((mCallList != null) && !(mCallList.existsLiveCall(mCallList.getActiveSubscription()))
-                && mCallList.switchToOtherActiveSubscription()) {
-            return;
+        if ((mCallList != null) && !(mCallList.existsLiveCall(mCallList.getActiveSubscription()))) {
+            Log.d(this, "Switch active sub. Last disc cause = " + mLastDisconnectCause);
+            boolean retainLch = (mLastDisconnectCause == Call.DisconnectCause.NORMAL)
+                    ? true: false;
+            if (mCallList.switchToOtherActiveSubscription(retainLch)) return;
         }
 
         if (doFinish) {
@@ -398,6 +402,8 @@ public class InCallPresenter implements CallList.Listener {
      */
     @Override
     public void onDisconnect(Call call) {
+        mLastDisconnectCause = (call != null ) ? call.getDisconnectCause():
+                Call.DisconnectCause.UNKNOWN;
         hideDialpadForDisconnect();
         maybeShowErrorDialogOnDisconnect(call);
 
