@@ -132,101 +132,107 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/primary_call_banner">
 
-            <!-- Volume boost and Volume enhancements in-call UI -->
-            <Button android:id="@+id/volumeBoost"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:visibility="invisible"
-                android:soundEffectsEnabled="false"
-                android:background="@drawable/volume_in_boost_nor"/>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-            <TextView android:id="@+id/recordingTime"
-                android:text="@string/recording_time_text"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:paddingTop="@dimen/call_recorder_top_right_padding"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight="@dimen/call_recorder_top_right_padding"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@color/incall_call_banner_text_color"
-                android:visibility="invisible"
-                android:singleLine="true"/>
+                <!-- Volume boost and Volume enhancements in-call UI -->
+                <Button android:id="@+id/volumeBoost"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:visibility="invisible"
+                    android:soundEffectsEnabled="false"
+                    android:background="@drawable/volume_in_boost_nor"/>
 
-            <TextView android:id="@+id/recordingIcon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toLeftOf="@id/recordingTime"
-                android:paddingTop="9dp"
-                android:drawableRight="@drawable/ic_recording_indicator"
-                android:visibility="invisible"
-                android:layout_marginRight="5dp" />
-        </RelativeLayout>
+                <TextView android:id="@+id/recordingTime"
+                    android:text="@string/recording_time_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="@dimen/call_recorder_top_right_padding"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="@dimen/call_recorder_top_right_padding"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/incall_call_banner_text_color"
+                    android:visibility="invisible"
+                    android:singleLine="true"/>
 
-        <LinearLayout android:id="@+id/supplementary_info_container"
-            style="@style/PrimaryCallInfoSupplementaryInfoContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|right"
-            android:orientation="vertical"
-            android:background="@color/incall_secondary_info_background"
-            android:animateLayoutChanges="true">
+                <TextView android:id="@+id/recordingIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@id/recordingTime"
+                    android:paddingTop="9dp"
+                    android:drawableRight="@drawable/ic_recording_indicator"
+                    android:visibility="invisible"
+                    android:layout_marginRight="5dp" />
+            </RelativeLayout>
 
-            <!-- Shown when a gateway provider is used during any outgoing call. -->
-            <LinearLayout android:id="@+id/providerInfo"
+            <!-- Layout to replace the InCallContactPhoto with the video call panel
+                 for a VT call. By default this view is not visible -->
+            <include layout="@layout/invideocall_panel" />
+
+            <LinearLayout android:id="@+id/supplementary_info_container"
+                style="@style/PrimaryCallInfoSupplementaryInfoContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="@dimen/provider_info_top_bottom_padding"
-                android:paddingBottom="@dimen/provider_info_top_bottom_padding"
-                android:paddingStart="@dimen/call_banner_side_padding"
-                android:paddingEnd="@dimen/call_banner_side_padding"
-                android:gravity="end"
-                android:orientation="horizontal"
-                android:background="@android:color/transparent"
-                android:visibility="gone">
-                <TextView android:id="@+id/providerLabel"
-                    android:layout_width="0px"
+                android:layout_gravity="center_vertical|right"
+                android:orientation="vertical"
+                android:background="@color/incall_secondary_info_background"
+                android:animateLayoutChanges="true">
+
+                <!-- Shown when a gateway provider is used during any outgoing call. -->
+                <LinearLayout android:id="@+id/providerInfo"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="6"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textAllCaps="true"
-                    android:textColor="@color/incall_call_banner_text_color"
-                    android:singleLine="true"
-                    android:ellipsize="marquee" />
-                <TextView android:id="@+id/providerAddress"
-                    android:layout_width="0px"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="4"
+                    android:paddingTop="@dimen/provider_info_top_bottom_padding"
+                    android:paddingBottom="@dimen/provider_info_top_bottom_padding"
+                    android:paddingStart="@dimen/call_banner_side_padding"
+                    android:paddingEnd="@dimen/call_banner_side_padding"
                     android:gravity="end"
-                    android:paddingStart="8dp"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textAllCaps="true"
-                    android:textColor="@color/incall_call_banner_text_color"
-                    android:singleLine="true"
-                    android:ellipsize="middle" />
+                    android:orientation="horizontal"
+                    android:background="@android:color/transparent"
+                    android:visibility="gone">
+                    <TextView android:id="@+id/providerLabel"
+                        android:layout_width="0px"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="6"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textAllCaps="true"
+                        android:textColor="@color/incall_call_banner_text_color"
+                        android:singleLine="true"
+                        android:ellipsize="marquee" />
+                    <TextView android:id="@+id/providerAddress"
+                        android:layout_width="0px"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="4"
+                        android:gravity="end"
+                        android:paddingStart="8dp"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textAllCaps="true"
+                        android:textColor="@color/incall_call_banner_text_color"
+                        android:singleLine="true"
+                        android:ellipsize="middle" />
+                </LinearLayout>
+
+                <!-- The "call state label": In some states, this shows a special
+                     indication like "Dialing" or "Incoming call" or "Call ended".
+                     It's unused for the normal case of an active ongoing call. -->
+                <TextView android:id="@+id/callStateLabel"
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:paddingTop="@dimen/provider_info_top_bottom_padding"
+                          android:paddingBottom="@dimen/provider_info_top_bottom_padding"
+                          android:paddingStart="@dimen/call_banner_side_padding"
+                          android:paddingEnd="@dimen/call_banner_side_padding"
+                          android:gravity="end"
+                          android:textAppearance="?android:attr/textAppearanceSmall"
+                          android:textColor="@color/incall_call_banner_text_color"
+                          android:textAllCaps="true"
+                          android:background="@android:color/transparent"
+                          android:singleLine="true"
+                          android:ellipsize="end"/>
             </LinearLayout>
 
-            <!-- The "call state label": In some states, this shows a special
-                 indication like "Dialing" or "Incoming call" or "Call ended".
-                 It's unused for the normal case of an active ongoing call. -->
-            <TextView android:id="@+id/callStateLabel"
-                      android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:paddingTop="@dimen/provider_info_top_bottom_padding"
-                      android:paddingBottom="@dimen/provider_info_top_bottom_padding"
-                      android:paddingStart="@dimen/call_banner_side_padding"
-                      android:paddingEnd="@dimen/call_banner_side_padding"
-                      android:gravity="end"
-                      android:textAppearance="?android:attr/textAppearanceSmall"
-                      android:textColor="@color/incall_call_banner_text_color"
-                      android:textAllCaps="true"
-                      android:background="@android:color/transparent"
-                      android:singleLine="true"
-                      android:ellipsize="end"/>
-        </LinearLayout>
-
-        <!-- Layout to replace the InCallContactPhoto with the video call panel
-             for a VT call. By default this view is not visible -->
-        <include layout="@layout/invideocall_panel" />
+        </RelativeLayout>
 
     </LinearLayout>
 
