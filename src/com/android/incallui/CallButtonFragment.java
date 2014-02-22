@@ -652,11 +652,17 @@ public class CallButtonFragment
                 boolean isRecording = ((InCallActivity)getActivity()).isInCallRecording();
                 boolean isRecordEnabled = ((InCallActivity)getActivity()).isInCallRecorderReady();
 
-                startRecord.setVisible(!isRecording && isRecordEnabled);
-                startRecord.setEnabled(!isRecording && isRecordEnabled);
+                // If there is Ims call, don't show call recorder
+                boolean hasImsCall = CallUtils.hasImsCall(CallList.getInstance());
 
-                stopRecord.setVisible(isRecording && isRecordEnabled);
-                stopRecord.setEnabled(isRecording && isRecordEnabled);
+                boolean startEnabled = !isRecording && isRecordEnabled && !hasImsCall;
+                boolean stopEnabled = isRecording && isRecordEnabled && !hasImsCall;
+
+                startRecord.setVisible(startEnabled);
+                startRecord.setEnabled(startEnabled);
+
+                stopRecord.setVisible(stopEnabled);
+                stopRecord.setEnabled(stopEnabled);
             }
             super.show();
         }
