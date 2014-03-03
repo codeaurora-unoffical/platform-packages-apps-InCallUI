@@ -21,6 +21,7 @@ package com.android.incallui;
 
 import android.animation.LayoutTransition;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -93,6 +94,9 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
     // if connected, speaker/earpiece for video/voice call.
     private static final int IMS_AUDIO_OUTPUT_DEFAULT = 0;
     private static final int IMS_AUDIO_OUTPUT_DISABLE_SPEAKER = 1;
+
+    private static final int TTY_MODE_OFF = 0;
+    private static final int TTY_MODE_HCO = 2;
 
     private static final String VOLUME_BOOST = "volume_boost";
 
@@ -787,7 +791,11 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
     private boolean isVBAvailable() {
         int mode = AudioModeProvider.getInstance().getAudioMode();
 
-        return (mode == AudioMode.EARPIECE || mode == AudioMode.SPEAKER);
+        int settingsTtyMode = Settings.Secure.getInt(getActivity().getContentResolver(),
+                Settings.Secure.PREFERRED_TTY_MODE, TTY_MODE_OFF);
+
+        return (mode == AudioMode.EARPIECE || mode == AudioMode.SPEAKER
+                || settingsTtyMode == TTY_MODE_HCO);
     }
 
     private void switchVBStatus() {
