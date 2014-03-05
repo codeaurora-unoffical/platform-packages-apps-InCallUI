@@ -754,7 +754,14 @@ public class InCallPresenter implements CallList.Listener {
         // for the call waiting case, we finish() the current activity and start a new one.
         // There should be no jank from this since the screen is already off and will remain so
         // until our new activity is up.
-        if (mProximitySensor.isScreenReallyOff() && isCallWaiting) {
+
+        // In addition to call waiting scenario, we need to force finish() in case of DSDA when
+        // we get an incoming call on one sub and there is a live call in other sub and screen
+        // is off.
+        boolean anyOtherSubActive = (incomingCall != null && mCallList.isAnyOtherSubActive(
+                mCallList.getActiveSubscription()));
+
+        if (mProximitySensor.isScreenReallyOff() && (isCallWaiting || anyOtherSubActive)) {
             if (isActivityStarted()) {
                 mInCallActivity.finish();
             }
@@ -850,6 +857,12 @@ public class InCallPresenter implements CallList.Listener {
             // that moment
             // the system may not find any Activity which can accept this Intent
             Log.e(LOG_TAG, "Activity for adding calls isn't found.");
+        }
+    }
+
+    public void onSuppServiceFailed(int service) {
+        if (mInCallActivity != null) {
+            mInCallActivity.onSuppServiceFailed(service);
         }
     }
 
