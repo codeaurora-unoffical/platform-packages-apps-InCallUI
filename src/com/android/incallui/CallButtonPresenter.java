@@ -322,6 +322,9 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
             mShowManageConference = (call.isConferenceCall() && !isGenericConference);
 
             updateExtraButtonRow();
+        } else {
+            ui.enableAddParticipant(false);
+            ui.showModifyCall(false);
         }
     }
 
