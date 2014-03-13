@@ -64,6 +64,7 @@ public class InCallPresenter implements CallList.Listener {
     private ProximitySensor mProximitySensor;
     private boolean mServiceConnected = false;
     private static String LOG_TAG = "InCallPresenter";
+    VideoCallManager mVideoCallManager;
 
     /**
      * This table is for deciding whether consent is
@@ -148,8 +149,10 @@ public class InCallPresenter implements CallList.Listener {
         // will kick off an update and the whole process can start.
         mCallList.addListener(this);
 
-        // Initialize VideoCallManager. Instantiates the singleton.
-        VideoCallManager.getInstance(mContext);
+        mVideoCallManager = VideoCallManager.getInstance(mContext);
+        final VideoPauseController videoPause = mVideoCallManager.getVideoPauseController();
+        addListener(videoPause);
+        addIncomingCallListener(videoPause);
 
         Log.d(this, "Finished InCallPresenter.setUp");
     }
@@ -535,6 +538,8 @@ public class InCallPresenter implements CallList.Listener {
         if (showing) {
             mIsActivityPreviouslyStarted = true;
         }
+
+        mVideoCallManager.getVideoPauseController().onUiShowing(showing);
     }
 
     /**
