@@ -226,7 +226,8 @@ public class InCallActivity extends Activity {
         // in-call UI:
 
         if (mDialpadFragment.isVisible()) {
-            mCallButtonFragment.displayDialpad(false);  // do the "closing" animation
+            // Notify CallButtonPresenter to remove Dialpad and update UI
+            mCallButtonFragment.getPresenter().showDialpadClicked(false);
             return;
         } else if (mConferenceManagerFragment.isVisible()) {
             mConferenceManagerFragment.setVisible(false);
