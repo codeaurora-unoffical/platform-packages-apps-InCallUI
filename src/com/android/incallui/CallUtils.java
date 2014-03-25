@@ -116,7 +116,9 @@ public class CallUtils {
     }
 
     public static boolean isVideoPaused(Call call) {
-        return call!=null && call.getCallDetails().getCallType() == CallDetails.CALL_TYPE_VT_PAUSE;
+        return call != null
+                && call.getCallDetails().getVideoPauseState()
+                == CallDetails.VIDEO_PAUSE_STATE_PAUSED;
     }
 
     public static boolean areCallsSame(Call call1, Call call2) {
