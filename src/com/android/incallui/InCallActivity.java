@@ -138,6 +138,11 @@ public class InCallActivity extends Activity {
             mCallButtonFragment.displayDialpad(true);
             mShowDialpadRequested = false;
         }
+
+        final Call call = CallList.getInstance().getIncomingCall();
+        if (call != null) {
+            CallCommandClient.getInstance().setSystemBarNavigationEnabled(false);
+        }
     }
 
     // onPause is guaranteed to be called when the InCallActivity goes
@@ -152,6 +157,8 @@ public class InCallActivity extends Activity {
         mDialpadFragment.onDialerKeyUp(null);
 
         InCallPresenter.getInstance().onUiShowing(false);
+
+        CallCommandClient.getInstance().setSystemBarNavigationEnabled(true);
     }
 
     @Override
