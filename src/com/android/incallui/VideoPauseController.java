@@ -154,15 +154,17 @@ class VideoPauseController implements InCallStateListener, IncomingCallListener 
      * @param resume If true resume request will be sent, otherwise pause request.
      */
     private void sendRequest(Call call, boolean resume) {
-        if (resume) {
-            log("sending resume request, call=" + call);
-            mCallCommandClient.modifyCallInitiate(call.getCallId(),
-                    CallDetails.CALL_TYPE_VT_RESUME);
-        } else {
-            log("sending pause request, call=" + call);
-            mCallCommandClient.modifyCallInitiate(call.getCallId(),
-                    CallDetails.CALL_TYPE_VT_PAUSE);
-        }
+//        Temporarily desabling video multitasking since modem doesn't
+//        support this yet.
+//        if (resume) {
+//            log("sending resume request, call=" + call);
+//            mCallCommandClient.modifyCallInitiate(call.getCallId(),
+//                    CallDetails.CALL_TYPE_VT_RESUME);
+//        } else {
+//            log("sending pause request, call=" + call);
+//            mCallCommandClient.modifyCallInitiate(call.getCallId(),
+//                    CallDetails.CALL_TYPE_VT_PAUSE);
+//        }
     }
 
     /**
