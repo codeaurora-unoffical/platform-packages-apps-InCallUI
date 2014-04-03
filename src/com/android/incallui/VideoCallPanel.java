@@ -70,6 +70,7 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
     private TextureView mCameraPreview;
     private SurfaceTexture mCameraSurface;
     private SurfaceTexture mFarEndSurface;
+    private boolean mCanReleaseFarEndSurface = false;
     private ImageView mCameraPicker;
     private final Resize mResize = new Resize();
 
@@ -228,8 +229,6 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
         // Set media event listener
         mVideoCallManager.setMediaEventListener(new MediaEventListener());
         mVideoCallManager.setCvoEventListener(new CvoListener());
-
-        releaseCachedSurfaces();
     }
 
     // The function must be called from the parent's onDestroy function.
@@ -386,14 +385,7 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
         if (surface.equals(mCameraPreview.getSurfaceTexture())) {
             if (DBG) log("Camera surface texture created");
 
-            // Use cached surface texture.
-            if (mCameraSurface==null) {
-                log("Caching camera surface texture.");
-                mCameraSurface = surface;
-            } else {
-                log("Resetting camera surface texture");
-                mCameraPreview.setSurfaceTexture(mCameraSurface);
-            }
+            mCameraSurface = surface;
 
             // Initialize Camera as needed.
             if (isCameraInitNeeded()) {
@@ -412,21 +404,26 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
             }
 
             mVideoCallManager.setFarEndSurface(mFarEndSurface);
+            mCanReleaseFarEndSurface = false;
         }
     }
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+        boolean relaseSurface = true;
         if (surface.equals(mCameraPreview.getSurfaceTexture())) {
             if (DBG) log("CameraPreview surface texture destroyed");
             stopRecordingAndPreview();
             closeCamera();
-            return false;
+            mCameraSurface = null;
+            relaseSurface = true;
         } else if (surface.equals(mFarEndView.getSurfaceTexture())) {
-            if (DBG) log("FarEndView surface texture destroyed");
-            return false;
+            if (DBG) log("FarEndView surface texture destroyed, CanReleaseFarEndSurface=" +
+                        mCanReleaseFarEndSurface);
+            relaseSurface = mCanReleaseFarEndSurface;
+            if (relaseSurface) setFarEndNull();
         }
-        return true;
+        return relaseSurface;
     }
 
     @Override
@@ -683,12 +680,21 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
     }
 
     private void releaseCachedSurfaces() {
-        release(mCameraSurface);
-        mCameraSurface = null;
+        log("releaseCachedSurfaces");
 
-        release(mFarEndSurface);
-        mFarEndSurface = null;
-        mVideoCallManager.setFarEndSurface(mFarEndSurface);
+        mCanReleaseFarEndSurface = true;
+        if (mFarEndView==null || !mFarEndView.isAvailable()) {
+            release(mFarEndSurface);
+            setFarEndNull();
+        }
+    }
+
+    private void setFarEndNull() {
+        log("setFarEndNull, " + mFarEndSurface);
+        if (mFarEndSurface != null) {
+            mFarEndSurface = null;
+            mVideoCallManager.setFarEndSurface(mFarEndSurface);
+        }
     }
 
     public void startOrientationListener(boolean start) {

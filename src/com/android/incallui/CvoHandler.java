@@ -47,10 +47,10 @@ public class CvoHandler extends Handler {
     private static final String TAG = "VideoCall_CvoHandler";
     private static final boolean DBG = true;
 
-    private static final int ORIENTATION_ANGLE_0 = 0;
-    private static final int ORIENTATION_ANGLE_90 = 1;
-    private static final int ORIENTATION_ANGLE_180 = 2;
-    private static final int ORIENTATION_ANGLE_270 = 3;
+    public static final int ORIENTATION_ANGLE_0 = 0;
+    public static final int ORIENTATION_ANGLE_90 = 1;
+    public static final int ORIENTATION_ANGLE_180 = 2;
+    public static final int ORIENTATION_ANGLE_270 = 3;
     private static final int ORIENTATION_MODE_THRESHOLD = 45;
 
     /**
