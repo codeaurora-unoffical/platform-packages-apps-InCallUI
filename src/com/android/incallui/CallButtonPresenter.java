@@ -223,7 +223,7 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
     }
 
     public void modifyCallButtonClicked() {
-        Call call = CallList.getInstance().getActiveCall();
+        Call call = CallList.getInstance().getActiveOrBackgroundCall();
         if (call != null) {
             getUi().displayModifyCallOptions(call.getCallId());
         }
