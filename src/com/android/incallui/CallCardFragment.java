@@ -274,7 +274,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             String[] sub = {"SUB 1", "SUB 2", "SUB 3"};
             int subscription = getPresenter().getActiveSubscription();
 
-            if (subscription != -1) {
+            if ((subscription != -1) && (!isSipCall)){
                 showSubscriptionInfo(sub[subscription]);
             }
         }
