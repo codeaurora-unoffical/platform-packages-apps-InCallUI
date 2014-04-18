@@ -46,12 +46,15 @@ class VideoPauseController implements InCallStateListener, IncomingCallListener 
 
     private CallCommandClient mCallCommandClient;
     private Context mContext;
+    private InCallPresenter mInCallPresenter;
 
     private Call mCurrCall = null; // call visible to the user, if any.
     private boolean mIsInBackground = false; // True if UI is not visible, false otherwise.
 
-    public VideoPauseController(Context context, CallCommandClient callCommandClient) {
+    public VideoPauseController(Context context, CallCommandClient callCommandClient,
+            InCallPresenter inCallPresenter) {
         mCallCommandClient = Preconditions.checkNotNull(callCommandClient);
+        mInCallPresenter = Preconditions.checkNotNull(inCallPresenter);
         mContext = Preconditions.checkNotNull(context);
     }
 
@@ -83,17 +86,17 @@ class VideoPauseController implements InCallStateListener, IncomingCallListener 
         log("onStateChange, IsInBackground=" + mIsInBackground);
         log("onStateChange, New call = " + call);
 
-        // Send pause request if outgoing request becomes active while UI is in
+        // Bring UI to foreground if outgoing request becomes active while UI is in
         // background.
         if (!hasPrimaryCallChanged && isOutgoing(mCurrCall) && canVideoPause && mIsInBackground) {
-            sendRequest(call, false);
+            bringToForeground();
         }
 
-        // Send pause request if VoLTE call becomes active while UI is in
+        // Bring UI to foreground if VoLTE call becomes active while UI is in
         // background.
         if (!hasPrimaryCallChanged && !CallUtils.isVideoCall(mCurrCall) && canVideoPause
                 && mIsInBackground) {
-            sendRequest(call, false);
+            bringToForeground();
         }
 
         // Send resume request for the active call, if user rejects incoming
@@ -109,10 +112,10 @@ class VideoPauseController implements InCallStateListener, IncomingCallListener 
             sendRequest(call, true);
         }
 
-        // Send pause request for the active call, if the holding call ends
+        // Bring UI to foreground, if the holding call ends and there is an active VT call
         // while UI is in background
         if (hasPrimaryCallChanged && isHolding(mCurrCall) && canVideoPause && mIsInBackground) {
-            sendRequest(call, false);
+            bringToForeground();
         }
 
         mCurrCall = call;
@@ -154,17 +157,15 @@ class VideoPauseController implements InCallStateListener, IncomingCallListener 
      * @param resume If true resume request will be sent, otherwise pause request.
      */
     private void sendRequest(Call call, boolean resume) {
-//        Temporarily desabling video multitasking since modem doesn't
-//        support this yet.
-//        if (resume) {
-//            log("sending resume request, call=" + call);
-//            mCallCommandClient.modifyCallInitiate(call.getCallId(),
-//                    CallDetails.CALL_TYPE_VT_RESUME);
-//        } else {
-//            log("sending pause request, call=" + call);
-//            mCallCommandClient.modifyCallInitiate(call.getCallId(),
-//                    CallDetails.CALL_TYPE_VT_PAUSE);
-//        }
+        if (resume) {
+            log("sending resume request, call=" + call);
+            mCallCommandClient.modifyCallInitiate(call.getCallId(),
+                    CallDetails.CALL_TYPE_VT_RESUME);
+        } else {
+            log("sending pause request, call=" + call);
+            mCallCommandClient.modifyCallInitiate(call.getCallId(),
+                    CallDetails.CALL_TYPE_VT_PAUSE);
+        }
     }
 
     /**
@@ -232,6 +233,15 @@ class VideoPauseController implements InCallStateListener, IncomingCallListener 
                 || (!primaryChanged && videoPauseStateChanged)) {
             log("Call " + newCall.getCallId() + " has been " + msg);
             Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void bringToForeground() {
+        if (mInCallPresenter != null) {
+            log("Bringing UI to foreground");
+            mInCallPresenter.bringToForeground(false);
+        } else {
+            loge("InCallPresenter is null. Cannot bring UI to foreground");
         }
     }
 
