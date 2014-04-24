@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
  * Not a Contribution.
  *
  * Copyright (C) 2006 The Android Open Source Project
@@ -22,7 +22,6 @@ package com.android.incallui;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-import com.android.recorder.ICallRecorder;
 import com.android.services.telephony.common.Call;
 import com.android.services.telephony.common.Call.State;
 import com.android.services.telephony.common.CallDetails;
@@ -58,12 +57,6 @@ public class InCallActivity extends Activity {
 
     private static final int INVALID_RES_ID = -1;
 
-    private static final String CALL_RECORDER_ACTION
-        = "com.android.action.CALL_RECORD";
-
-    private static final boolean DBG = false;
-    private final String DBG_CALL_RECORD = "CallRecorder";
-
     protected CallButtonFragment mCallButtonFragment;
     protected CallCardFragment mCallCardFragment;
     private AnswerFragment mAnswerFragment;
@@ -76,16 +69,16 @@ public class InCallActivity extends Activity {
     /** Use to pass 'showDialpad' from {@link #onNewIntent} to {@link #onResume} */
     private boolean mShowDialpadRequested;
 
-    private ICallRecorder mCallRecorder;
+    // This enum maps to Phone.SuppService defined in telephony
+    private enum SuppService {
+        UNKNOWN, SWITCH, SEPARATE, TRANSFER, CONFERENCE, REJECT, HANGUP;
+    }
 
     @Override
     protected void onCreate(Bundle icicle) {
         Log.d(this, "onCreate()...  this = " + this);
 
         super.onCreate(icicle);
-
-        // bind call record service when start up in call ui
-        bindRecorderService(this);
 
         if (MSimTelephonyManager.getDefault().getMultiSimConfiguration()
                 == MSimTelephonyManager.MultiSimVariants.DSDA) {
@@ -173,7 +166,6 @@ public class InCallActivity extends Activity {
 
         InCallPresenter.getInstance().setActivity(null);
 
-        unbindRecorderService(this);
         super.onDestroy();
     }
 
@@ -635,6 +627,62 @@ public class InCallActivity extends Activity {
     }
 
     /**
+     * Handle a failure notification for a supplementary service
+     * (i.e. conference, switch, separate, transfer, etc.).
+     */
+    void onSuppServiceFailed(int service) {
+        Log.d(this, "onSuppServiceFailed: " + service);
+        SuppService  result = SuppService.values()[service];
+        int errorMessageResId;
+
+        switch (result) {
+            case SWITCH:
+                // Attempt to switch foreground and background/incoming calls failed
+                // ("Failed to switch calls")
+                errorMessageResId = R.string.incall_error_supp_service_switch;
+                break;
+
+            case SEPARATE:
+                // Attempt to separate a call from a conference call
+                // failed ("Failed to separate out call")
+                errorMessageResId = R.string.incall_error_supp_service_separate;
+                break;
+
+            case TRANSFER:
+                // Attempt to connect foreground and background calls to
+                // each other (and hanging up user's line) failed ("Call
+                // transfer failed")
+                errorMessageResId = R.string.incall_error_supp_service_transfer;
+                break;
+
+            case CONFERENCE:
+                // Attempt to add a call to conference call failed
+                // ("Conference call failed")
+                errorMessageResId = R.string.incall_error_supp_service_conference;
+                break;
+
+            case REJECT:
+                // Attempt to reject an incoming call failed
+                // ("Call rejection failed")
+                errorMessageResId = R.string.incall_error_supp_service_reject;
+                break;
+
+            case HANGUP:
+                // Attempt to release a call failed ("Failed to release call(s)")
+                errorMessageResId = R.string.incall_error_supp_service_hangup;
+                break;
+
+            case UNKNOWN:
+            default:
+                // Attempt to use a service we don't recognize or support
+                // ("Unsupported service" or "Selected service failed")
+                errorMessageResId = R.string.incall_error_supp_service_unknown;
+                break;
+        }
+        showErrorDialog(errorMessageResId);
+    }
+
+    /**
      * Utility function to bring up a generic "error" dialog.
      */
     private void showErrorDialog(int resId) {
@@ -719,98 +767,5 @@ public class InCallActivity extends Activity {
 
     public void updateDsdaTab() {
         Log.e(this, "updateDsdaTab : Not supported ");
-    }
-
-    private void bindRecorderService(Context context) {
-        if (mCallRecorder == null) {
-            final Intent intent = new Intent(CALL_RECORDER_ACTION);
-            try {
-                context.bindService(intent, connection, BIND_AUTO_CREATE);
-            } catch (Exception e) {
-                logd(DBG_CALL_RECORD + " bind call recorder failed : " + e);
-            }
-        }
-    }
-
-    private void unbindRecorderService(Context context) {
-        if (mCallRecorder == null) {
-            try {
-                context.unbindService(connection);
-            } catch (Exception e) {
-                logd(DBG_CALL_RECORD + " unbind call recorder failed : " + e);
-            }
-        }
-    }
-
-    protected ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            mCallRecorder = ICallRecorder.Stub.asInterface(service);
-            logd(DBG_CALL_RECORD + "bind call record service:" + mCallRecorder);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            logd(DBG_CALL_RECORD + "call record service is unbind");
-            mCallRecorder = null;
-        }
-    };
-
-    public boolean isInCallRecorderReady() {
-        if (mCallRecorder != null) {
-            try {
-                return mCallRecorder.isEnabled();
-            } catch (RemoteException e) {
-                mCallRecorder = null;
-
-                logd(DBG_CALL_RECORD + "Call recorder not ready, error:" + e);
-            }
-        }
-
-        return false;
-    }
-
-    public boolean isInCallRecording() {
-        if (mCallRecorder != null) {
-            try {
-                return mCallRecorder.isRecording();
-            } catch (RemoteException e) {
-                mCallRecorder = null;
-
-                logd(DBG_CALL_RECORD + "get recorder status error:" + e);
-            }
-        }
-
-        return false;
-    }
-
-    public void startInCallRecorder() {
-        if (mCallRecorder != null) {
-            try {
-                mCallRecorder.startInCallRecorder();
-            } catch (RemoteException e) {
-                mCallRecorder = null;
-
-                logd(DBG_CALL_RECORD + "start recorder error:" + e);
-            }
-        }
-    }
-
-    public void stopInCallRecorder() {
-        if (mCallRecorder != null) {
-            try {
-                mCallRecorder.stopInCallRecorder();
-            } catch (RemoteException e) {
-                mCallRecorder = null;
-
-                logd(DBG_CALL_RECORD + "start recorder error:" + e);
-            }
-        }
-    }
-
-    public void logd(String msg) {
-        if (DBG) {
-            Log.w(this, msg);
-        }
     }
 }
