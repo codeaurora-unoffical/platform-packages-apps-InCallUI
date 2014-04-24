@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
  * Not a Contribution.
  *
  * Copyright (C) 2013 The Android Open Source Project
@@ -37,6 +37,7 @@ import android.widget.PopupMenu.OnMenuItemClickListener;
 import android.widget.ToggleButton;
 
 import com.android.services.telephony.common.AudioMode;
+import com.android.recorder.CallRecorderService;
 
 /**
  * Fragment for call control buttons
@@ -339,17 +340,13 @@ public class CallButtonFragment
                 break;
 
             case R.id.menu_start_record:
-                if (getActivity() != null
-                        && getActivity() instanceof InCallActivity) {
-                    ((InCallActivity) getActivity()).startInCallRecorder();
-                }
+                CallRecorderService.getInstance().startInCallRecorder();
+
                 return true;
 
             case R.id.menu_stop_record:
-                if (getActivity() != null
-                        && getActivity() instanceof InCallActivity) {
-                    ((InCallActivity) getActivity()).stopInCallRecorder();
-                }
+                CallRecorderService.getInstance().stopInCallRecorder();
+
                 return true;
 
             case R.id.menu_add_call:
@@ -647,10 +644,9 @@ public class CallButtonFragment
             final MenuItem startRecord = menu.findItem(R.id.menu_start_record);
             final MenuItem stopRecord = menu.findItem(R.id.menu_stop_record);
 
-            if (getActivity() != null
-                    && getActivity() instanceof InCallActivity) {
-                boolean isRecording = ((InCallActivity)getActivity()).isInCallRecording();
-                boolean isRecordEnabled = ((InCallActivity)getActivity()).isInCallRecorderReady();
+            if (CallRecorderService.getInstance() != null) {
+                boolean isRecording = CallRecorderService.getInstance().isInCallRecording();
+                boolean isRecordEnabled = CallRecorderService.getInstance().isInCallRecorderReady();
 
                 // If there is Ims call, don't show call recorder
                 boolean hasImsCall = CallUtils.hasImsCall(CallList.getInstance());
