@@ -231,8 +231,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
             }
             mCallTimer.cancel();
         } else {
-            final long callStart = mPrimary.getConnectTime();
-            final long duration = System.currentTimeMillis() - callStart;
+            final long duration = getCallDuration(mPrimary.getCallId());
             ui.setPrimaryCallElapsedTime(true, DateUtils.formatElapsedTime(duration / 1000));
         }
     }
@@ -466,6 +465,10 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
 
     public void secondaryPhotoClicked() {
         CallCommandClient.getInstance().swap();
+    }
+
+    private long getCallDuration(int callId) {
+        return CallCommandClient.getInstance().getCallDuration(callId);
     }
 
     public interface CallCardUi extends Ui {
