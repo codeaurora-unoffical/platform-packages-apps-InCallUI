@@ -21,16 +21,49 @@
              android:layout_height="0dp"
              android:layout_weight="1">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <!-- Contact photo for primary call info -->
-    <ImageView android:id="@+id/photo"
-               android:layout_alignParentStart="true"
-               android:layout_alignParentTop="true"
-               android:layout_width="match_parent"
-               android:layout_height="match_parent"
-               android:gravity="top|center_horizontal"
-               android:scaleType="centerCrop"
-               android:contentDescription="@string/contactPhoto"
-               android:src="@drawable/picture_unknown"/>
+        <ImageView android:id="@+id/photo"
+                   android:layout_alignParentStart="true"
+                   android:layout_alignParentTop="true"
+                   android:layout_width="match_parent"
+                   android:layout_height="match_parent"
+                   android:gravity="top|center_horizontal"
+                   android:scaleType="centerCrop"
+                   android:contentDescription="@string/contactPhoto"
+                   android:src="@drawable/picture_unknown"/>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentBottom="true">
+
+                <TextView android:id="@+id/recordingIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginLeft="16dp"
+                    android:paddingBottom="14dp"
+                    android:drawableRight="@drawable/ic_recording_indicator"
+                    android:visibility="invisible" />
+                <TextView android:id="@+id/recordingTime"
+                    android:text="@string/recording_time_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/recordingIcon"
+                    android:layout_marginLeft="5dp"
+                    android:paddingBottom="15dp"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/incall_call_banner_text_color"
+                    android:visibility="invisible"
+                    android:singleLine="true"/>
+
+            </RelativeLayout>
+    </RelativeLayout>
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -143,27 +176,6 @@
                     android:visibility="invisible"
                     android:soundEffectsEnabled="false"
                     android:background="@drawable/volume_in_boost_nor"/>
-
-                <TextView android:id="@+id/recordingTime"
-                    android:text="@string/recording_time_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="@dimen/call_recorder_top_right_padding"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginRight="@dimen/call_recorder_top_right_padding"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="@color/incall_call_banner_text_color"
-                    android:visibility="invisible"
-                    android:singleLine="true"/>
-
-                <TextView android:id="@+id/recordingIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_toLeftOf="@id/recordingTime"
-                    android:paddingTop="9dp"
-                    android:drawableRight="@drawable/ic_recording_indicator"
-                    android:visibility="invisible"
-                    android:layout_marginRight="5dp" />
             </RelativeLayout>
 
             <!-- Layout to replace the InCallContactPhoto with the video call panel
