@@ -22,6 +22,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 
+import com.android.recorder.CallRecorderService;
+
 /**
  * Top-level Application class for the InCall app.
  */
@@ -42,6 +44,9 @@ public class InCallApp extends Application {
 
     @Override
     public void onCreate() {
+        if (CallRecorderService.getInstance() != null) {
+            CallRecorderService.getInstance().init(getApplicationContext());
+        }
     }
 
     @Override
