@@ -33,6 +33,7 @@ import android.os.Bundle;
 import android.telephony.MSimTelephonyManager;
 import android.os.SystemProperties;
 import android.provider.Settings;
+import android.text.format.DateUtils;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -88,6 +89,8 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
 
     private VideoCallPanel mVideoCallPanel;
     private boolean mAudioDeviceInitialized = false;
+
+    private int mRecordingTime = -1;
 
     // Constants for TelephonyProperties.PROPERTY_IMS_AUDIO_OUTPUT property.
     // Currently, the default audio output is headset if connected, bluetooth
@@ -271,11 +274,13 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         if (MSimTelephonyManager.getDefault().isMultiSimEnabled() &&
                 !(MSimTelephonyManager.getDefault().getMultiSimConfiguration()
                 == MSimTelephonyManager.MultiSimVariants.DSDA)) {
-            String[] sub = {"SUB 1", "SUB 2", "SUB 3"};
+            final String multiSimName = "perferred_name_sub";
             int subscription = getPresenter().getActiveSubscription();
 
             if ((subscription != -1) && (!isSipCall)){
-                showSubscriptionInfo(sub[subscription]);
+                final String simName = Settings.System.getString(getActivity()
+                        .getContentResolver(), multiSimName + (subscription + 1));
+                showSubscriptionInfo(simName);
             }
         }
 
@@ -874,17 +879,27 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         getActivity().unregisterReceiver(recorderStateReceiver);
     }
 
+    private void showCallRecordingElapsedTime() {
+        mRecordingTime = mRecordingTime + 1;
+        String duration = (DateUtils.formatElapsedTime(mRecordingTime));
+
+        if (mRecordingTimeLabel.getVisibility() != View.VISIBLE) {
+            AnimationUtils.Fade.show(mRecordingTimeLabel);
+        }
+        mRecordingTimeLabel.setText(duration);
+    }
+
     private BroadcastReceiver recorderStateReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
             if (ACTION_RECORD_TIME_CHANGED.equals(intent.getAction())) {
                 mRecordingTimeLabel.setVisibility(View.VISIBLE);
-
+                showCallRecordingElapsedTime();
                 mRecordingIcon.setVisibility(View.VISIBLE);
             } else if (ACTION_RECORD_STOP.equals(intent.getAction())) {
                 mRecordingTimeLabel.setVisibility(View.GONE);
-
+                mRecordingTime = -1;
                 mRecordingIcon.setVisibility(View.GONE);
             }
         }
