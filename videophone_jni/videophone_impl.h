@@ -56,6 +56,7 @@ struct VtImplApis {
     VtImplUint32VoidFunc getUIOrientationMode;
     VtImplUint32VoidFunc getPeerHeight;
     VtImplUint32VoidFunc getPeerWidth;
+    VtImplUint32VoidFunc getVideoQualityIndication;
 };
 
 #endif
