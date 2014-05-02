@@ -274,11 +274,13 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         if (MSimTelephonyManager.getDefault().isMultiSimEnabled() &&
                 !(MSimTelephonyManager.getDefault().getMultiSimConfiguration()
                 == MSimTelephonyManager.MultiSimVariants.DSDA)) {
-            String[] sub = {"SUB 1", "SUB 2", "SUB 3"};
+            final String multiSimName = "perferred_name_sub";
             int subscription = getPresenter().getActiveSubscription();
 
             if ((subscription != -1) && (!isSipCall)){
-                showSubscriptionInfo(sub[subscription]);
+                final String simName = Settings.System.getString(getActivity()
+                        .getContentResolver(), multiSimName + (subscription + 1));
+                showSubscriptionInfo(simName);
             }
         }
 
