@@ -183,6 +183,13 @@ public class VideoCallManager {
     }
 
     /**
+     * Get Video Quality Level
+     */
+    public int getVideoQualityLevel() {
+        return mMediaHandler.getVideoQualityLevel();
+    }
+
+    /**
      * Get negotiated FPS
      */
     public short getNegotiatedFps() {
