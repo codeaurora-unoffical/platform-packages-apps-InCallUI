@@ -344,8 +344,7 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
 
         if (state == Call.State.ACTIVE) {
             builder.setUsesChronometer(true);
-            long callDurationMsec = getCallDuration(call.getCallId());
-            builder.setWhen(System.currentTimeMillis() - callDurationMsec);
+            builder.setWhen(call.getConnectTime());
         } else {
             builder.setUsesChronometer(false);
         }
@@ -364,10 +363,6 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
         Log.d(this, "Notifying IN_CALL_NOTIFICATION: " + notification);
         mNotificationManager.notify(IN_CALL_NOTIFICATION, notification);
         mIsShowingNotification = true;
-    }
-
-    private long getCallDuration(int callId) {
-        return CallCommandClient.getInstance().getCallDuration(callId);
     }
 
     /**

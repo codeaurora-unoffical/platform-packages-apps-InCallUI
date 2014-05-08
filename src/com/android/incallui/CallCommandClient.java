@@ -334,19 +334,4 @@ public class CallCommandClient {
         Log.i(this, "get active sub " + subscriptionId);
         return subscriptionId;
     }
-
-    public long getCallDuration(int callId) {
-        long duration = 0;
-        Log.i(this, "getCallDuration: " + callId);
-        if (mCommandService == null) {
-            Log.e(this, "Cannot getCallDuration(); CallCommandService == null");
-            return duration;
-        }
-        try {
-            duration = mCommandService.getCallDuration(callId);
-        } catch (RemoteException e) {
-            Log.e(this, "Error on getCallDuration().", e);
-        }
-        return duration;
-    }
 }
