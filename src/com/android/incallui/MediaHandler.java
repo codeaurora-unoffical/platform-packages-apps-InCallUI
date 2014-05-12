@@ -69,6 +69,7 @@ public class MediaHandler extends Handler {
     private static native int nativeGetUIOrientationMode();
     private static native int nativeGetPeerHeight();
     private static native int nativeGetPeerWidth();
+    private static native int nativeGetVideoQualityIndication();
     private static native void nativeRegisterForMediaEvents(MediaHandler instance);
 
     public static final int MEDIA_EVENT = 0;
@@ -80,6 +81,7 @@ public class MediaHandler extends Handler {
     public static final int PLAYER_STOP_EVENT = 4;
     public static final int DISPLAY_MODE_EVT = 5;
     public static final int PEER_RESOLUTION_CHANGE_EVT = 6;
+    public static final int VIDEO_QUALITY_EVT = 7;
 
     protected final RegistrantList mDisplayModeEventRegistrants
             = new RegistrantList();
@@ -88,6 +90,13 @@ public class MediaHandler extends Handler {
     private static final int LANDSCAPE_MODE = 1;
     private static final int PORTRAIT_MODE = 2;
     private static final int CVO_MODE = 3;
+
+    //Following values 0, 1, and 2 are from the IMS VT API documentation
+    public static final int VIDEO_QUALITY_UNKNOWN = -1;
+    public static final int VIDEO_QUALITY_LOW = 0;
+    public static final int VIDEO_QUALITY_MEDIUM = 1;
+    public static final int VIDEO_QUALITY_HIGH = 2;
+
     /*
      * Initializing default negotiated parameters to a working set of valuesso
      * that the application does not crash in case we do not get the Param ready
@@ -100,6 +109,7 @@ public class MediaHandler extends Handler {
 
     private int mPeerHeight = DEFAULT_HEIGHT;
     private int mPeerWidth = DEFAULT_WIDTH;
+    private int mVideoQualityLevel = VIDEO_QUALITY_UNKNOWN;
     private IMediaEventListener mMediaEventListener;
     public RegistrantList mCvoModeOnRegistrant = new RegistrantList();
 
@@ -128,6 +138,7 @@ public class MediaHandler extends Handler {
         void onStartReadyEvent();
         void onPeerResolutionChangeEvent();
         void onPlayerStateChanged(int state);
+        void onVideoQualityEvent(int videoQuality);
     }
 
     static {
@@ -257,6 +268,14 @@ public class MediaHandler extends Handler {
     }
 
     /**
+     * Get Video Quality level
+     */
+    public int getVideoQualityLevel() {
+        Log.d(TAG, "Video Quality Level = " + mVideoQualityLevel);
+        return mVideoQualityLevel;
+    }
+
+    /**
      * Register for event that will invoke
      * {@link MediaHandler#onMediaEvent(int)}
      */
@@ -307,6 +326,13 @@ public class MediaHandler extends Handler {
             case PLAYER_STOP_EVENT:
                 if (mMediaEventListener != null) {
                     mMediaEventListener.onPlayerStateChanged(PLAYER_STATE_STOPPED);
+                }
+                break;
+            case VIDEO_QUALITY_EVT:
+                mVideoQualityLevel = nativeGetVideoQualityIndication();
+                Log.d(TAG, "Received VIDEO_QUALITY_EVT" + mVideoQualityLevel);
+                if (mMediaEventListener != null) {
+                    mMediaEventListener.onVideoQualityEvent(mVideoQualityLevel);
                 }
                 break;
             default:
