@@ -29,6 +29,7 @@
 package com.android.incallui;
 
 import android.content.Context;
+import android.widget.Toast;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.os.SystemProperties;
@@ -103,6 +104,22 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
         }
     }
 
+    private static String fromVideoQualityLevel(int videoQuality) {
+        String str = "Unknown";
+        switch (videoQuality) {
+            case MediaHandler.VIDEO_QUALITY_HIGH:
+                str = "High";
+                break;
+            case MediaHandler.VIDEO_QUALITY_MEDIUM:
+                str = "Medium";
+                break;
+            case MediaHandler.VIDEO_QUALITY_LOW:
+                str = "Low";
+                break;
+        }
+        return str;
+    }
+
 
     /**
      * This class implements the listener for PARAM READY EVENT
@@ -156,6 +173,13 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
             if (mHeight != INVALID_SIZE && mWidth != INVALID_SIZE) {
                 resizeFarEndView();
             }
+        }
+
+        @Override
+        public void onVideoQualityEvent(int videoQuality) {
+            // Display Toast for the received Video Quality value
+            String msg = "Video Quality : " + fromVideoQualityLevel(videoQuality);
+            Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
         }
     }
 
