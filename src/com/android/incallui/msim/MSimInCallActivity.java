@@ -63,6 +63,7 @@ public class MSimInCallActivity extends InCallActivity {
                 | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
                 | WindowManager.LayoutParams.FLAG_IGNORE_CHEEK_PRESSES);
 
+        setTheme(R.style.InCallScreenWithActionBar);
         requestWindowFeature(Window.FEATURE_ACTION_BAR);
 
         getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -188,6 +189,7 @@ public class MSimInCallActivity extends InCallActivity {
             bar.addTab(mDsdaTab[subscription], subscription, false);
         }
         mDsdaTabAdd[subscription] = true;
+        Log.d(this, "addDsdaTab, subscription = " + subscription + " tab count = " + tabCount);
     }
 
     private void removeDsdaTab(int subscription) {
@@ -201,6 +203,7 @@ public class MSimInCallActivity extends InCallActivity {
                 return;
             }
         }
+        Log.d(this, "removeDsdaTab, subscription = " + subscription + " tab count = " + tabCount);
     }
 
     private void updateDsdaTabSelection() {

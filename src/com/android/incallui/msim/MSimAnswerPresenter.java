@@ -41,10 +41,15 @@ public class MSimAnswerPresenter extends Presenter<MSimAnswerPresenter.AnswerUi>
         super.onUiReady(ui);
 
         final CallList calls = CallList.getInstance();
-        final Call call = calls.getIncomingCall();
-        // TODO: change so that answer presenter never starts up if it's not incoming.
-        if (call != null) {
-            processIncomingCall(call);
+        for (int i = 0; i < MSimTelephonyManager.getDefault().getPhoneCount(); i++) {
+            Call call = calls.getCallWithState(Call.State.INCOMING, 0, i);
+            if (call == null) {
+                call = calls.getCallWithState(Call.State.CALL_WAITING, 0, i);
+            }
+            // TODO: change so that answer presenter never starts up if it's not incoming.
+            if (call != null) {
+                processIncomingCall(call);
+            }
         }
 
         // Listen for incoming calls.
@@ -56,13 +61,14 @@ public class MSimAnswerPresenter extends Presenter<MSimAnswerPresenter.AnswerUi>
     public void onUiUnready(AnswerUi ui) {
         super.onUiUnready(ui);
 
-        int subscription = CallList.getInstance().getActiveSubscription();
         CallList.getInstance().removeListener(this);
 
         // This is necessary because the activity can be destroyed while an incoming call exists.
         // This happens when back button is pressed while incoming call is still being shown.
-        if (mCallId[subscription] != Call.INVALID_CALL_ID) {
-            CallList.getInstance().removeCallUpdateListener(mCallId[subscription], this);
+        for (int i = 0; i < MSimTelephonyManager.getDefault().getPhoneCount(); i++) {
+            if (mCallId[i] != Call.INVALID_CALL_ID) {
+                CallList.getInstance().removeCallUpdateListener(mCallId[i], this);
+            }
         }
         CallList.getInstance().removeActiveSubChangeListener(this);
     }
@@ -121,7 +127,12 @@ public class MSimAnswerPresenter extends Presenter<MSimAnswerPresenter.AnswerUi>
             // Stop listening for updates.
             CallList.getInstance().removeCallUpdateListener(mCallId[subscription], this);
 
-            getUi().showAnswerUi(false);
+            final Call incall = CallList.getInstance().getIncomingCall();
+            if (incall != null) {
+                getUi().showAnswerUi(true);
+            } else {
+                getUi().showAnswerUi(false);
+            }
 
             // mCallId will hold the state of the call. We don't clear the mCall variable here as
             // it may be useful for sending text messages after phone disconnects.
@@ -132,6 +143,7 @@ public class MSimAnswerPresenter extends Presenter<MSimAnswerPresenter.AnswerUi>
     public void onAnswer(int callType) {
         int subscription = CallList.getInstance().getActiveSubscription();
         if (mCallId[subscription] == Call.INVALID_CALL_ID) {
+            Log.d(this, "onAnswer sub = " + subscription);
             return;
         }
 
@@ -193,6 +205,8 @@ public class MSimAnswerPresenter extends Presenter<MSimAnswerPresenter.AnswerUi>
         } else if ((call == null) && (calls.existsLiveCall(subscription))) {
             Log.i(TAG, "Hide incoming for call id: " + mCallId[subscription] + " " + this);
             getUi().showAnswerUi(false);
+        } else {
+            Log.i(TAG, "No incoming call present for sub = " + subscription + " " + this);
         }
     }
 }
