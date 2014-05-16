@@ -112,7 +112,9 @@ public class CallList {
         // ensure the ringing call is active subscription, since phone state
         // changed is notified before new incoming call ringing, and the event
         // will switch active sub to to a incorrect sub(which is not ringing)
-        CallCommandClient.getInstance().setActiveSubscription(call.getSubscription());
+        if (MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
+            CallCommandClient.getInstance().setActiveSubscription(call.getSubscription());
+        }
         updateActiveSuscription();
 
         updateCallInMap(call);
@@ -582,7 +584,13 @@ public class CallList {
                 Log.i(this, "switchToOtherActiveSubscription, sub = " + i +
                         " retainLch = " + retainLch);
                 subSwitched = true;
-                CallCommandClient.getInstance().setActiveSubscription(i, retainLch);
+                if (retainLch) {
+                    CallCommandClient.getInstance().setSubInConversation(
+                            MSimConstants.INVALID_SUBSCRIPTION);
+                    CallCommandClient.getInstance().setActiveSubscription(i);
+                } else {
+                    CallCommandClient.getInstance().setActiveAndConversationSub(i);
+                }
                 setActiveSubscription(i);
                 break;
             }
