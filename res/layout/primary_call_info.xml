@@ -96,7 +96,6 @@
                       android:gravity="end"
                       android:textAppearance="?android:attr/textAppearanceSmall"
                       android:textColor="@color/incall_call_banner_text_color"
-                      android:textAllCaps="true"
                       android:singleLine="true"
                       android:ellipsize="end"/>
 
