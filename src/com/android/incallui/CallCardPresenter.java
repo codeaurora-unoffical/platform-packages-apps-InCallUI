@@ -43,7 +43,6 @@ import com.android.services.telephony.common.CallDetails;
 import com.android.services.telephony.common.CallIdentification;
 import com.google.common.base.Preconditions;
 import com.android.incallui.CallUtils;
-import com.android.internal.telephony.Phone;
 
 /**
  * Presenter for the Call Card Fragment.
