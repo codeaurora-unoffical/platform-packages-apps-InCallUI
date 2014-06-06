@@ -947,144 +947,6 @@
     <!-- Text for the onscreen "Add Participant" button -->
     <string name="onscreenAddParticipant">Add Participant</string>
 
-    <!-- Menu item label in SIM Contacts: Import a single contact entry from the SIM card -->
-    <string name="importSimEntry">Import</string>
-    <!-- Menu item label in SIM Contacts: Import all contact entries from the SIM card -->
-    <string name="importAllSimEntries">Import all</string>
-    <!-- SIM Contacts: status message displayed while importing card -->
-    <string name="importingSimContacts">Importing SIM contacts</string>
-    <!-- Import a single contact entry from contacts to the SIM card -->
-    <string name="importToFDNfromContacts">Import from contacts</string>
-
-    <!-- Hearing aid settings -->
-    <string name="hac_mode_title">Hearing aids</string>
-    <string name="hac_mode_summary">Turn on hearing aid compatibility</string>
-
-    <!-- Service option entries.  -->
-    <string-array name="tty_mode_entries">
-        <item>TTY Off</item>
-        <item>TTY Full</item>
-        <item>TTY HCO</item>
-        <item>TTY VCO</item>
-    </string-array>
-
-    <!-- Do not translate. -->
-    <string-array name="tty_mode_values" translatable="false">
-        <!-- Do not translate. -->
-        <item>0</item>
-        <!-- Do not translate. -->
-        <item>1</item>
-        <!-- Do not translate. -->
-        <item>2</item>
-        <!-- Do not translate. -->
-        <item>3</item>
-    </string-array>
-
-    <!-- Dtmf tones settings -->
-    <!-- Title for the DTMF Tones options displayed in Call Settings -->
-    <string name="dtmf_tones_title">DTMF tones</string>
-    <!-- Summary for the DTMF Tones options displayed in Call Settings -->
-    <string name="dtmf_tones_summary">Set the length of DTMF tones</string>
-    <!-- Options displayed as part of DTMF Tones in Call Settings -->
-    <string-array name="dtmf_tone_entries">
-      <item>Normal</item>
-      <item>Long</item>
-    </string-array>
-    <!-- Do not translate. -->
-    <string-array name="dtmf_tone_values" translatable="false">
-       <item>0</item>
-       <item>1</item>
-    </string-array>
-
-    <!-- Title for the dialog used to display CDMA DisplayInfo -->
-    <string name="network_message">Network message</string>
-
-    <!-- OTA-specific strings -->
-    <!-- Title shown on OTA screen -->
-    <string name="ota_title_activate">Activate your phone</string>
-    <!-- Message displayed on the OTA activation screen. -->
-    <string name="ota_touch_activate">A special call needs to be made to activate your phone service.
-    \n\nAfter pressing \u201CActivate\u201D, listen to the instructions provided to activate your phone.</string>
-
-    <!-- Title of skip activation dialog -->
-    <string name="ota_skip_activation_dialog_title">Skip activation\?</string>
-    <!-- Message displayed in skip activation dialog  -->
-    <string name="ota_skip_activation_dialog_message">If you skip activation, you can\'t place calls or connect to mobile data networks (though you can connect to Wi-Fi networks). Until you activate your phone, you are asked to activate it each time you turn it on.</string>
-    <!-- Label shown on dialog button that allows the user to skip activation -->
-    <string name="ota_skip_activation_dialog_skip_label">Skip</string>
-
-    <!-- Button label within the OTA activation screen -->
-    <string name="ota_activate">Activate</string>
-    <!-- Title text shown when phone activation is successful -->
-    <string name="ota_title_activate_success">Phone is activated.</string>
-    <!-- Title text shown on screen where activation fails -->
-    <string name="ota_title_problem_with_activation">Problem with activation</string>
-    <!-- Message displayed on the OTA "listening" screen. This message
-         needs to be kept at 2 lines or less to be sure that there's
-         enough room for the dialpad. [CHAR LIMIT=80] -->
-    <string name="ota_listen">Follow the spoken instructions until you hear that activation is complete.</string>
-
-    <!-- Button label within the OTA listen screen -->
-    <string name="ota_speaker">Speaker</string>
-    <!-- String to be displayed on OTA listen screen once user has selected the
-         correct option to begin provisioning -->
-    <string name="ota_progress">Wait while your phone is being programmed.</string>
-    <!-- String to display within the OTA Fail Notice dialog -->
-    <string name="ota_failure">Programming unsuccessful</string>
-    <!-- String to be displayed on the OTA Fail/Success screen upon successful provisioning -->
-    <string name="ota_successful">Your phone is now activated.  It may take up to 15 minutes for service to start.</string>
-    <!-- String to be displayed on the OTA Fail/Success screen upon unsuccessful provisioning -->
-    <string name="ota_unsuccessful">Your phone didn\'t activate.
-    \nYou may need to find an area with better coverage (near a window, or outside).
-    \n\nTry again or call customer service for more options.</string>
-    <!-- String to display within the OTA SPC Fail Notice dialog -->
-    <string name="ota_spc_failure">EXCESS SPC FAILURES</string>
-    <!-- Button label in OTA listen screen that cancels activation and goes to the previous screen -->
-    <string name="ota_call_end">Back</string>
-    <!-- Button label shown on OTA error screen to allow the user to try again -->
-    <string name="ota_try_again">Try again</string>
-    <!-- Button label shown on OTA screens that have a next screen -->
-    <string name="ota_next">Next</string>
-
-    <!-- Emergency Callback Mode (ECM) -->
-    <string name="ecm_exit_dialog">EcmExitDialog</string>
-    <!-- ECM: Status bar notification message -->
-    <string name="phone_entered_ecm_text">Entered Emergency Callback Mode</string>
-    <!-- ECM: Notification title -->
-    <string name="phone_in_ecm_notification_title">Emergency Callback Mode</string>
-    <!-- ECM: Notification body -->
-    <string name="phone_in_ecm_call_notification_text">Data connection disabled</string>
-    <plurals name="phone_in_ecm_notification_time">
-        <!-- number of minutes is one -->
-        <item quantity="one">No data connection for <xliff:g id="count">%s</xliff:g> minute</item>
-        <!-- number of minutes is not equal to one -->
-        <item quantity="other">No data connection for <xliff:g id="count">%s</xliff:g> minutes</item>
-    </plurals>
-    <!-- ECM: Dialog box message for exiting from the notifications screen -->
-    <plurals name="alert_dialog_exit_ecm">
-        <!-- number of minutes is one -->
-        <item quantity="one">The phone will be in Emergency Callback mode for <xliff:g id="count">%s</xliff:g> minute. While in this mode no apps using a data connection can be used. Do you want to exit now?</item>
-        <!-- number of minutes is not equal to one -->
-        <item quantity="other">The phone will be in Emergency Callback mode for <xliff:g id="count">%s</xliff:g> minutes. While in this mode no applications using a data connection can be used. Do you want to exit now?</item>
-    </plurals>
-    <!-- ECM: Dialog box message for exiting from any other app -->
-    <plurals name="alert_dialog_not_avaialble_in_ecm">
-        <!-- number of minutes is one -->
-        <item quantity="one">The selected action isn\'t available while in the Emergency Callback mode. The phone will be in this mode for <xliff:g id="count">%s</xliff:g> minute. Do you want to exit now?</item>
-        <!-- number of minutes is not equal to one -->
-        <item quantity="other">The selected action isn\'t available while in the Emergency Callback mode. The phone will be in this mode for <xliff:g id="count">%s</xliff:g> minutes. Do you want to exit now?</item>
-    </plurals>
-    <!-- ECM: Dialog box message while in emergency call -->
-    <string name="alert_dialog_in_ecm_call">The selected action isn\'t available while in an emergency call.</string>
-    <!-- ECM: Progress text -->
-    <string name="progress_dialog_exiting_ecm">Exiting Emergency Callback mode</string>
-    <!-- ECM: ECM exit dialog choice -->
-    <string name="alert_dialog_yes">Yes</string>
-    <!-- ECM: ECM exit dialog choice -->
-    <string name="alert_dialog_no">No</string>
-    <!-- ECM: ECM exit dialog choice -->
-    <string name="alert_dialog_dismiss">Dismiss</string>
-
     <!-- For incoming calls, this is a string we can get from a CDMA network instead of
          the actual phone number, to indicate there's no number present.  DO NOT TRANSLATE. -->
     <string-array name="absent_num" translatable="false">
@@ -1116,203 +978,6 @@
     <string name="goPrivate">go private</string>
     <!--  Use this to describe the select contact button in EditPhoneNumberPreference; currently for screen readers through accessibility. -->
     <string name="selectContact">select contact</string>
-
-
-    <!-- Start of SIP related strings defined from here. -->
-
-    <!-- Title displayed SIP settings coming after other call settings in the call features screen. [CHAR LIMIT=NONE] -->
-    <string name="sip_settings">Internet call settings</string>
-    <!-- Title displayed SIP account settings in the sip settings category. [CHAR LIMIT=NONE] -->
-    <string name="sip_accounts">Internet calling (SIP) accounts</string>
-    <!-- Title displayed SIP account settings in the sip settings category. [CHAR LIMIT=NONE] -->
-    <string name="sip_accounts_title">Accounts</string>
-    <!-- Title displayed for the button of receiving incoming SIP calls flag. Enabled for receiving calls. [CHAR LIMIT=NONE] -->
-    <string name="sip_receive_calls">Receive incoming calls</string>
-    <!-- Help user to understand that it will require more battery usage if the 'receiving incoming call' is enabled. [CHAR LIMIT=NONE] -->
-    <string name="sip_receive_calls_summary">Reduces battery life</string>
-    <!-- Title for the dialog of selecting the way we handle an outgoing call. [CHAR LIMIT=NONE] -->
-    <string name="sip_call_options_title">Use Internet calling</string>
-    <!-- Title for the dialog of selecting the way we handle an outgoing call (Wi-Fi only). [CHAR LIMIT=NONE] -->
-    <string name="sip_call_options_wifi_only_title">Use Internet calling (Wi-Fi only)</string>
-
-    <!-- Item of the Internet call option dialog: for routing all outgoing calls via SIP. [CHAR LIMIT=NONE] -->
-    <string name="sip_call_options_entry_1">For all calls when data network is available</string>
-    <!-- Item of the Internet call option dialog: for routing a outgoing call via SIP if the destination is a SIP URI. [CHAR LIMIT=NONE] -->
-    <string name="sip_call_options_entry_2">Only for Internet calls</string>
-    <!-- Item of the Internet call option dialog: for asking user to select the way for each outgoing call. [CHAR LIMIT=NONE] -->
-    <string name="sip_call_options_entry_3">Ask for each call</string>
-    <!-- Item of the Internet call (Wi-Fi only) option dialog: for routing all outgoing calls via SIP. [CHAR LIMIT=NONE] -->
-    <string name="sip_call_options_wifi_only_entry_1">For all calls</string>
-
-    <!-- Title of the dialog to select the phone type for the outgoing call. [CHAR LIMIT=NONE] -->
-    <string name ="pick_outgoing_call_phone_type">Place call</string>
-
-    <!-- Title of the dialog to select the phone among the list of phones for the outgoing call. [CHAR LIMIT=NONE] -->
-    <string name ="pick_outgoing_sip_phone">Use Internet calling account:</string>
-
-    <!-- Text of checkbox to remember the sip phone for all outbound calls. [CHAR LIMIT=NONE] -->
-    <string name ="remember_my_choice">Always use to place Internet calls</string>
-
-    <!-- Help text of checkbox to unset the default sip phone for all outbound calls. [CHAR LIMIT=NONE] -->
-    <string name ="reset_my_choice_hint">You can change which Internet calling account to use by default from the Phone &gt; Settings &gt; Internet call settings &gt; Accounts screen.</string>
-
-    <!-- Item of the dialog to select the phone type for outgoing call. [CHAR LIMIT=NONE] -->
-    <string name ="pstn_phone">Cell phone call</string>
-
-    <!-- Item of the dialog to select the phone type for outgoing call. [CHAR LIMIT=NONE] -->
-    <string name ="internet_phone">Internet call</string>
-
-    <!-- Title of the dialog to redirect the user to SIP settings. [CHAR LIMIT=NONE] -->
-    <string name ="no_sip_account_found_title">No Internet calling account</string>
-    <!-- Message of the dialog to redirect the user to SIP settings. [CHAR LIMIT=NONE] -->
-    <string name ="no_sip_account_found">There are no Internet calling accounts on this phone. Do you want to add one now?</string>
-    <!-- Menu item for no sip account found dialog -->
-    <string name="sip_menu_add">Add</string>
-
-    <!-- Title for the button to add a new sip account. [CHAR LIMIT=NONE] -->
-    <string name="add_sip_account">Add account</string>
-    <!-- Title for the button to remove a sip account. [CHAR LIMIT=NONE] -->
-    <string name="remove_sip_account">Remove account</string>
-    <!-- String of the category which lists all sip accounts. [CHAR LIMIT=NONE] -->
-    <string name="sip_account_list">SIP accounts</string>
-    <!-- Toast message to indicate that the system is saving the account. [CHAR LIMIT=NONE] -->
-    <string name="saving_account">Saving the account\u2026</string>
-    <!-- Toast message to indicate that the system is removing the account. [CHAR LIMIT=NONE] -->
-    <string name="removing_account">Removing the account\u2026</string>
-
-    <!-- Menu item when the menu button is pressed in the sip account editor. [CHAR LIMIT=NONE] -->
-    <string name="sip_menu_save">Save</string>
-    <!-- Menu item when the menu button is pressed in the sip account editor. [CHAR LIMIT=NONE] -->
-    <string name="sip_menu_discard">Discard</string>
-
-    <!-- Title of the alert dialog. [CHAR LIMIT=NONE] -->
-    <string name="alert_dialog_close">Close the profile</string>
-    <!-- Title of the button to show in a alert dialog. [CHAR LIMIT=NONE] -->
-    <string name="alert_dialog_ok">OK</string>
-    <!-- Title of the button to show in a alert dialog. [CHAR LIMIT=NONE] -->
-    <string name="close_profile">Close</string>
-
-    <!-- Summary of a SIP account in the list of SIP accounts, consists of primary account status and registration status. This string indicates that this SIP account is a primary account and the string placeholder is the registration status, which will be one of the strings with name starting with "registration_status_" below. [CHAR LIMIT=NONE] -->
-    <string name="primary_account_summary_with">Primary account. <xliff:g id="registration_status" example="Registering...">%s</xliff:g></string>
-    <!-- Text of Internet-call registration status, checking current registration status with SIP service [CHAR LIMIT=NONE] -->
-    <string name="registration_status_checking_status">Checking status...</string>
-    <!-- Text of Internet-call registration status, registering with SIP server in order to receive calls on this account [CHAR LIMIT=NONE] -->
-    <string name="registration_status_registering">Registering\u2026</string>
-    <!-- Text of Internet-call registration status, still trying to register with SIP server [CHAR LIMIT=NONE] -->
-    <string name="registration_status_still_trying">Still trying\u2026</string>
-    <!-- Text of Internet-call registration status, currently not receiving calls on this account [CHAR LIMIT=NONE] -->
-    <string name="registration_status_not_receiving">Not receiving calls.</string>
-    <!-- Text of Internet-call registration status, no data connection [CHAR LIMIT=NONE] -->
-    <string name="registration_status_no_data">Account registration stopped because there is no Internet connection.</string>
-    <!-- Text of Internet-call registration status, no Wi-Fi connection [CHAR LIMIT=NONE] -->
-    <string name="registration_status_no_wifi_data">Account registration stopped because there is no Wi-Fi connection.</string>
-    <!-- Text of Internet-call registration status, registration process is not running due to some error [CHAR LIMIT=NONE] -->
-    <string name="registration_status_not_running">Account registration unsuccessful.</string>
-    <!-- Text of Internet-call registration status, currently we can receive calls on this account [CHAR LIMIT=NONE] -->
-    <string name="registration_status_done">Receiving calls.</string>
-    <!-- Text of Internet-call registration status, registration failed with a reason; will try again later [CHAR LIMIT=NONE] -->
-    <string name="registration_status_failed_try_later">Account registration unsuccessful: (<xliff:g id="registration_error_message" example="timed out">%s</xliff:g>); will try later</string>
-    <!-- Text of Internet-call registration status, registration failed due to invalid credentials [CHAR LIMIT=NONE] -->
-    <string name="registration_status_invalid_credentials">Account registration unsuccessful: Incorrect username or password.</string>
-    <!-- Text of Internet-call registration status, registration failed due to unknown host exception [CHAR LIMIT=NONE] -->
-    <string name="registration_status_server_unreachable">Account registration unsuccessful: Check the server name.</string>
-    <!-- Text for describing the account's owner and status. For example, 'Active, in use by Google Talk', it means that the account managed by SIP service was registered by the application 'Google Talk' and the status is active. [CHAR LIMIT=NONE] -->
-    <string name="third_party_account_summary">This account is currently in use by the <xliff:g id="account_owner" example="Google Talk">%s</xliff:g> app.</string>
-
-
-    <!-- Title of the sip editor screen. [CHAR LIMIT=NONE] -->
-    <string name="sip_edit_title">SIP account details</string>
-    <!-- Title of the sip editor screen. [CHAR LIMIT=NONE] -->
-    <string name="sip_edit_new_title">SIP account details</string>
-
-    <!-- Text of the domain address preference. [CHAR LIMIT=NONE] -->
-    <string name="domain_address_title">Server</string>
-    <!-- Text of the username preference. [CHAR LIMIT=NONE] -->
-    <string name="username_title">Username</string>
-    <!-- Text of the password preference. [CHAR LIMIT=NONE] -->
-    <string name="password_title">Password</string>
-    <!-- Text of the display name preference. [CHAR LIMIT=NONE] -->
-    <string name="display_name_title">Display name</string>
-    <!-- Text of the outbound proxy address preference. [CHAR LIMIT=NONE] -->
-    <string name="proxy_address_title">Outbound proxy address</string>
-    <!-- Text of the sip server/proxy port number. [CHAR LIMIT=NONE] -->
-    <string name="port_title">Port number</string>
-    <!-- Text of the transport type preference. [CHAR LIMIT=NONE] -->
-    <string name="transport_title">Transport type</string>
-    <!-- Text of the keepalive preference. [CHAR LIMIT=NONE] -->
-    <string name="send_keepalive_title">Send keep-alive</string>
-    <!-- Text of the set-primary preference. Simplified from "Make this my primary account". [CHAR LIMIT=NONE] -->
-    <string name="set_primary_title">Set as primary account</string>
-    <!-- Text of the set-primary preference summary. [CHAR LIMIT=NONE] -->
-    <string name="set_primary_summary">Used for outbound calls</string>
-    <!-- Text of the advanced settings section. [CHAR LIMIT=NONE] -->
-    <string name="advanced_settings">Optional settings</string>
-    <!-- Text of the username used in authentication. [CHAR LIMIT=NONE] -->
-    <string name="auth_username_title">Authentication username</string>
-    <!-- Help text of the auth_username field. [CHAR LIMIT=NONE] -->
-    <string name="auth_username_summary">Username used for authentication</string>
-
-    <!-- Initial status of the preferences is '<Not set>'. [CHAR LIMIT=NONE] -->
-    <string name="default_preference_summary">&lt;Not set&gt;</string>
-    <!-- Default value for the display-name preference summary. [CHAR LIMIT=NONE] -->
-    <string name="display_name_summary">&lt;Same as username&gt;</string>
-    <!-- Default value for the outbound-proxy-address preference summary. [CHAR LIMIT=NONE] -->
-    <string name="optional_summary">&lt;Optional&gt;</string>
-
-    <!-- Default sip server/proxy port number. -->
-    <string translatable="false" name="default_port">5060</string>
-    <!-- Default sip server/proxy transport protocol. -->
-    <string translatable="false" name="default_transport">UDP</string>
-
-
-    <!-- Hint to show the advanced settings section. [CHAR LIMIT=NONE] -->
-    <string name="advanced_settings_show">▷ Touch to show all</string>
-    <!-- Hint to hide the advanced settings section. [CHAR LIMIT=NONE] -->
-    <string name="advanced_settings_hide">▽ Touch to hide all</string>
-
-    <!-- Text in an alert dialog telling the user that some input field (name of which is also part of the strings being translated above) is required and can not be left blank. [CHAR LIMIT=NONE] -->
-    <string name="empty_alert"><xliff:g id="input_field_name" example="Username, Password...">%s</xliff:g> is required and can\'t be left blank.</string>
-    <!-- Showing that port number is out of range in an alert dialog. [CHAR LIMIT=NONE] -->
-    <string name="not_a_valid_port">Port number should be within 1000 and 65534.</string>
-
-    <!-- Title of the alert dialog to notify user that there is no Internet connectivity. [CHAR LIMIT=40] -->
-    <string name="no_internet_available_title">No Internet connection</string>
-    <!-- Title of the alert dialog to notify user that there is no Wi-Fi connectivity. [CHAR LIMIT=40] -->
-    <string name="no_wifi_available_title">No Wi-Fi connection</string>
-    <!-- Message of the alert dialog to notify user that there is no Internet connectivity. [CHAR LIMIT=NONE] -->
-    <string name="no_internet_available">To place an Internet call, check your Internet connection first.</string>
-    <!-- Message of the alert dialog to notify user that there is no Wi-Fi connectivity. [CHAR LIMIT=NONE] -->
-    <string name="no_wifi_available">You need to be connected to a Wi-Fi network for Internet calls (use the Wireless &amp; Network settings).</string>
-    <!-- Title of the alert dialog to notify user that Internet call is not supported. [CHAR LIMIT=40] -->
-    <string name="no_voip">Internet calling not supported</string>
-
-    <!-- Option for whether the SIP service should send keepalive messages. [CHAR LIMIT=40] -->
-    <string translatable="true" name="sip_system_decide">Automatic</string>
-    <!-- Option for whether the SIP service should send keepalive messages. [CHAR LIMIT=40] -->
-    <string translatable="true" name="sip_always_send_keepalive">Always send</string>
-
-    <!-- Do not translate the following strings. Used for the Internet call options. Need to be in-sync with Settings.System.SIP_ strings. -->
-    <string translatable="false" name="sip_always">SIP_ALWAYS</string>
-    <string translatable="false" name="sip_address_only">SIP_ADDRESS_ONLY</string>
-    <string translatable="false" name="sip_ask_me_each_time">SIP_ASK_ME_EACH_TIME</string>
-
-    <!-- Do not translate the following strings. Used for the preference keys -->
-    <string translatable="false" name="domain_address">SipDomain</string>
-    <string translatable="false" name="username">UserName</string>
-    <string translatable="false" name="password">Password</string>
-    <string translatable="false" name="display_name">DisplayName</string>
-    <string translatable="false" name="proxy_address">ProxyAddress</string>
-    <string translatable="false" name="port">Port</string>
-    <string translatable="false" name="transport">Protocol</string>
-    <string translatable="false" name="send_keepalive">SendKeepAlive</string>
-    <string translatable="false" name="set_primary">SetPrimary</string>
-    <string translatable="false" name="advanced_settings_container">advanced settings container</string>
-    <string translatable="false" name="auth_username">AuthUserName</string>
-    <!-- End of SIP settings related strings -->
-
-    <!-- Dialog title to notify user that Voice calling is not supported
-         on this device. [CHAR LIMIT=40] -->
-    <string name="not_voice_capable">Voice calling not supported</string>
 
     <!-- Canned response for the "Respond via SMS" feature for incoming calls. [CHAR LIMIT=35] -->
     <string name="respond_via_sms_canned_response_1">Can\'t talk now. What\'s up?</string>
@@ -1543,4 +1208,54 @@
     <string name="sub_2">SUB 2</string>
     <!-- This can be used in any application wanting to disable the text "Emergency number" -->
     <string name="emergency_call_dialog_number_for_display">Emergency number</string>
+
+    <!-- The digit to be displayed on the 0 key of the dialpad [CHAR LIMIT=1]-->
+    <string name="dialpad_0_number">0</string>
+    <!-- The digit to be displayed on the 1 key of the dialpad [CHAR LIMIT=1]-->
+    <string name="dialpad_1_number">1</string>
+    <!-- The digit to be displayed on the 2 key of the dialpad [CHAR LIMIT=1]-->
+    <string name="dialpad_2_number">2</string>
+    <!-- The digit to be displayed on the 3 key of the dialpad [CHAR LIMIT=1]-->
+    <string name="dialpad_3_number">3</string>
+    <!-- The digit to be displayed on the 4 key of the dialpad [CHAR LIMIT=1]-->
+    <string name="dialpad_4_number">4</string>
+    <!-- The digit to be displayed on the 5 key of the dialpad [CHAR LIMIT=1]-->
+    <string name="dialpad_5_number">5</string>
+    <!-- The digit to be displayed on the 6 key of the dialpad [CHAR LIMIT=1]-->
+    <string name="dialpad_6_number">6</string>
+    <!-- The digit to be displayed on the 7 key of the dialpad [CHAR LIMIT=1]-->
+    <string name="dialpad_7_number">7</string>
+    <!-- The digit to be displayed on the 8 key of the dialpad [CHAR LIMIT=1]-->
+    <string name="dialpad_8_number">8</string>
+    <!-- The digit to be displayed on the 9 key of the dialpad [CHAR LIMIT=1]-->
+    <string name="dialpad_9_number">9</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_star_number">*</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_pound_number">#</string>
+
+    <!--  Do not translate. -->
+    <string name="dialpad_0_letters">+</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_1_letters"></string>
+    <!--  Do not translate. -->
+    <string name="dialpad_2_letters">ABC</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_3_letters">DEF</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_4_letters">GHI</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_5_letters">JKL</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_6_letters">MNO</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_7_letters">PQRS</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_8_letters">TUV</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_9_letters">WXYZ</string>
+    <!--  Do not translate. -->
+    <string name="dialpad_star_letters"></string>
+    <!--  Do not translate. -->
+    <string name="dialpad_pound_letters"></string>
 </resources>
