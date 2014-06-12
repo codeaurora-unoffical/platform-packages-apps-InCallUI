@@ -469,6 +469,8 @@ public class InCallActivity extends Activity {
     public void displayManageConferencePanel(boolean showPanel) {
         if (showPanel) {
             mConferenceManagerFragment.setVisible(true);
+        } else {
+            mConferenceManagerFragment.setVisible(false);
         }
     }
 
