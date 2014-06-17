@@ -222,14 +222,24 @@ public class InCallPresenter implements CallList.Listener {
         final int currCallType = CallUtils.getCallType(call);
         final int proposedCallType = CallUtils.getProposedCallType(call);
         final boolean error = CallUtils.hasCallModifyFailed(call);
+        final boolean isRinging = mInCallState == InCallState.INCOMING;
 
         log("VideoCall onMoifyCallRequest: CallId =" + callId + " currCallType="
                 + currCallType
-                + " proposedCallType= " + proposedCallType + " error=" + error);
+                + " proposedCallType= " + proposedCallType + " error=" + error
+                + " isRinging = " + isRinging);
         try {
             if (isUserConsentRequired(proposedCallType, currCallType)) {
                 if (mInCallActivity != null) {
-                    mInCallActivity.displayModifyCallConsentDialog(call);
+                    if (!error && isRinging) {
+                        /* WaitingCall takes precedence over upgrade requests, so
+                         * reject upgrade requests if there is waiting call that
+                         * is pending user action
+                         */
+                        modifyCallConfirm(false, call);
+                    } else {
+                        mInCallActivity.displayModifyCallConsentDialog(call);
+                    }
                 } else {
                     Log.e(this, "VideoCall: onMoifyCallRequest: InCallActivity is null.");
                 }
