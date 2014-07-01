@@ -29,6 +29,7 @@ import com.android.services.telephony.common.Call;
 import com.android.services.telephony.common.CallDetails;
 import com.android.services.telephony.common.Call.Capabilities;
 
+import android.telephony.MSimTelephonyManager;
 import android.telephony.PhoneNumberUtils;
 
 /**
@@ -260,7 +261,14 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
 
             if (showMerge) {
                 ui.showMerge(true);
-                ui.showAddCall(false);
+                if ((MSimTelephonyManager.getDefault().getMultiSimConfiguration()
+                        == MSimTelephonyManager.MultiSimVariants.DSDA) && canAdd) {
+                    Log.d(this, "DSDA is enabled");
+                    ui.showAddCall(true);
+                    ui.enableAddCall(canAdd);
+                } else {
+                    ui.showAddCall(false);
+                }
             } else {
                 ui.showMerge(false);
                 ui.showAddCall(true);
