@@ -183,6 +183,13 @@ public class VideoCallManager {
     }
 
     /**
+     * Request for RTP Data Usage
+     */
+    public int requestRtpDataUsage() {
+        return mMediaHandler.requestRtpDataUsage();
+    }
+
+    /**
      * Get Video Quality Level
      */
     public int getVideoQualityLevel() {

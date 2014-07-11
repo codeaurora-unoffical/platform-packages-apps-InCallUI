@@ -160,6 +160,25 @@ static int dpl_getVideoQualityIndication(JNIEnv *e, jobject o) {
     return def;
 }
 
+static int dpl_requestRtpDataUsage(JNIEnv *e, jobject o) {
+    int def = -1;
+    ALOGD("%s", __func__);
+
+    if(vt_apis && vt_apis->requestRtpDataUsage) {
+        return vt_apis->requestRtpDataUsage();
+    }
+    return def;
+}
+
+static int dpl_getRtpDataUsage(JNIEnv *e, jobject o, jint direction) {
+    int def = -1;
+    ALOGD("%s", __func__);
+
+    if(vt_apis && vt_apis->getRtpDataUsage) {
+        return vt_apis->getRtpDataUsage(direction);
+    }
+    return def;
+}
 
 static void onMediaEvent(uint16_t eventId) {
     bool threadAttached = false;
@@ -218,6 +237,8 @@ static JNINativeMethod sMethods[] =
     {"nativeGetPeerHeight", "()I", (void *)dpl_getPeerHeight},
     {"nativeGetPeerWidth", "()I", (void *)dpl_getPeerWidth},
     {"nativeGetVideoQualityIndication", "()I", (void *)dpl_getVideoQualityIndication},
+    {"nativeRequestRtpDataUsage", "()I", (void *)dpl_requestRtpDataUsage},
+    {"nativeGetRtpDataUsage", "(I)I", (void *)dpl_getRtpDataUsage},
     {"nativeRegisterForMediaEvents", "(Lcom/android/incallui/MediaHandler;)V"
         , (void *)dpl_registerForImsEvent}
 };
@@ -237,6 +258,8 @@ static JNINativeMethod sMethods[] =
 #define IMPL_SYM_PEER_HEIGHT  "getPeerHeight"
 #define IMPL_SYM_PEER_WIDTH   "getPeerWidth"
 #define IMPL_SYM_VIDEO_QUALITY_IND     "getVideoQualityIndication"
+#define IMPL_SYM_REQUEST_RTP_DATA_USAGE    "requestRtpDataUsage"
+#define IMPL_SYM_GET_RTP_DATA_USAGE    "getRtpDataUsage"
 #define IMPL_SYM_REGISTER    "registerAppEventCallback"
 
 struct VtImplApis *vt_load_impl_lib(const char *path)
@@ -264,6 +287,8 @@ struct VtImplApis *vt_load_impl_lib(const char *path)
     ret->getPeerHeight = (VtImplUint32VoidFunc) dlsym(handle, IMPL_SYM_PEER_HEIGHT);
     ret->getPeerWidth = (VtImplUint32VoidFunc) dlsym(handle, IMPL_SYM_PEER_WIDTH);
     ret->getVideoQualityIndication = (VtImplUint32VoidFunc) dlsym(handle, IMPL_SYM_VIDEO_QUALITY_IND);
+    ret->requestRtpDataUsage = (VtImplUint32VoidFunc) dlsym(handle, IMPL_SYM_REQUEST_RTP_DATA_USAGE);
+    ret->getRtpDataUsage = (VtImplGetRtpDataUsageFunc) dlsym(handle, IMPL_SYM_GET_RTP_DATA_USAGE);
     ret->registerAppEventCallback = (VtImplRegisterCbFun) dlsym(handle, IMPL_SYM_REGISTER);
 
     return ret;
