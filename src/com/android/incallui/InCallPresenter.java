@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
  * Not a Contribution, Apache license notifications and license are retained
  * for attribution purposes only.
  *
@@ -360,7 +360,10 @@ public class InCallPresenter implements CallList.Listener {
                 == MSimTelephonyManager.MultiSimVariants.DSDA && (mInCallActivity != null)) {
             mInCallActivity.updateDsdaTab();
         }
-        if (isActivityStarted()) {
+        // Get the config whether we need to dismiss the keyguard screen, Google design is true.
+        boolean shouldDismissKeyguard = (mInCallActivity != null &&
+                mInCallActivity.getResources().getBoolean(R.bool.config_incall_dismiss_keyguard));
+        if (isActivityStarted() && shouldDismissKeyguard) {
             final boolean hasCall = callList.getActiveOrBackgroundCall() != null ||
                     callList.getOutgoingCall() != null;
             mInCallActivity.dismissKeyguard(hasCall);
@@ -410,7 +413,10 @@ public class InCallPresenter implements CallList.Listener {
         // We need to do the run the same code as onCallListChange.
         onCallListChange(CallList.getInstance());
 
-        if (isActivityStarted()) {
+        // Get the config whether we need to dismiss the keyguard screen, Google design is true.
+        boolean shouldDismissKeyguard = (mInCallActivity != null &&
+                mInCallActivity.getResources().getBoolean(R.bool.config_incall_dismiss_keyguard));
+        if (isActivityStarted() && shouldDismissKeyguard) {
             mInCallActivity.dismissKeyguard(false);
         }
     }
