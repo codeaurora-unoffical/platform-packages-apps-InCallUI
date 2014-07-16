@@ -221,7 +221,7 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
     public void showDialpadClicked(boolean checked) {
         Log.v(this, "Show dialpad " + String.valueOf(checked));
         getUi().displayDialpad(checked);
-        updateExtraButtonRow();
+        updateExtraButtonRow(checked);
     }
 
     public void modifyCallButtonClicked() {
@@ -331,12 +331,17 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
     }
 
     private void updateExtraButtonRow() {
+        updateExtraButtonRow(getUi().isDialpadVisible());
+    }
+
+    private void updateExtraButtonRow(boolean isDialpadVisible) {
         final boolean showExtraButtonRow = (mShowGenericMerge || mShowManageConference) &&
-                !getUi().isDialpadVisible();
+                !isDialpadVisible;
 
         Log.d(this, "isGeneric: " + mShowGenericMerge);
         Log.d(this, "mShowManageConference : " + mShowManageConference);
         Log.d(this, "mShowGenericMerge: " + mShowGenericMerge);
+        Log.d(this, "isDialpadVisible: " + isDialpadVisible);
         if (showExtraButtonRow) {
             if (mShowGenericMerge) {
                 getUi().showGenericMergeButton();
