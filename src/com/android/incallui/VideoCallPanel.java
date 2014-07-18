@@ -130,6 +130,17 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
         return str;
     }
 
+    private static String fromPlayerState(int state) {
+        switch (state) {
+            case MediaHandler.PLAYER_STATE_STARTED:
+                return "Started";
+            case MediaHandler.PLAYER_STATE_STOPPED:
+                return "Stopped";
+            default:
+                return "State Unknown";
+        }
+    }
+
 
     /**
      * This class implements the listener for PARAM READY EVENT
@@ -150,13 +161,9 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
 
         @Override
         public void onPlayerStateChanged(int state) {
-            if (state == MediaHandler.PLAYER_STATE_STARTED) {
-                log("PLAYER_STARTED");
-            } else if (state == MediaHandler.PLAYER_STATE_STOPPED) {
-                log("PLAYER_STOPPED");
-            } else {
-                log("UNKOWN_STATE");
-            }
+            String msg = "Player: " + fromPlayerState(state);
+            if (DBG) log(msg);
+            Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
         }
 
         @Override
