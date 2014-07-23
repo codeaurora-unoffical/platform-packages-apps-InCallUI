@@ -113,6 +113,18 @@ public class CallCommandClient {
         }
     }
 
+    public void updateMuteState(int sub, boolean muted) {
+        if (mCommandService == null) {
+            Log.e(this, "Cannot updateMuteState; CallCommandService == null");
+            return;
+        }
+        try {
+            mCommandService.updateMuteState(sub, muted);
+        } catch (RemoteException e) {
+            Log.e(this, "Error updateMuteState.", e);
+        }
+    }
+
     public void hold(int callId, boolean onOff) {
         Log.i(this, "hold call(" + onOff + "): " + callId);
         if (mCommandService == null) {
