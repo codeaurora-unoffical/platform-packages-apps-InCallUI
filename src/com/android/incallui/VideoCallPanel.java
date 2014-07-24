@@ -95,14 +95,14 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
     private boolean mCameraNeeded = false;
 
     // Flag to indicate if recording can be started
-    private boolean mStartReceived = false;
+    private static boolean mStartReceived = false;
 
     /*
      * Flag to indicate whether recording has started or not
      * False: recording hasn't started
      * True: recording has started
      */
-    private boolean mIsRecordingStarted = false;
+    private static boolean mIsRecordingStarted = false;
 
     /**
     * This class implements the zoom listener for zoomControl
