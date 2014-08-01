@@ -89,7 +89,7 @@ public class ConferenceManagerPresenter
 
     private void initParticipantList(CallList callList) {
         mParticipantList = null;
-        Call call = callList.getActiveOrBackgroundCall();
+        Call call = callList.getFirstCallWithState(Call.State.CONFERENCED);
 
         if (isImsCall(call)) {
             String[] confParticipantList = call.getCallDetails().getConfParticipantList();
