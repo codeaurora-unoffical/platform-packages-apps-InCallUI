@@ -259,6 +259,17 @@ public class InCallPresenter implements CallList.Listener {
     }
 
     /**
+     * Modify call response
+     */
+    public void onCallModifyResponse(Call call) {
+        if (mInCallActivity != null) {
+            mInCallActivity.onCallModifyResponse(call);
+        } else {
+            Log.e(this, "onCallModifyResponse: InCallActivity is null.");
+        }
+    }
+
+    /**
      * Called when the UI begins or ends. Starts the callstate callbacks if the UI just began.
      * Attempts to tear down everything if the UI just ended. See #tearDown for more insight on
      * the tear-down process.

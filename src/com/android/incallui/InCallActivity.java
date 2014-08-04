@@ -545,6 +545,12 @@ public class InCallActivity extends Activity {
         }
     }
 
+    public void onCallModifyResponse(Call call) {
+        log("onModifyCallReqfailed: Response " + call.getCallModifyDetails().getErrorInfo());
+        Toast.makeText(this, call.getCallModifyDetails().getErrorInfo(),
+                Toast.LENGTH_LONG).show();
+    }
+
     private class ModifyCallConsentListener implements DialogInterface.OnClickListener,
             DialogInterface.OnDismissListener {
         private boolean mClicked = false;

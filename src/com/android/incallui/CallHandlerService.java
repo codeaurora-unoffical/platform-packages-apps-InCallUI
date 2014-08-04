@@ -51,6 +51,7 @@ public class CallHandlerService extends Service {
     private static final int ON_ACTIVE_SUB_CHANGE = 11;
     private static final int ON_UNSOL_CALLMODIFY = 12;
     private static final int ON_SUPP_SERVICE_FAIL = 13;
+    private static final int ON_MODIFY_CALL_RESPONSE = 14;
 
     private static final int LARGEST_MSG_ID = ON_SUPP_SERVICE_FAIL;
 
@@ -193,7 +194,7 @@ public class CallHandlerService extends Service {
         @Override
         public void onModifyCall(Call call) {
             try {
-                Log.i(TAG, "onModifyCallResponse: " + call);
+                Log.i(TAG, "onModifyCall:" + call);
                 mMainHandler.sendMessage(mMainHandler.obtainMessage(ON_UNSOL_CALLMODIFY, call));
             } catch (Exception e) {
                 Log.e(TAG, "Error processing onDisconnect() call.", e);
@@ -208,6 +209,12 @@ public class CallHandlerService extends Service {
         @Override
         public void onSuppServiceFailed(int service) {
             mMainHandler.sendMessage(mMainHandler.obtainMessage(ON_SUPP_SERVICE_FAIL, service));
+        }
+
+        @Override
+        public void onCallModifyResponse(Call call){
+            Log.i(TAG, "onCallModifyResponse:" + call);
+            mMainHandler.sendMessage(mMainHandler.obtainMessage(ON_MODIFY_CALL_RESPONSE, call));
         }
 
     };
@@ -353,6 +360,11 @@ public class CallHandlerService extends Service {
             case ON_SUPP_SERVICE_FAIL:
                 Log.i(TAG, "ON_SUPP_SERVICE_FAIL: ");
                 mInCallPresenter.onSuppServiceFailed((Integer) msg.obj);
+                break;
+            case ON_MODIFY_CALL_RESPONSE:
+                Call modifyFail = (Call) msg.obj;
+                Log.i(TAG, "ON_MODIFY_CALL_RESPONSE: ");
+                mInCallPresenter.onCallModifyResponse(modifyFail);
                 break;
 
             default:
