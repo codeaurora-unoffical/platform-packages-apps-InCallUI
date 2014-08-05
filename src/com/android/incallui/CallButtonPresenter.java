@@ -42,6 +42,8 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
     private boolean mAutomaticallyMuted = false;
     private boolean mPreviousMuteState = false;
 
+    private int mPreviousSub = 0;
+
     private boolean mShowGenericMerge = false;
     private boolean mShowManageConference = false;
 
@@ -206,6 +208,7 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         // Automatically mute the current call
         mAutomaticallyMuted = true;
         mPreviousMuteState = AudioModeProvider.getInstance().getMute();
+        mPreviousSub = mCall.getSubscription();
         // Simulate a click on the mute button
         muteClicked(true);
 
@@ -348,6 +351,10 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
 
     public void refreshMuteState() {
         // Restore the previous mute state
+        if (mAutomaticallyMuted) {
+            CallCommandClient.getInstance().updateMuteState(
+                    mPreviousSub, mPreviousMuteState);
+        }
         if (mAutomaticallyMuted &&
                 AudioModeProvider.getInstance().getMute() != mPreviousMuteState) {
             if (getUi() == null) {
