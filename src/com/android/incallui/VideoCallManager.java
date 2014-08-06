@@ -92,7 +92,8 @@ public class VideoCallManager {
         mCvoHandler = new CvoHandler(context);
         mMediaHandler.registerForCvoModeRequestChanged(mHandler, CVO_MODE_REQUEST_CHANGED, null);
         mCvoHandler.registerForCvoInfoChange(mHandler, CVO_INFO_CHANGED, null);
-        mVideoPauseController = new VideoPauseController(context, CallCommandClient.getInstance());
+        mVideoPauseController = new VideoPauseController(context, CallCommandClient.getInstance(),
+                InCallPresenter.getInstance());
     }
 
     private void notifyCvoClient(int orientation) {
