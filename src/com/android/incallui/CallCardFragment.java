@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
  * Not a Contribution.
  *
  * Copyright (C) 2013 The Android Open Source Project
@@ -41,10 +41,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -162,7 +164,9 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         super.onCreateView(inflater, container, savedInstanceState);
 
         mDensity = getResources().getDisplayMetrics().density;
-
+        if (CallUtils.hasImsCall(CallList.getInstance())){
+            return inflater.inflate(R.layout.ims_call_card, container, false);
+        }
         return inflater.inflate(R.layout.call_card, container, false);
     }
 
@@ -315,6 +319,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             setDrawableToImageView(mSecondaryPhoto, photo);
         } else {
             mSecondaryCallInfo.setVisibility(View.GONE);
+            mVideoCallPanel.onShowSecondary(false);
         }
     }
 
@@ -428,6 +433,9 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
     }
 
     private void setDrawableToImageView(ImageView view, Drawable photo) {
+        if (view == null){
+            return;
+        }
         if (photo == null) {
             photo = view.getResources().getDrawable(R.drawable.picture_unknown);
         }
@@ -596,12 +604,17 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         if (mSecondaryCallName == null) {
             mSecondaryCallName = (TextView) getView().findViewById(R.id.secondaryCallName);
         }
+
         if (mSecondaryPhoto == null) {
             mSecondaryPhoto = (ImageView) getView().findViewById(R.id.secondaryCallPhoto);
         }
 
         if (mSecondaryPhotoOverlay == null) {
             mSecondaryPhotoOverlay = getView().findViewById(R.id.dim_effect_for_secondary_photo);
+            if (CallUtils.hasImsCall(CallList.getInstance())){
+                mSecondaryPhotoOverlay.getBackground().setAlpha(100);
+            }
+
             mSecondaryPhotoOverlay.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -610,6 +623,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             });
             mSecondaryPhotoOverlay.setOnTouchListener(new SmallerHitTargetTouchListener());
         }
+        mVideoCallPanel.onShowSecondary(true);
     }
 
     public void dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
@@ -868,6 +882,10 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
                 mAudioManager.setParameters(VOLUME_BOOST + "=off");
             }
         }
+    }
+
+    public void handleSwitchCamera(){
+        mVideoCallPanel.handleSwitchCamera();
     }
 
     @Override

@@ -858,6 +858,7 @@ public class InCallPresenter implements CallList.Listener {
     }
 
     public Intent getInCallIntent(boolean showDialpad) {
+        boolean hasImsCall = CallUtils.hasImsCall(CallList.getInstance());
         final Intent intent = new Intent(Intent.ACTION_MAIN, null);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
@@ -871,6 +872,7 @@ public class InCallPresenter implements CallList.Listener {
         if (showDialpad) {
             intent.putExtra(InCallActivity.SHOW_DIALPAD_EXTRA, true);
         }
+        intent.putExtra(InCallActivity.LAUNCH_IMS_UI, hasImsCall);
 
         return intent;
     }

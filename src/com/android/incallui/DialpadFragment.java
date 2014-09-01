@@ -439,8 +439,18 @@ public class DialpadFragment extends BaseFragment<DialpadPresenter, DialpadPrese
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        final View parent = inflater.inflate(
-                com.android.incallui.R.layout.dtmf_twelve_key_dialer_view, container, false);
+        boolean isImsUI = false;
+        if (this.getActivity() instanceof InCallActivity){
+            isImsUI = ((InCallActivity)getActivity()).isImsUI();
+        }
+        final View parent;
+        if (isImsUI){
+            parent = inflater.inflate(
+                    com.android.incallui.R.layout.ims_dtmf_twelve_key_dialer_view, container, false);
+        }else{
+            parent = inflater.inflate(
+                    com.android.incallui.R.layout.dtmf_twelve_key_dialer_view, container, false);
+        }
         mDtmfDialerField = (EditText) parent.findViewById(R.id.dtmfDialerField);
         if (mDtmfDialerField != null) {
             mDialerKeyListener = new DTMFKeyListener();
@@ -448,8 +458,12 @@ public class DialpadFragment extends BaseFragment<DialpadPresenter, DialpadPrese
             // remove the long-press context menus that support
             // the edit (copy / paste / select) functions.
             mDtmfDialerField.setLongClickable(false);
-
-            setupKeypad(parent);
+            if (isImsUI){
+                setupImsKeypad(parent);
+                return parent;
+            }else{
+                setupKeypad(parent);
+            }
         }
 
         final ViewTreeObserver vto = parent.getViewTreeObserver();
@@ -469,7 +483,6 @@ public class DialpadFragment extends BaseFragment<DialpadPresenter, DialpadPrese
                 vto.removeOnPreDrawListener(this);
                 return true;
             }
-
         };
 
         vto.addOnPreDrawListener(preDrawListener);
@@ -569,6 +582,21 @@ public class DialpadFragment extends BaseFragment<DialpadPresenter, DialpadPrese
             if (lettersView != null) {
                 lettersView.setText(resources.getString(letterIds[i]));
             }
+        }
+    }
+
+    private void setupImsKeypad(View parent) {
+        // for each view id listed in the displaymap
+        View button;
+        for (int viewId : mDisplayMap.keySet()) {
+            // locate the view
+            button = parent.findViewById(viewId);
+            // Setup the listeners for the buttons
+            button.setOnTouchListener(this);
+            button.setClickable(true);
+            button.setOnKeyListener(this);
+            button.setOnHoverListener(this);
+            button.setOnClickListener(this);
         }
     }
 }
