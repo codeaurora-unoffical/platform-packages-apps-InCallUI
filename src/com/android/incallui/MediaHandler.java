@@ -52,6 +52,11 @@ public class MediaHandler extends Handler {
     public static final int PLAYER_STATE_STARTED = 0;
     public static final int PLAYER_STATE_STOPPED = 1;
 
+    //transmit direction
+    public static final int DATA_USAGE_UPLINK = 0;
+    //receive direction
+    public static final int DATA_USAGE_DOWNLINK = 1;
+
     private static final String TAG = "VideoCall_MediaHandler";
 
     private static SurfaceTexture mSurface;
@@ -70,6 +75,8 @@ public class MediaHandler extends Handler {
     private static native int nativeGetPeerHeight();
     private static native int nativeGetPeerWidth();
     private static native int nativeGetVideoQualityIndication();
+    private static native int nativeRequestRtpDataUsage();
+    private static native int nativeGetRtpDataUsage(int direction);
     private static native void nativeRegisterForMediaEvents(MediaHandler instance);
 
     public static final int MEDIA_EVENT = 0;
@@ -82,6 +89,7 @@ public class MediaHandler extends Handler {
     public static final int DISPLAY_MODE_EVT = 5;
     public static final int PEER_RESOLUTION_CHANGE_EVT = 6;
     public static final int VIDEO_QUALITY_EVT = 7;
+    public static final int VT_RTP_DATA_USAGE_EVENT = 8;
     public static final int STOP_READY_EVT = 9;
 
     protected final RegistrantList mDisplayModeEventRegistrants
@@ -140,6 +148,7 @@ public class MediaHandler extends Handler {
         void onPeerResolutionChangeEvent();
         void onPlayerStateChanged(int state);
         void onVideoQualityEvent(int videoQuality);
+        void onRtpDataUsageEvent(int upLinkCount, int downLinkCount);
         void onStopReadyEvent();
     }
 
@@ -270,6 +279,18 @@ public class MediaHandler extends Handler {
     }
 
     /**
+     * Request for RTP Data usage
+     * 0 This value is returned when the request was properly communicated
+     * -1 This error value is returned when there is some issue during
+     *    communication to RTP layer
+     */
+    public int requestRtpDataUsage() {
+        int mRet = nativeRequestRtpDataUsage();
+        Log.d(TAG, "requestRtpDataUsage mRet: " + mRet);
+        return mRet;
+    }
+
+    /**
      * Get Video Quality level
      */
     public int getVideoQualityLevel() {
@@ -344,6 +365,20 @@ public class MediaHandler extends Handler {
                     mMediaEventListener.onVideoQualityEvent(mVideoQualityLevel);
                 }
                 break;
+            case VT_RTP_DATA_USAGE_EVENT:
+                Log.d(TAG, "Received VT_RTP_DATA_USAGE_EVENT");
+                //get uplink data usage count
+                int uplinkCount = nativeGetRtpDataUsage(DATA_USAGE_UPLINK);
+                //get downlink data usage count
+                int downlinkCount = nativeGetRtpDataUsage(DATA_USAGE_DOWNLINK);
+                Log.d(TAG, "uplink data usage: " + uplinkCount
+                        + " downlink data usage: " + downlinkCount);
+                if (mMediaEventListener != null) {
+                    mMediaEventListener.onRtpDataUsageEvent(uplinkCount, downlinkCount);
+                }
+
+                break;
+
             default:
                 Log.e(TAG, "Received unknown event id=" + eventId);
         }
