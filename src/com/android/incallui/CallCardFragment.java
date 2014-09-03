@@ -91,7 +91,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
     private VideoCallPanel mVideoCallPanel;
     private boolean mAudioDeviceInitialized = false;
 
-    private int mRecordingTime = -1;
+    private String mRecordingTime;
 
     // Constants for TelephonyProperties.PROPERTY_IMS_AUDIO_OUTPUT property.
     // Currently, the default audio output is headset if connected, bluetooth
@@ -883,13 +883,10 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
     }
 
     private void showCallRecordingElapsedTime() {
-        mRecordingTime = mRecordingTime + 1;
-        String duration = (DateUtils.formatElapsedTime(mRecordingTime));
-
         if (mRecordingTimeLabel.getVisibility() != View.VISIBLE) {
             AnimationUtils.Fade.show(mRecordingTimeLabel);
         }
-        mRecordingTimeLabel.setText(duration);
+        mRecordingTimeLabel.setText(mRecordingTime);
     }
 
     private BroadcastReceiver recorderStateReceiver = new BroadcastReceiver() {
@@ -897,12 +894,15 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         @Override
         public void onReceive(Context context, Intent intent) {
             if (ACTION_RECORD_TIME_CHANGED.equals(intent.getAction())) {
-                mRecordingTimeLabel.setVisibility(View.VISIBLE);
-                showCallRecordingElapsedTime();
-                mRecordingIcon.setVisibility(View.VISIBLE);
+                String temp = intent.getStringExtra(Intent.EXTRA_TEXT);
+                if (!TextUtils.isEmpty(temp)) {
+                    mRecordingTime = temp;
+                    mRecordingTimeLabel.setVisibility(View.VISIBLE);
+                    showCallRecordingElapsedTime();
+                    mRecordingIcon.setVisibility(View.VISIBLE);
+                }
             } else if (ACTION_RECORD_STOP.equals(intent.getAction())) {
                 mRecordingTimeLabel.setVisibility(View.GONE);
-                mRecordingTime = -1;
                 mRecordingIcon.setVisibility(View.GONE);
             }
         }
