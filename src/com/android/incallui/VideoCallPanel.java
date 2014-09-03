@@ -29,6 +29,7 @@
 package com.android.incallui;
 
 import android.content.Context;
+import android.widget.Toast;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.os.SystemProperties;
@@ -140,6 +141,13 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
             } else {
                 log("UNKOWN_STATE");
             }
+            /*
+             * Query IMS VT of RTP data usage.
+             * Querying here ensures that we get UL/DL count
+             * whenever video STARTS/STOPS flowing.
+             * OEMs can customize the RTP data usage API call
+             */
+             mVideoCallManager.requestRtpDataUsage();
         }
 
         @Override
@@ -177,6 +185,12 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
             if (mHeight != INVALID_SIZE && mWidth != INVALID_SIZE) {
                 resizeFarEndView();
             }
+        }
+
+        @Override
+        public void onRtpDataUsageEvent(int ulCount, int dlCount) {
+            String msg = "UpLink Count : " + ulCount + "DownLink Count : " + dlCount;
+            Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
         }
     }
 
