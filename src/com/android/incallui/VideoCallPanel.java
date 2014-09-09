@@ -162,8 +162,15 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
         @Override
         public void onPlayerStateChanged(int state) {
             String msg = "Player: " + fromPlayerState(state);
-            if (DBG) log(msg);
+            if (true) log(msg);
             Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+                /*
+                 * Query IMS VT of RTP data usage.
+                 * Querying here ensures that we get UL/DL count
+                 * whenever video STARTS/STOPS flowing.
+                 * OEMs can customize the RTP data usage API call
+                 */
+                mVideoCallManager.requestRtpDataUsage();
         }
 
         @Override
@@ -207,6 +214,12 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
         public void onVideoQualityEvent(int videoQuality) {
             // Display Toast for the received Video Quality value
             String msg = "Video Quality : " + fromVideoQualityLevel(videoQuality);
+            Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onRtpDataUsageEvent(int ulCount, int dlCount) {
+            String msg = "UpLink Count : " + ulCount + "DownLink Count : " + dlCount;
             Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
         }
     }
