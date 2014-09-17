@@ -197,6 +197,12 @@ public class ConferenceManagerPresenter
         intent.setClassName("com.android.dialer.conference",
                 "com.android.dialer.conference.ConferenceCallActivity");
         intent.putExtra(InCallApp.ADD_PARTICIPANT_KEY, true);
+        StringBuffer sb = new StringBuffer();
+        for (String number: mParticipantList){
+            sb.append(number).append(";");
+        }
+        Log.d(LOG_TAG, "manageAddParticipants existingParticipants=" + sb.toString());
+        intent.putExtra(InCallApp.CURRENT_PARTICIPANT_LIST, sb.toString());
         try {
             mContext.startActivity(intent);
         } catch (ActivityNotFoundException e) {
