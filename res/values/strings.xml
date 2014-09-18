@@ -1603,6 +1603,7 @@
     <string name="dialpad_star_letters"></string>
     <!--  Do not translate. -->
     <string name="dialpad_pound_letters"></string>
+    <string name="card_title_incoming_video_call">Incoming Video Call</string>
     <string name="ims_modify_vt">switch to video Call</string>
     <string name="ims_modify_volte">switch to voice Call</string>
     <string name="ims_camera_open">Show Me</string>

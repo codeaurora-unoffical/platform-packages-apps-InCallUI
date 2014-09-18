@@ -155,7 +155,7 @@ public class ImsCallButtonFragment extends CallButtonFragment {
     private void handleClickModifyButton(){
         Log.d(this, "handleClickModifyButton mVTOn = " + mVTOn);
         getPresenter().modifyWithCallType(mVTOn);
-        mVTOn = !mVTOn;
+        //mVTOn = !mVTOn;
         mImsModify.setEnabled(false);
         mModifyDrawable.setEnabled(false);
         mModifyText.setEnabled(false);
@@ -169,6 +169,7 @@ public class ImsCallButtonFragment extends CallButtonFragment {
     
     
     public void handleUpdateModifyButtons(int callType) {
+        Log.d(this, "enter handleUpdateModifyButtons callType = " + callType);
         switch (callType) {
             case CallDetails.CALL_TYPE_VT_TX:
                 break;
@@ -180,10 +181,10 @@ public class ImsCallButtonFragment extends CallButtonFragment {
                 mModifyDrawable.setEnabled(true);
                 mImsModify.setEnabled(true);
                 mModifyText.setEnabled(true);
-                
                 mImsSwitch.setEnabled(true);
                 mSwitchDrawable.setEnabled(true);
                 mSwitchText.setEnabled(true);
+                mVTOn = true;
                 break;
             case CallDetails.CALL_TYPE_VOICE:
                 mModifyText.setText(R.string.ims_modify_vt);
@@ -191,10 +192,10 @@ public class ImsCallButtonFragment extends CallButtonFragment {
                 mModifyDrawable.setEnabled(true);
                 mImsModify.setEnabled(true);
                 mModifyText.setEnabled(true);
-                
                 mImsSwitch.setEnabled(false);
                 mSwitchDrawable.setEnabled(false);
                 mSwitchText.setEnabled(false);
+                mVTOn = false;
                 break;
 
             default:

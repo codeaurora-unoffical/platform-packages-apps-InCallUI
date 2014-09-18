@@ -45,6 +45,7 @@ public class ConferenceManagerPresenter
     private Integer[] mCallerIds;
     private String[] mParticipantList;
     private Context mContext;
+    private StringBuffer mExistedParticipants;
     private static String LOG_TAG = "ConferenceManagerPresenter";
 
     @Override
@@ -94,6 +95,7 @@ public class ConferenceManagerPresenter
 
     private void initParticipantList(CallList callList) {
         mParticipantList = null;
+        mExistedParticipants = new StringBuffer();
         Call call = callList.getActiveOrBackgroundCall();
 
         if (isImsCall(call)) {
@@ -162,6 +164,7 @@ public class ConferenceManagerPresenter
 
             final String name = contactCacheEntry.name;
             final String number = contactCacheEntry.number;
+            mExistedParticipants.append(number).append(";");
 
             if (canSeparate) {
                 getUi().setCanSeparateButtonForRow(i, canSeparate);
@@ -182,6 +185,7 @@ public class ConferenceManagerPresenter
             getUi().setRowVisible(i, true);
             getUi().setupEndButtonForRowWithUrl(i, url);
             getUi().displayCallerInfoForConferenceRow(i, "", url, "");
+            mExistedParticipants.append(url).append(";");
         } else {
             // Disable this row of the Manage conference panel:
             getUi().setRowVisible(i, false);
@@ -197,12 +201,12 @@ public class ConferenceManagerPresenter
         intent.setClassName("com.android.dialer.conference",
                 "com.android.dialer.conference.ConferenceCallActivity");
         intent.putExtra(InCallApp.ADD_PARTICIPANT_KEY, true);
-        StringBuffer sb = new StringBuffer();
-        for (String number: mParticipantList){
-            sb.append(number).append(";");
+
+        if (mExistedParticipants != null) {
+            Log.d(LOG_TAG,
+                    "manageAddParticipants existingParticipants=" + mExistedParticipants.toString());
+            intent.putExtra(InCallApp.CURRENT_PARTICIPANT_LIST, mExistedParticipants.toString());
         }
-        Log.d(LOG_TAG, "manageAddParticipants existingParticipants=" + sb.toString());
-        intent.putExtra(InCallApp.CURRENT_PARTICIPANT_LIST, sb.toString());
         try {
             mContext.startActivity(intent);
         } catch (ActivityNotFoundException e) {
