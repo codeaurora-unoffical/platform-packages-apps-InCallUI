@@ -877,6 +877,22 @@ public class InCallPresenter implements CallList.Listener {
         return intent;
     }
 
+    public void sendAddParticipantIntents() {
+        Intent intent = new Intent(Intent.ACTION_DIAL);
+        intent.setClassName("com.android.dialer.conference",
+                "com.android.dialer.conference.ConferenceCallActivity");
+        intent.putExtra(InCallApp.ADD_PARTICIPANT_KEY, true);
+        try {
+            mContext.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            // This is rather rare but possible.
+            // Note: this method is used even when the phone is encrypted. At
+            // that moment
+            // the system may not find any Activity which can accept this Intent
+            Log.e(LOG_TAG, "Activity for adding calls isn't found.");
+        }
+    }
+
     public void sendAddParticipantIntent() {
         Intent intent = new Intent(Intent.ACTION_DIAL);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

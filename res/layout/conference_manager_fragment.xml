@@ -125,26 +125,6 @@
                 layout="@layout/caller_in_conference"
                 android:id="@+id/caller4"/>
 
-            <LinearLayout
-                android:id="@+id/addParticipantGroup"
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="64dp"
-                android:paddingStart="16dp">
-                <ImageView
-                    android:src="@drawable/ic_add_group_holo_dark"
-                    android:layout_width="46dp"
-                    android:layout_height="46dp"
-                    android:scaleType="center"/>
-                 <TextView
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:textSize="18sp"
-                    android:singleLine="true"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="@string/addParticipants"/>
-            </LinearLayout>
         </LinearLayout>  <!-- End of "list of callers on conference call" -->
 
     </ScrollView>  <!-- End of scrolling list wrapper for the linear layout -->

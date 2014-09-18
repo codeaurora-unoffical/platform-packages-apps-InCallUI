@@ -145,7 +145,7 @@ public class AnswerFragment extends BaseFragment<AnswerPresenter, AnswerPresente
     @Override
     public void showVideoButtons() {
         Log.d(this, "ims video ");
-        final int targetResourceId = R.array.incoming_call_widget_6way_ims_targets;
+        final int targetResourceId = R.array.incoming_call_widget_4way_ims_targets;
 
         if (targetResourceId != mGlowpad.getTargetResourceId()) {
             // Answer, Decline, Respond via SMS, and Video options

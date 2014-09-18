@@ -20,6 +20,8 @@
 package com.android.incallui;
 
 import android.telephony.MSimTelephonyManager;
+
+import com.android.incallui.CallUtils;
 import com.android.services.telephony.common.Call;
 
 import java.util.ArrayList;
@@ -109,8 +111,11 @@ public class MSimAnswerPresenter extends Presenter<MSimAnswerPresenter.AnswerUi>
         final ArrayList<String> textMsgs = CallList.getInstance().getTextResponses(
                 call.getCallId());
         getUi().showAnswerUi(true);
-
-        if (call.can(Call.Capabilities.RESPOND_VIA_TEXT) && textMsgs != null) {
+        if (CallUtils.isVideoCall(call)) {
+            getUi().showVideoButtons();
+            if (textMsgs != null)
+                getUi().configureMessageDialog(textMsgs);
+        } else if (call.can(Call.Capabilities.RESPOND_VIA_TEXT) && textMsgs != null) {
             getUi().showTextButton(true);
             getUi().configureMessageDialog(textMsgs);
         } else {
@@ -149,7 +154,7 @@ public class MSimAnswerPresenter extends Presenter<MSimAnswerPresenter.AnswerUi>
 
         Log.d(this, "onAnswer " + mCallId[subscription]);
 
-        CallCommandClient.getInstance().answerCall(mCallId[subscription]);
+        CallCommandClient.getInstance().answerCallWithCallType(mCallId[subscription], callType);
     }
 
     public void onDecline() {
@@ -180,6 +185,7 @@ public class MSimAnswerPresenter extends Presenter<MSimAnswerPresenter.AnswerUi>
 
     interface AnswerUi extends Ui {
         public void showAnswerUi(boolean show);
+        public void showVideoButtons();
         public void showTextButton(boolean show);
         public void showMessageDialog();
         public void configureMessageDialog(ArrayList<String> textResponses);

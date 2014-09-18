@@ -35,6 +35,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import com.android.incallui.Log;
 import com.google.common.base.Preconditions;
 
 import java.util.ArrayList;
@@ -305,6 +306,23 @@ public class MSimAnswerFragment extends BaseFragment<MSimAnswerPresenter,
     @Override
     public void onText() {
         getPresenter().onText();
+    }
+
+    public void showVideoButtons() {
+        Log.d(this, "ims video ");
+        final int targetResourceId = R.array.incoming_call_widget_4way_ims_targets;
+
+        if (targetResourceId != mGlowpad.getTargetResourceId()) {
+            // Answer, Decline, Respond via SMS, and Video options
+            // (VT,VoLTE,VT-TX,VT-RX)
+            mGlowpad.setTargetResources(R.array.incoming_call_widget_4way_ims_targets);
+            mGlowpad.setTargetDescriptionsResourceId(
+                    R.array.incoming_call_widget_4way_ims_target_descriptions);
+            mGlowpad.setDirectionDescriptionsResourceId(
+                    R.array.incoming_call_widget_4way_ims_direction_descriptions);
+
+            mGlowpad.reset(false);
+        }
     }
 
     /**

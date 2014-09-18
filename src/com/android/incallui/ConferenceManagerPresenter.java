@@ -192,14 +192,10 @@ public class ConferenceManagerPresenter
         getUi().setVisible(false);
     }
 
-    public void manageAddParticipants(){
+    public void manageAddParticipants() {
         Intent intent = new Intent(Intent.ACTION_DIAL);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        // when we request the dialer come up, we also want to inform
-        // it that we're going through the "add participant" option from the
-        // InCallScreen.
-        intent.putExtra(InCallApp.ADD_CALL_MODE_KEY, true);
+        intent.setClassName("com.android.dialer.conference",
+                "com.android.dialer.conference.ConferenceCallActivity");
         intent.putExtra(InCallApp.ADD_PARTICIPANT_KEY, true);
         try {
             mContext.startActivity(intent);

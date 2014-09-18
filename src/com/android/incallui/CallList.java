@@ -60,7 +60,8 @@ public class CallList {
     private int mSubscription = 0;
     private final ArrayList<ActiveSubChangeListener> mActiveSubChangeListeners =
             Lists.newArrayList();
-
+    private final ArrayList<SrvccListener> mSrvccListeners =
+            Lists.newArrayList();
     /**
      * Static singleton accessor method.
      */
@@ -377,10 +378,13 @@ public class CallList {
                 Log.d(this, "disconnect cause: " + disconnCause);
                 if (disconnCause == Call.DisconnectCause.SRVCC_CALL_DROP) {
                     Log.d(this, "SRVCC call so silently removing call entry");
-                    //silently remove the call entry
+                    // silently remove the call entry
                     call.setState(Call.State.IDLE);
                     mCallMap.remove(id);
                     updated = false;
+                    for (SrvccListener listener : mSrvccListeners) {
+                        listener.onSrvcc();
+                    }
                 } else {
 
                     // For disconnected calls, we want to keep them alive for a few seconds
@@ -643,6 +647,22 @@ public class CallList {
             }
         }
         return retval;
+    }
+
+    public interface SrvccListener {
+        public void onSrvcc();
+    }
+
+    public void addSrvccListener(SrvccListener listener){
+        Preconditions.checkNotNull(listener);
+        mSrvccListeners.add(listener);
+        Log.d(this, "addSrvccListener mSrvccListeners=", mSrvccListeners);
+    }
+
+    public void removeSrvccListener(SrvccListener listener){
+        Preconditions.checkNotNull(listener);
+        mSrvccListeners.remove(listener);
+        Log.d(this, "removeSrvccListener mSrvccListeners=", mSrvccListeners);
     }
 
     public void addActiveSubChangeListener(ActiveSubChangeListener listener) {
