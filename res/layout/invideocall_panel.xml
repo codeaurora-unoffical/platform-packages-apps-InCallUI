@@ -30,26 +30,31 @@
  -->
 <com.android.incallui.VideoCallPanel xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/videoCallPanel"
-    android:layout_alignParentBottom="true"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="295dp"
     android:gravity="top|center_horizontal"
     android:visibility="gone" >
 
     <!-- Row 1: The camera preview and the video stream from far end. -->
     <TextureView
         android:id="@+id/video_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_height="325dp"
         android:layout_centerInParent="true"/>
 
-    <TextureView
-        android:id="@+id/camera_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true" />
-
+	<FrameLayout
+        android:id="@+id/local_view"
+        android:layout_width="124dp"
+        android:layout_height="103dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/local_bg" >
+        <TextureView
+            android:id="@+id/camera_view"
+            android:layout_width="116dp"
+            android:layout_height="95dp"
+            android:layout_gravity="center" />
+    </FrameLayout>
     <!-- Row 2: The Settings bar. -->
     <!-- This bar contains the camera picker button and the zoom slider
          if camera supports zoom feature -->
@@ -59,7 +64,8 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/indicator_bar_width"
         android:paddingLeft="8dp"
-        android:paddingRight="8dp" >
+        android:paddingRight="8dp"
+        android:visibility="gone" >
 
         <ImageView
             android:id="@+id/camera_picker"

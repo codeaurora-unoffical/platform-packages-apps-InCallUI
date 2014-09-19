@@ -1486,7 +1486,7 @@
     <string name="description_direction_left">"Slide left for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
     <!-- Description of the right direction in which one can to slide the handle in the phone answer screen. [CHAR LIMIT=NONE] -->
     <string name="description_direction_right">Slide right for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
-
+     <string name="description_direction_down">Slide down for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
     <!-- Dialog title for the vibration settings for voicemail notifications [CHAR LIMIT=40] -->
     <string name="voicemail_notification_vibrate_when_title" msgid="8731372580674292759">Vibrate</string>
     <!-- Dialog title for the vibration settings for voice mail notifications [CHAR LIMIT=40]-->
@@ -1603,4 +1603,17 @@
     <string name="dialpad_star_letters"></string>
     <!--  Do not translate. -->
     <string name="dialpad_pound_letters"></string>
+    <string name="ims_modify_vt">switch to video Call</string>
+    <string name="ims_modify_volte">switch to voice Call</string>
+    <string name="ims_camera_open">Show Me</string>
+    <string name="ims_camera_close">Hide Me</string>
+    <string name ="ims_switch_camera">Switch Camera</string>
+    <string name="ims_connecting">Connecting...</string>
+    <string name="ims_conference">MANAGE CONFERENCE</string>
+    <string name="ims_redial_option">Redial Option</string>
+    <string name="ims_redial_msg">Unable to make a video call, try to dial again</string>
+    <string name="ims_voice_redial">By Voice Call</string>
+    <string name="ims_video_redial">By Video Call</string>
+    <string name="addParticipants">Add Participants</string>
+
 </resources>

@@ -1,4 +1,7 @@
 /*
+ * Copyright (c) 2014, The Linux Foundation. All rights reserved.
+ * Not a Contribution.
+ *
  * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,12 +19,14 @@
 
 package com.android.incallui;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Chronometer;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 /**
@@ -36,6 +41,7 @@ public class ConferenceManagerFragment
     private ViewGroup[] mConferenceCallList;
     private Chronometer mConferenceTime;
 
+    private View mAddParticipants;
     @Override
     ConferenceManagerPresenter createPresenter() {
         // having a singleton instance.
@@ -55,8 +61,19 @@ public class ConferenceManagerFragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        final View parent = inflater.inflate(R.layout.conference_manager_fragment, container,
-                false);
+        final View parent;
+        boolean isImsUI = false;
+        if (this.getActivity() instanceof InCallActivity) {
+            isImsUI = ((InCallActivity) getActivity()).isImsUI();
+        }
+        if (isImsUI) {
+            parent = inflater.inflate(R.layout.ims_conference_manager_fragment, container,
+                    false);
+        } else {
+            parent = inflater.inflate(R.layout.conference_manager_fragment, container,
+                    false);
+        }
+
 
         // set up the Conference Call chronometer
         mConferenceTime = (Chronometer) parent.findViewById(R.id.manageConferencePanelHeader);
@@ -80,6 +97,13 @@ public class ConferenceManagerFragment
             }
         });
 
+        mAddParticipants = parent.findViewById(R.id.addParticipantGroup);
+        mAddParticipants.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getPresenter().manageAddParticipants();
+            }
+        });
         return parent;
     }
 
@@ -129,6 +153,35 @@ public class ConferenceManagerFragment
         final TextView numberTypeTextView = (TextView) mConferenceCallList[rowId].findViewById(
                 R.id.conferenceCallerNumberType);
 
+        // set the caller name
+        nameTextView.setText(callerName);
+
+        // set the caller number in subscript, or make the field disappear.
+        if (TextUtils.isEmpty(callerNumber)) {
+            numberTextView.setVisibility(View.GONE);
+            numberTypeTextView.setVisibility(View.GONE);
+        } else {
+            numberTextView.setVisibility(View.VISIBLE);
+            numberTextView.setText(callerNumber);
+            numberTypeTextView.setVisibility(View.VISIBLE);
+            numberTypeTextView.setText(callerNumberType);
+        }
+    }
+
+    @Override
+    public final void displayCallerInfoForImsConferenceRow(int rowId, String callerName,
+            String callerNumber, String callerNumberType, Drawable photo) {
+
+        final TextView nameTextView = (TextView) mConferenceCallList[rowId].findViewById(
+                R.id.conferenceCallerName);
+        final TextView numberTextView = (TextView) mConferenceCallList[rowId].findViewById(
+                R.id.conferenceCallerNumber);
+        final TextView numberTypeTextView = (TextView) mConferenceCallList[rowId].findViewById(
+                R.id.conferenceCallerNumberType);
+
+        final ImageView photoImage = (ImageView) mConferenceCallList[rowId].findViewById(
+                R.id.imsPhoto);
+        photoImage.setImageDrawable(photo);
         // set the caller name
         nameTextView.setText(callerName);
 

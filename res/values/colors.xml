@@ -61,4 +61,6 @@
 
     <!-- Translucent shadow color -->
     <color name="translucent_shadow">#33999999</color>
+    <color name="dialpad_background">#000000</color>
+    <color name="dtmf_dialer_display_text">#FFFFFF</color> <!-- white -->
 </resources>
