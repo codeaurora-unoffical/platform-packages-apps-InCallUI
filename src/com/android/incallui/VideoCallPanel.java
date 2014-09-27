@@ -518,6 +518,7 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
 
     public void handleSwitchCamera(){
         int direction =  mVideoCallManager.getCameraDirection();
+        log("VideoCallPanel handleSwitchCamera, current direction = " + direction);
         switch(direction) {
             case CAMERA_UNKNOWN:
                 switchCamera(mFrontCameraId);
@@ -526,7 +527,7 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
                 switchCamera(mBackCameraId);
                 break;
             case Camera.CameraInfo.CAMERA_FACING_BACK:
-                switchCamera(CAMERA_UNKNOWN);
+                switchCamera(mFrontCameraId);
                 break;
         }
     }
