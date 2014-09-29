@@ -1,4 +1,6 @@
 /*
+ * Copyright (c) 2014, The Linux Foundation. All rights reserved.
+ * Not a Contribution.
  * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +18,10 @@
 
 package com.android.incallui;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.drawable.Drawable;
 
 import com.android.incallui.ContactInfoCache.ContactCacheEntry;
 import com.android.incallui.InCallPresenter.InCallState;
@@ -163,7 +168,9 @@ public class ConferenceManagerPresenter
             }
             // display the CallerInfo.
             getUi().setupEndButtonForRow(i);
-            getUi().displayCallerInfoForConferenceRow(i, name, number, contactCacheEntry.label);
+            getUi().displayCallerInfoForImsConferenceRow(i, name, number, contactCacheEntry.label,
+                    contactCacheEntry.photo);
+
         } else {
             // Disable this row of the Manage conference panel:
             getUi().setRowVisible(i, false);
@@ -183,6 +190,26 @@ public class ConferenceManagerPresenter
 
     public void manageConferenceDoneClicked() {
         getUi().setVisible(false);
+    }
+
+    public void manageAddParticipants(){
+        Intent intent = new Intent(Intent.ACTION_DIAL);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        // when we request the dialer come up, we also want to inform
+        // it that we're going through the "add participant" option from the
+        // InCallScreen.
+        intent.putExtra(InCallApp.ADD_CALL_MODE_KEY, true);
+        intent.putExtra(InCallApp.ADD_PARTICIPANT_KEY, true);
+        try {
+            mContext.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            // This is rather rare but possible.
+            // Note: this method is used even when the phone is encrypted. At
+            // that moment
+            // the system may not find any Activity which can accept this Intent
+            Log.e(LOG_TAG, "Activity for adding calls isn't found.");
+        }
     }
 
     public int getMaxCallersInConference() {
@@ -208,6 +235,8 @@ public class ConferenceManagerPresenter
         void setRowVisible(int rowId, boolean on);
         void displayCallerInfoForConferenceRow(int rowId, String callerName, String callerNumber,
                 String callerNumberType);
+        void displayCallerInfoForImsConferenceRow(int rowId, String callerName, String callerNumber,
+                String callerNumberType, Drawable photo);
         void setCanSeparateButtonForRow(int rowId, boolean canSeparate);
         void setupEndButtonForRow(int rowId);
 

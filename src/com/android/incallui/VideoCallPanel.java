@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2013, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2014, The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -68,6 +68,8 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
 
     private TextureView mFarEndView;
     private TextureView mCameraPreview;
+    private View mLocalView;
+    private boolean mLocalViewMargined = false;
     private SurfaceTexture mCameraSurface;
     private SurfaceTexture mFarEndSurface;
     private boolean mCanReleaseFarEndSurface = false;
@@ -175,7 +177,7 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
             if (DBG) log("onPeerResolutionChangeEvent");
 
             if (mHeight != INVALID_SIZE && mWidth != INVALID_SIZE) {
-                resizeFarEndView();
+              //  resizeFarEndView();
             }
         }
     }
@@ -226,13 +228,13 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
         mZoomControl = (ZoomControlBar) findViewById(R.id.zoom_control);
         mFarEndView = (TextureView) findViewById(R.id.video_view);
         mCameraPreview = (TextureView) findViewById(R.id.camera_view);
-        mCameraPicker = (ImageView) findViewById(R.id.camera_picker);
+ //       mCameraPicker = (ImageView) findViewById(R.id.camera_picker);
+        mLocalView = findViewById(R.id.local_view);
 
         // Set listeners
         mCameraPreview.setSurfaceTextureListener(this);
         mFarEndView.setSurfaceTextureListener(this);
-        mCameraPicker.setOnClickListener(this);
-
+//        mCameraPicker.setOnClickListener(this);
         // Get the camera IDs for front and back cameras
         mVideoCallManager = VideoCallManager.getInstance(mContext);
         mBackCameraId = mVideoCallManager.getBackCameraId();
@@ -241,11 +243,11 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
 
         // Check if camera supports dual cameras
         mNumberOfCameras = mVideoCallManager.getNumberOfCameras();
-        if (mNumberOfCameras > 1) {
-            mCameraPicker.setVisibility(View.VISIBLE);
-        } else {
-            mCameraPicker.setVisibility(View.GONE);
-        }
+//        if (mNumberOfCameras > 1) {
+//            mCameraPicker.setVisibility(View.VISIBLE);
+//        } else {
+//            mCameraPicker.setVisibility(View.GONE);
+//        }
 
         // Set media event listener
         mVideoCallManager.setMediaEventListener(new MediaEventListener());
@@ -310,8 +312,8 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
         mHeight = getHeight();
 
         if (DBG) log("doSizeChanged: VideoCallPanel width=" + mWidth + ", height=" + mHeight);
-        resizeCameraPreview();
-        resizeFarEndView();
+        //resizeCameraPreview();
+        //resizeFarEndView();
     }
 
     /**
@@ -339,7 +341,7 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
         if (false == openCamera(mCameraId)) {
             return;
         }
-        initializeZoom();
+        //initializeZoom();
         initializeCameraParams();
         startPreviewAndRecording();
     }
@@ -514,6 +516,21 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
         }
     }
 
+    public void handleSwitchCamera(){
+        int direction =  mVideoCallManager.getCameraDirection();
+        switch(direction) {
+            case CAMERA_UNKNOWN:
+                switchCamera(mFrontCameraId);
+                break;
+            case Camera.CameraInfo.CAMERA_FACING_FRONT:
+                switchCamera(mBackCameraId);
+                break;
+            case Camera.CameraInfo.CAMERA_FACING_BACK:
+                switchCamera(CAMERA_UNKNOWN);
+                break;
+        }
+    }
+
     @Override
     public void onClick(View v) {
         int direction =  mVideoCallManager.getCameraDirection();
@@ -600,6 +617,7 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
         log("setPanelElementsVisibility: callType= " + callType);
         switch (callType) {
             case CallDetails.CALL_TYPE_VT:
+                mLocalView.setVisibility(VISIBLE);
                 mCameraPreview.setVisibility(VISIBLE);
                 mFarEndView.setVisibility(VISIBLE);
                 if (isCameraInitNeeded()) {
@@ -608,6 +626,7 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
                 log("setPanelElementsVisibility: VT: mCameraPreview:VISIBLE, mFarEndView:VISIBLE");
                 break;
             case CallDetails.CALL_TYPE_VT_TX:
+                mLocalView.setVisibility(VISIBLE);
                 mCameraPreview.setVisibility(View.VISIBLE);
                 if (isCameraInitNeeded()) {
                     initializeCamera();
@@ -623,6 +642,7 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
                     stopRecordingAndPreview();
                     closeCamera();
                 }
+                mLocalView.setVisibility(View.GONE);
                 mCameraPreview.setVisibility(View.GONE);
                 log("setPanelElementsVisibility VT_RX: mCameraPreview:GONE mFarEndView:VISIBLE");
                 break;
@@ -747,6 +767,17 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
 
     public void startOrientationListener(boolean start) {
         mVideoCallManager.startOrientationListener(start);
+    }
+
+    public void onShowSecondary(boolean show) {
+        if (show) {
+            this.mLocalView.offsetTopAndBottom(-65);
+            mLocalViewMargined = true;
+        } else if (mLocalViewMargined){
+            mLocalView.offsetTopAndBottom(65);
+            mLocalViewMargined = false;
+        }
+
     }
 
     private void log(String msg) {

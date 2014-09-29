@@ -150,11 +150,11 @@ public class AnswerFragment extends BaseFragment<AnswerPresenter, AnswerPresente
         if (targetResourceId != mGlowpad.getTargetResourceId()) {
             // Answer, Decline, Respond via SMS, and Video options
             // (VT,VoLTE,VT-TX,VT-RX)
-            mGlowpad.setTargetResources(R.array.incoming_call_widget_6way_ims_targets);
+            mGlowpad.setTargetResources(R.array.incoming_call_widget_4way_ims_targets);
             mGlowpad.setTargetDescriptionsResourceId(
-                    R.array.incoming_call_widget_6way_ims_target_descriptions);
+                    R.array.incoming_call_widget_4way_ims_target_descriptions);
             mGlowpad.setDirectionDescriptionsResourceId(
-                    R.array.incoming_call_widget_6way_ims_direction_descriptions);
+                    R.array.incoming_call_widget_4way_ims_direction_descriptions);
 
             mGlowpad.reset(false);
         }
