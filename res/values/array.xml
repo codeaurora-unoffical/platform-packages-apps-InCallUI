@@ -143,6 +143,34 @@
         <item>@string/description_direction_down_right</item>
     </array>
 
+       <!-- qrd added incoming four way answer for ims UI
+         - Answer with voice (drag down)
+         - Respond via SMS (drag up)
+         - Reject (drag left)
+         - Answer as VT (drag right) -->
+
+    <array name="incoming_call_widget_4way_ims_targets">
+        <item>@drawable/ic_lockscreen_answer_video</item>
+        <item>@drawable/ic_lockscreen_text</item>
+        <item>@drawable/ic_lockscreen_decline</item>
+        <item>@drawable/ic_lockscreen_answer</item>
+    </array>
+
+    <array name="incoming_call_widget_4way_ims_target_descriptions">
+        <item>@string/description_target_answer_video</item>
+        <item>@string/description_target_send_sms</item>
+        <item>@string/description_target_decline</item>
+        <item>@string/description_target_answer</item>
+    </array>
+
+    <array name="incoming_call_widget_4way_ims_direction_descriptions">
+        <item>@string/description_direction_right</item>
+        <item>@string/description_direction_up</item>
+        <item>@string/description_direction_left</item>
+        <item>@string/description_direction_down</item>
+
+    </array>
+
     <array name="sim_icons">
         <item>@drawable/ic_sim_icon_1</item>
         <item>@drawable/ic_sim_icon_2</item>

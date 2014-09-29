@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
  * Not a Contribution, Apache license notifications and license are retained
  * for attribution purposes only.
  *
@@ -224,6 +224,49 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         updateExtraButtonRow();
     }
 
+    public void modifyWithCallType(boolean toVolte) {
+        Call call = CallList.getInstance().getActiveCall();
+        if (call == null) {
+            Log.e(this, "modifyWithCamera call == null");
+            return;
+        }
+        int callId = call.getCallId();
+        int callType = toVolte ? CallDetails.CALL_TYPE_VOICE : CallDetails.CALL_TYPE_VT;
+        InCallPresenter.getInstance().sendModifyCallRequest(callId, callType);
+    }
+
+    public void modifyWithCamera(boolean closeCamera) {
+        Call call = CallList.getInstance().getActiveCall();
+        if (call == null) {
+            Log.e(this, "modifyWithCamera call == null");
+        }
+        int callId = call.getCallId();
+        int currentType = CallUtils.getCallType(call);
+        int callType = -1;
+        switch (currentType) {
+            case CallDetails.CALL_TYPE_VOICE:
+                if (!closeCamera)
+                    callType = CallDetails.CALL_TYPE_VT_TX;
+                break;
+            case CallDetails.CALL_TYPE_VT_RX:
+                if (!closeCamera)
+                    callType = CallDetails.CALL_TYPE_VT;
+                break;
+            case CallDetails.CALL_TYPE_VT_TX:
+                if (closeCamera)
+                    callType = CallDetails.CALL_TYPE_VOICE;
+                break;
+            case CallDetails.CALL_TYPE_VT:
+                if (closeCamera)
+                    callType = CallDetails.CALL_TYPE_VT;
+                break;
+            default:
+                Log.e(this, "modifyWithCamera currentType = " + currentType);
+        }
+        Log.e(this, "modifyWithCamera callType = " + callType);
+        InCallPresenter.getInstance().sendModifyCallRequest(callId, callType);
+    }
+
     public void modifyCallButtonClicked() {
         Call call = CallList.getInstance().getActiveCall();
         if (call != null) {
@@ -324,6 +367,10 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
             mShowManageConference = (call.isConferenceCall() && !isGenericConference);
 
             updateExtraButtonRow();
+
+            if (ui instanceof ImsCallButtonFragment){
+                ((ImsCallButtonFragment)ui).handleUpdateModifyButtons(CallUtils.getCallType(call));
+            }
         } else {
             ui.enableAddParticipant(false);
             ui.showModifyCall(false);
@@ -333,8 +380,7 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
     private void updateExtraButtonRow() {
         final boolean showExtraButtonRow = (mShowGenericMerge || mShowManageConference) &&
                 !getUi().isDialpadVisible();
-
-        Log.d(this, "isGeneric: " + mShowGenericMerge);
+        Log.d(this, "isGeneric: " + showExtraButtonRow);
         Log.d(this, "mShowManageConference : " + mShowManageConference);
         Log.d(this, "mShowGenericMerge: " + mShowGenericMerge);
         if (showExtraButtonRow) {
@@ -344,6 +390,9 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
                 getUi().showManageConferenceCallButton();
             }
         } else {
+            if (getUi() instanceof ImsCallButtonFragment){
+                ((ImsCallButtonFragment)getUi()).hideExtraRow(mShowManageConference);
+            }
             getUi().hideExtraRow();
         }
     }

@@ -20,6 +20,7 @@
 package com.android.incallui;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -47,25 +48,25 @@ public class CallButtonFragment
         implements CallButtonPresenter.CallButtonUi, OnMenuItemClickListener, OnDismissListener,
         View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
-    private ImageButton mMuteButton;
-    private ImageButton mAudioButton;
-    private ImageButton mHoldButton;
-    private ToggleButton mShowDialpadButton;
-    private ImageButton mMergeButton;
-    private ImageButton mAddCallButton;
-    private ImageButton mSwapButton;
-    private ImageButton mAddParticipantButton;
-    private ImageButton mMoreMenuButton;
+    protected ImageButton mMuteButton;
+    protected ImageButton mAudioButton;
+    protected ImageButton mHoldButton;
+    protected ToggleButton mShowDialpadButton;
+    protected ImageButton mMergeButton;
+    protected ImageButton mAddCallButton;
+    protected ImageButton mSwapButton;
+    protected ImageButton mAddParticipantButton;
+    protected ImageButton mMoreMenuButton;
 
-    private PopupMenu mAudioModePopup;
-    private boolean mAudioModePopupVisible;
-    private View mEndCallButton;
-    private View mExtraRowButton;
-    private View mManageConferenceButton;
-    private View mGenericMergeButton;
-    private PopupMenu mMoreMenu;
+    protected PopupMenu mAudioModePopup;
+    protected boolean mAudioModePopupVisible;
+    protected View mEndCallButton;
+    protected View mExtraRowButton;
+    protected View mManageConferenceButton;
+    protected View mGenericMergeButton;
+    protected PopupMenu mMoreMenu;
 
-    private Button mModifyCallButton;
+    protected Button mModifyCallButton;
 
     @Override
     CallButtonPresenter createPresenter() {
@@ -399,7 +400,7 @@ public class CallButtonFragment
      * Checks for supporting modes.  If bluetooth is supported, it uses the audio
      * pop up menu.  Otherwise, it toggles the speakerphone.
      */
-    private void onAudioButtonClicked() {
+    protected void onAudioButtonClicked() {
         Log.d(this, "onAudioButtonClicked: " +
                 AudioMode.toString(getPresenter().getSupportedAudio()));
 

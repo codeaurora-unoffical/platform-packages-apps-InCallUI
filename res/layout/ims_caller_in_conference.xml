@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2014, The Linux Foundation. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of The Linux Foundation nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
+ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="64dp"
+    android:orientation="horizontal"
+    android:gravity="center_vertical">
+
+    <!-- Caller information -->
+    <LinearLayout
+        android:id="@+id/conferenceCallerSeparate"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:background="?android:attr/selectableItemBackground"
+        android:paddingStart="16dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/imsPhoto"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:scaleType="center" />
+
+        <LinearLayout
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:paddingStart="8dp"
+             android:gravity="center_vertical"
+             android:orientation="vertical">
+
+            <TextView
+                 android:id="@+id/conferenceCallerName"
+                 android:textAppearance="?android:attr/textAppearanceLarge"
+                 android:textSize="18sp"
+                 android:singleLine="true"
+                 android:layout_width="wrap_content"
+                 android:layout_height="match_parent"
+                 android:layout_marginEnd="2dp" />
+
+            <LinearLayout
+                 android:layout_width="wrap_content"
+                 android:layout_height="match_parent"
+                 android:orientation="horizontal"
+                 android:gravity="bottom">
+
+                <TextView
+                     android:id="@+id/conferenceCallerNumber"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:textSize="14sp"
+                     android:ellipsize="marquee"
+                     android:textColor="@color/manage_conference_secondary_text_color"
+                     android:singleLine="true"
+                     android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:id="@+id/conferenceCallerNumberType"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:textColor="@color/manage_conference_secondary_text_color"
+                    android:ellipsize="marquee"
+                    android:singleLine="true"
+                    android:textAllCaps="true"
+                    android:gravity="start" />
+
+            </LinearLayout>  <!-- End of caller number -->
+
+        </LinearLayout>  <!-- End of caller information -->
+    </LinearLayout>
+
+    <ImageButton
+         android:id="@+id/conferenceCallerDisconnect"
+         android:layout_width="80dp"
+         android:layout_height="match_parent"
+         android:src="@drawable/ic_in_call_phone_hangup"
+         android:background="@drawable/end_call_background"
+         android:scaleType="center"
+         android:visibility="gone"
+         android:contentDescription="@string/onscreenEndCallText" />
+
+</LinearLayout>  <!-- End of single list element -->

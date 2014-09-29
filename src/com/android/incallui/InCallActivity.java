@@ -38,10 +38,12 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.telephony.MSimTelephonyManager;
+import android.telephony.PhoneNumberUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -55,6 +57,7 @@ import android.widget.Toast;
 public class InCallActivity extends Activity {
 
     public static final String SHOW_DIALPAD_EXTRA = "InCallActivity.show_dialpad";
+    public static final String LAUNCH_IMS_UI = "InCallActivity.launch_ims_ui";
 
     private static final int INVALID_RES_ID = -1;
 
@@ -66,6 +69,7 @@ public class InCallActivity extends Activity {
     private boolean mIsForegroundActivity;
     protected AlertDialog mDialog;
     private AlertDialog mModifyCallPromptDialog;
+    private boolean isImsUI = false;
 
     /** Use to pass 'showDialpad' from {@link #onNewIntent} to {@link #onResume} */
     private boolean mShowDialpadRequested;
@@ -100,8 +104,14 @@ public class InCallActivity extends Activity {
         // lp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;
 
         // Inflate everything in incall_screen.xml and add it to the screen.
-        setContentView(R.layout.incall_screen);
 
+        isImsUI = getIntent().getBooleanExtra(LAUNCH_IMS_UI, false);
+        Log.d(this, "onCreate() isImsUI=" + isImsUI);
+        if (isImsUI){
+            setContentView(R.layout.ims_incall_screen);
+        }else{
+            setContentView(R.layout.incall_screen);
+        }
         initializeInCall();
 
         // Handle the Intent we were launched with, but only if this is the
@@ -115,6 +125,10 @@ public class InCallActivity extends Activity {
         }
 
         Log.d(this, "onCreate(): exit");
+    }
+
+    public boolean isImsUI(){
+        return isImsUI;
     }
 
     @Override
@@ -456,16 +470,28 @@ public class InCallActivity extends Activity {
     }
 
     public void displayDialpad(boolean showDialpad) {
-        final FragmentTransaction ft = getFragmentManager().beginTransaction();
-        if (showDialpad) {
-            ft.setCustomAnimations(R.anim.incall_dialpad_slide_in, 0);
-            ft.show(mDialpadFragment);
+        if (isImsUI) {
+            if (showDialpad) {
+                mDialpadFragment.setVisible(true);
+            } else {
+                mDialpadFragment.setVisible(false);
+                mCallCardFragment.setVisible(true);
+            }
         } else {
-            ft.setCustomAnimations(0, R.anim.incall_dialpad_slide_out);
-            ft.hide(mDialpadFragment);
-        }
-        ft.commitAllowingStateLoss();
+            final FragmentTransaction ft = getFragmentManager().beginTransaction();
+            if (showDialpad) {
+                ft.setCustomAnimations(R.anim.incall_dialpad_slide_in, 0);
+                ft.show(mDialpadFragment);
+                mCallCardFragment.setVisible(false);
 
+            } else {
+                ft.setCustomAnimations(0, R.anim.incall_dialpad_slide_out);
+                ft.hide(mDialpadFragment);
+                mCallCardFragment.setVisible(true);
+            }
+
+            ft.commitAllowingStateLoss();
+        }
         InCallPresenter.getInstance().getProximitySensor().onDialpadVisible(showDialpad);
     }
 
@@ -625,10 +651,16 @@ public class InCallActivity extends Activity {
         Log.d(this, "maybeShowErrorDialogOnDisconnect: Call=" + call);
 
         if (!isFinishing() && call != null) {
-            final int resId = getResIdForDisconnectCause(call.getDisconnectCause(),
-                    call.getSuppServNotification());
-            if (resId != INVALID_RES_ID) {
-                showErrorDialog(resId);
+            if (CallUtils.isImsCall(call)
+                    && (getResIdForDisconnectCause(call.getDisconnectCause(),
+                            call.getSuppServNotification())) != INVALID_RES_ID) {
+                showRedialDialog(call.getNumber());
+            } else {
+                final int resId = getResIdForDisconnectCause(call.getDisconnectCause(),
+                        call.getSuppServNotification());
+                if (resId != INVALID_RES_ID) {
+                    showErrorDialog(resId);
+                }
             }
         }
     }
@@ -644,6 +676,10 @@ public class InCallActivity extends Activity {
             mModifyCallPromptDialog.dismiss();
             mModifyCallPromptDialog = null;
         }
+    }
+
+    public void handleSwitchCamera(){
+        mCallCardFragment.handleSwitchCamera();
     }
 
     /**
@@ -724,6 +760,43 @@ public class InCallActivity extends Activity {
                     onDialogDismissed();
                 }})
             .create();
+
+        mDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        mDialog.show();
+    }
+
+    private void imsRedial(String number, boolean isVt) {
+        Uri uri = Uri.fromParts("tel", number, null);
+        final Intent intent = new Intent(Intent.ACTION_CALL_PRIVILEGED, uri);
+        intent.setComponent(new ComponentName(
+                "com.android.phone", "com.android.phone.PrivilegedOutgoingCallBroadcaster"));
+        intent.putExtra("ims_videocall ", isVt);
+        startActivity(intent);
+    }
+
+    private void showRedialDialog(final String number) {
+        dismissPendingDialogs();
+        mDialog = new AlertDialog.Builder(this).setTitle(R.string.ims_redial_option)
+                .setMessage(R.string.ims_redial_msg)
+                .setPositiveButton(R.string.custom_message_cancel, new OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        onDialogDismissed();
+                    }
+                })
+                .setNeutralButton(R.string.ims_voice_redial, new OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        imsRedial(number, false);
+                    }
+                })
+                .setNegativeButton(R.string.ims_video_redial, new OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        imsRedial(number, true);
+                    }
+                })
+                .create();
 
         mDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         mDialog.show();

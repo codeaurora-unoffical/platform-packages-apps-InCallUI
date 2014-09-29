@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2014, The Linux Foundation. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of The Linux Foundation nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
+ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+
+<!-- The grid of buttons used in the onscreen DTMF dialpad;
+     see dtmf_twelve_key_dialer_view.xml. -->
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/dtmf_twelve_key_dialer_view"
+    android:layout_width="match_parent"
+    android:layout_height="390dp"
+    android:orientation="vertical"
+    android:layout_marginTop="1dip" >
+
+    <!-- Display of the digits you've typed so far.
+         This widget appears completely non-interactive to the user: you
+         can't edit or "hit backspace" since these are DTMF tones you've
+         already sent over the network.  But it's still an EditText rather
+         than a TextView because it needs to receive key events from a
+         hard keyboard, if present (see mDialerKeyListener). -->
+    <EditText
+        android:id="@+id/dtmfDialerField"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginBottom="5dp"
+        android:paddingEnd="16dp"
+        android:paddingStart="16dp"
+        android:singleLine="true"
+        android:scrollHorizontally="true"
+        android:textSize="23sp"
+        android:gravity="center"
+        android:freezesText="true"
+        android:background="@drawable/ims_input_bg"
+        android:textColor="@color/dtmf_dialer_display_text"
+        android:focusableInTouchMode="false"
+        android:clickable="false"/>
+
+    <TableLayout
+        android:id="@+id/dialpad"
+        android:layout_width="match_parent"
+        android:layout_height="188dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="20dp"
+        android:layout_alignParentBottom="true"
+        android:background="#393a3b"
+        android:layoutDirection="ltr">
+
+        <TableRow
+             android:layout_height="0px"
+             android:layout_weight="1">
+            <ImageButton android:id="@+id/one" style="@style/DialpadButtonStyle"
+                android:src="@drawable/ims_1"
+                android:contentDescription="@string/description_image_button_one"
+                android:background="@color/dialpad_background"
+                android:layout_marginBottom="1dip" />
+            <ImageButton android:id="@+id/two" style="@style/DialpadButtonStyle"
+                android:src="@drawable/ims_2"
+                android:contentDescription="@string/description_image_button_two"
+                android:background="@color/dialpad_background"
+                android:layout_marginLeft="1dip"
+                android:layout_marginRight="1dip"
+                android:layout_marginBottom="1dip"/>
+            <ImageButton android:id="@+id/three" style="@style/DialpadButtonStyle"
+                android:src="@drawable/ims_3"
+                android:contentDescription="@string/description_image_button_three"
+                android:background="@color/dialpad_background"
+                android:layout_marginBottom="1dip"/>
+        </TableRow>
+
+        <TableRow
+             android:layout_height="0px"
+             android:layout_weight="1">
+            <ImageButton android:id="@+id/four" style="@style/DialpadButtonStyle"
+                android:src="@drawable/ims_4"
+                android:contentDescription="@string/description_image_button_four"
+                android:background="@color/dialpad_background"
+                android:layout_marginBottom="1dip"/>
+            <ImageButton android:id="@+id/five" style="@style/DialpadButtonStyle"
+                android:src="@drawable/ims_5"
+                android:contentDescription="@string/description_image_button_five"
+                android:background="@color/dialpad_background"
+                android:layout_marginLeft="1dip"
+                android:layout_marginRight="1dip"
+                android:layout_marginBottom="1dip"/>
+            <ImageButton android:id="@+id/six" style="@style/DialpadButtonStyle"
+                android:src="@drawable/ims_6"
+                android:contentDescription="@string/description_image_button_six"
+                android:background="@color/dialpad_background"
+                android:layout_marginBottom="1dip"/>
+        </TableRow>
+
+        <TableRow
+             android:layout_height="0px"
+             android:layout_weight="1">
+            <ImageButton android:id="@+id/seven" style="@style/DialpadButtonStyle"
+                android:src="@drawable/ims_7"
+                android:contentDescription="@string/description_image_button_seven"
+                android:background="@color/dialpad_background"
+                android:layout_marginBottom="1dip"/>
+            <ImageButton android:id="@+id/eight" style="@style/DialpadButtonStyle"
+                android:src="@drawable/ims_8"
+                android:contentDescription="@string/description_image_button_eight"
+                android:background="@color/dialpad_background"
+                android:layout_marginLeft="1dip"
+                android:layout_marginRight="1dip"
+                android:layout_marginBottom="1dip"/>
+            <ImageButton android:id="@+id/nine" style="@style/DialpadButtonStyle"
+                android:src="@drawable/ims_9"
+                android:contentDescription="@string/description_image_button_nine"
+                android:background="@color/dialpad_background"
+                android:layout_marginBottom="1dip"/>
+        </TableRow>
+
+        <TableRow
+             android:layout_height="0px"
+             android:layout_weight="1">
+            <ImageButton android:id="@+id/star" style="@style/DialpadButtonStyle"
+                android:src="@drawable/ims_asterisk"
+                android:contentDescription="@string/description_image_button_star"
+                android:background="@color/dialpad_background"
+                />
+            <ImageButton android:id="@+id/zero" style="@style/DialpadButtonStyle"
+                android:src="@drawable/ims_0"
+                android:contentDescription="@string/description_image_button_zero"
+                android:background="@color/dialpad_background"
+                android:layout_marginLeft="1dip"
+                android:layout_marginRight="1dip" />
+            <ImageButton android:id="@+id/pound" style="@style/DialpadButtonStyle"
+                android:src="@drawable/ims_pound"
+                android:contentDescription="@string/description_image_button_pound"
+                android:background="@color/dialpad_background"
+                />
+        </TableRow>
+    </TableLayout>
+</RelativeLayout>
