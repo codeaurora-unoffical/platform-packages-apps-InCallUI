@@ -882,6 +882,19 @@ public class InCallPresenter implements CallList.Listener {
         intent.setClassName("com.android.dialer.conference",
                 "com.android.dialer.conference.ConferenceCallActivity");
         intent.putExtra(InCallApp.ADD_PARTICIPANT_KEY, true);
+
+        Call call = CallList.getInstance().getActiveOrBackgroundCall();
+        if (CallUtils.isImsCall(call)) {
+            String[] confParticipantList = call.getCallDetails().getConfParticipantList();
+            if (confParticipantList != null) {
+                StringBuffer sb = new StringBuffer();
+                for (String number : confParticipantList) {
+                    sb.append(number).append(";");
+                }
+                Log.d(LOG_TAG, "sendAddParticipantIntents existingParticipants=" + sb.toString());
+                intent.putExtra(InCallApp.CURRENT_PARTICIPANT_LIST, sb.toString());
+            }
+        }
         try {
             mContext.startActivity(intent);
         } catch (ActivityNotFoundException e) {
