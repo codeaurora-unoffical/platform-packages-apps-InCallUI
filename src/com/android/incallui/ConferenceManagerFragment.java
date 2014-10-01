@@ -97,13 +97,15 @@ public class ConferenceManagerFragment
             }
         });
 
-        mAddParticipants = parent.findViewById(R.id.addParticipantGroup);
-        mAddParticipants.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getPresenter().manageAddParticipants();
-            }
-        });
+        if (isImsUI) {
+            mAddParticipants = parent.findViewById(R.id.addParticipantGroup);
+            mAddParticipants.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getPresenter().manageAddParticipants();
+                }
+            });
+        }
         return parent;
     }
 

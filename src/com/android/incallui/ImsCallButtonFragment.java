@@ -214,7 +214,7 @@ public class ImsCallButtonFragment extends CallButtonFragment {
                 getPresenter().showDialpadClicked(mShowDialpadButton.isChecked());
                 break;
             case R.id.addParticipant:
-                getPresenter().addParticipantClicked();
+                InCallPresenter.getInstance().sendAddParticipantIntents();
                 break;
             case R.id.imsModify:
                 handleClickModifyButton();

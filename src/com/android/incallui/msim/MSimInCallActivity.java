@@ -70,8 +70,11 @@ public class MSimInCallActivity extends InCallActivity {
         getActionBar().setDisplayShowTitleEnabled(false);
         getActionBar().setDisplayShowHomeEnabled(false);
 
-        // Inflate everything in incall_screen.xml and add it to the screen.
-        setContentView(R.layout.incall_screen_msim);
+        if (isImsUI){
+            setContentView(R.layout.ims_incall_screen_msim);
+        }else{
+            setContentView(R.layout.incall_screen_msim);
+        }
 
         initializeInCall();
 

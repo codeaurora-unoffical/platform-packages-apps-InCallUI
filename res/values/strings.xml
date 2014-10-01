@@ -1615,5 +1615,5 @@
     <string name="ims_voice_redial">By Voice Call</string>
     <string name="ims_video_redial">By Video Call</string>
     <string name="addParticipants">Add Participants</string>
-
+    <string name="srvcc_message">Ims call has been downgraded to 2G/3G call, because the 4G network is not available.</string>
 </resources>
