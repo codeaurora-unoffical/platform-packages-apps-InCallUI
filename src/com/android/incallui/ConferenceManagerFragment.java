@@ -19,6 +19,9 @@
 
 package com.android.incallui;
 
+import com.android.incallui.ContactInfoCache.ContactCacheEntry;
+import com.android.incallui.ContactInfoCache.ContactInfoCacheCallback;
+
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -146,34 +149,8 @@ public class ConferenceManagerFragment
      */
     @Override
     public final void displayCallerInfoForConferenceRow(int rowId, String callerName,
-            String callerNumber, String callerNumberType) {
-
-        final TextView nameTextView = (TextView) mConferenceCallList[rowId].findViewById(
-                R.id.conferenceCallerName);
-        final TextView numberTextView = (TextView) mConferenceCallList[rowId].findViewById(
-                R.id.conferenceCallerNumber);
-        final TextView numberTypeTextView = (TextView) mConferenceCallList[rowId].findViewById(
-                R.id.conferenceCallerNumberType);
-
-        // set the caller name
-        nameTextView.setText(callerName);
-
-        // set the caller number in subscript, or make the field disappear.
-        if (TextUtils.isEmpty(callerNumber)) {
-            numberTextView.setVisibility(View.GONE);
-            numberTypeTextView.setVisibility(View.GONE);
-        } else {
-            numberTextView.setVisibility(View.VISIBLE);
-            numberTextView.setText(callerNumber);
-            numberTypeTextView.setVisibility(View.VISIBLE);
-            numberTypeTextView.setText(callerNumberType);
-        }
-    }
-
-    @Override
-    public final void displayCallerInfoForImsConferenceRow(int rowId, String callerName,
-            String callerNumber, String callerNumberType, Drawable photo) {
-
+            String callerNumber, String callerNumberType, Drawable photo, String state) {
+        Log.v(this, "displayCallerInfoForConferenceRow state = " + state);
         final TextView nameTextView = (TextView) mConferenceCallList[rowId].findViewById(
                 R.id.conferenceCallerName);
         final TextView numberTextView = (TextView) mConferenceCallList[rowId].findViewById(
@@ -183,10 +160,35 @@ public class ConferenceManagerFragment
 
         final ImageView photoImage = (ImageView) mConferenceCallList[rowId].findViewById(
                 R.id.imsPhoto);
-        photoImage.setImageDrawable(photo);
+        if (photoImage != null) {
+            if (photo != null) {
+                photoImage.setImageDrawable(photo);
+            } else {
+                final ContactInfoCache cache = ContactInfoCache.getInstance(getView().getContext());
+                cache.findInfo(callerNumber, false, new ContactInfoCacheCallback() {
+                    @Override
+                    public void onContactInfoComplete(int callId, ContactCacheEntry entry) {
+                        Log.v(this, "Contact of conference found: " + entry);
+                    }
+
+                    @Override
+                    public void onImageLoadComplete(int callId, ContactCacheEntry entry) {
+                        Log.v(this, "onImageLoadComplete: " + entry);
+                        if (entry.photo != null) {
+                            photoImage.setImageDrawable(entry.photo);
+                        }
+                    }
+                });
+            }
+        }
         // set the caller name
         nameTextView.setText(callerName);
 
+        final TextView stateTextView = (TextView) mConferenceCallList[rowId].findViewById(
+                R.id.imsUserStatus);
+        if ((stateTextView != null) && (state != null)){
+            stateTextView.setText(state);
+        }
         // set the caller number in subscript, or make the field disappear.
         if (TextUtils.isEmpty(callerNumber)) {
             numberTextView.setVisibility(View.GONE);
@@ -213,12 +215,14 @@ public class ConferenceManagerFragment
    @Override
     public void setupEndButtonForRowWithUrl(final int rowId, final String url) {
         View endButton = mConferenceCallList[rowId].findViewById(R.id.conferenceCallerDisconnect);
-        endButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getPresenter().endConferenceConnectionUrl(rowId, url);
-            }
-        });
+        if (endButton != null) {
+            endButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getPresenter().endConferenceConnectionUrl(rowId, url);
+                }
+            });
+        }
     }
 
     @Override
@@ -259,5 +263,15 @@ public class ConferenceManagerFragment
         if (mConferenceTime != null) {
             mConferenceTime.stop();
         }
+    }
+
+    @Override
+    public void hideAddParticipant(boolean hide){
+        Log.v(this, "hideAddParticipant hide = " + hide);
+        View icon = mAddParticipants.findViewById(R.id.addParticipantIcon);
+        View text = mAddParticipants.findViewById(R.id.addParticipantText);
+        mAddParticipants.setEnabled(!hide);
+        icon.setEnabled(!hide);
+        text.setEnabled(!hide);
     }
 }
