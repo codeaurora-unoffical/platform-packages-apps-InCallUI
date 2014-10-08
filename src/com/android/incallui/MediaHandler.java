@@ -88,6 +88,7 @@ public class MediaHandler extends Handler {
     public static final int DISPLAY_MODE_EVT = 5;
     public static final int PEER_RESOLUTION_CHANGE_EVT = 6;
     public static final int VT_RTP_DATA_USAGE_EVENT = 8;
+    public static final int STOP_READY_EVT = 9;
 
     protected final RegistrantList mDisplayModeEventRegistrants
             = new RegistrantList();
@@ -137,6 +138,7 @@ public class MediaHandler extends Handler {
         void onPeerResolutionChangeEvent();
         void onPlayerStateChanged(int state);
         void onRtpDataUsageEvent(int upLinkCount, int downLinkCount);
+        void onStopReadyEvent();
     }
 
     static {
@@ -308,9 +310,16 @@ public class MediaHandler extends Handler {
                 }
                 break;
             case START_READY_EVT:
-                Log.d(TAG, "Received START_READY_EVT. Camera frames can be sent now");
+                Log.d(TAG, "Received START_READY_EVT. Camera recording can be started");
                 if (mMediaEventListener != null) {
                     mMediaEventListener.onStartReadyEvent();
+                }
+                break;
+
+            case STOP_READY_EVT:
+                Log.d(TAG, "Received STOP_READY_EVT");
+                if (mMediaEventListener != null) {
+                    mMediaEventListener.onStopReadyEvent();
                 }
                 break;
             case DISPLAY_MODE_EVT:
