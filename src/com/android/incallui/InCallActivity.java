@@ -22,6 +22,7 @@ package com.android.incallui;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
+import com.android.incallui.CallList.SrvccListener;
 import com.android.services.telephony.common.Call;
 import com.android.services.telephony.common.Call.State;
 import com.android.services.telephony.common.CallDetails;
@@ -69,8 +70,9 @@ public class InCallActivity extends Activity {
     private boolean mIsForegroundActivity;
     protected AlertDialog mDialog;
     private AlertDialog mModifyCallPromptDialog;
-    private boolean isImsUI = false;
+    protected boolean isImsUI = false;
 
+    private boolean restartTag = false;
     /** Use to pass 'showDialpad' from {@link #onNewIntent} to {@link #onResume} */
     private boolean mShowDialpadRequested;
 
@@ -84,7 +86,8 @@ public class InCallActivity extends Activity {
         Log.d(this, "onCreate()...  this = " + this);
 
         super.onCreate(icicle);
-
+        checkImsUI();
+        CallList.getInstance().addSrvccListener(mSrvccListener);
         if (MSimTelephonyManager.getDefault().getMultiSimConfiguration()
                 == MSimTelephonyManager.MultiSimVariants.DSDA) {
             return;
@@ -105,7 +108,6 @@ public class InCallActivity extends Activity {
 
         // Inflate everything in incall_screen.xml and add it to the screen.
 
-        isImsUI = getIntent().getBooleanExtra(LAUNCH_IMS_UI, false);
         Log.d(this, "onCreate() isImsUI=" + isImsUI);
         if (isImsUI){
             setContentView(R.layout.ims_incall_screen);
@@ -127,9 +129,22 @@ public class InCallActivity extends Activity {
         Log.d(this, "onCreate(): exit");
     }
 
+    protected void checkImsUI(){
+      isImsUI = getIntent().getBooleanExtra(LAUNCH_IMS_UI, false);
+      Log.d(this, "checkImsUI isImsUI=" + isImsUI);
+    }
+
     public boolean isImsUI(){
         return isImsUI;
     }
+
+    private SrvccListener mSrvccListener = new SrvccListener(){
+
+        @Override
+        public void onSrvcc() {
+            Log.d(this, "onSrvcc");
+            handleSrvcc();
+        }};
 
     @Override
     protected void onStart() {
@@ -193,6 +208,13 @@ public class InCallActivity extends Activity {
         InCallPresenter.getInstance().setActivity(null);
 
         super.onDestroy();
+        CallList.getInstance().removeSrvccListener(mSrvccListener);
+        Log.d(this, "onDestroy()...  restartTag = " + restartTag);
+        if (restartTag){
+            Intent i = InCallPresenter.getInstance().getInCallIntent(false);
+            startActivity(i);
+            restartTag = false;
+        }
     }
 
     /**
@@ -843,6 +865,13 @@ public class InCallActivity extends Activity {
         }
 
         return resId;
+    }
+
+    private void handleSrvcc(){
+        String srvccMsg = getResources().getString(R.string.srvcc_message);
+        toast(srvccMsg);
+        restartTag = true;
+        finish();
     }
 
     private void onDialogDismissed() {

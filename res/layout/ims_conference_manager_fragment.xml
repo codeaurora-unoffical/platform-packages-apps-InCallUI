@@ -143,11 +143,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 android:paddingStart="16dp"
                 android:gravity="center_vertical">
                 <ImageView
+                    android:id="@+id/addParticipantIcon"
                     android:src="@drawable/ic_add_group_holo_dark"
                     android:layout_width="46dp"
                     android:layout_height="46dp"
                     android:scaleType="center"/>
                  <TextView
+                    android:id="@+id/addParticipantText"
                     android:textAppearance="?android:attr/textAppearanceLarge"
                     android:textSize="18sp"
                     android:singleLine="true"

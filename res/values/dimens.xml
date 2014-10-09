@@ -118,6 +118,7 @@
     <dimen name="glowpadview_inner_radius">15dip</dimen>
 
     <dimen name="glowpadview_margin_bottom">-48dip</dimen>
+    <dimen name="glowpadview_margin_bottom_for_ims">-10dip</dimen>
     <dimen name="glowpadview_margin_right">0dip</dimen>
 
     <!-- Dimensions for Video Call Panel -->
