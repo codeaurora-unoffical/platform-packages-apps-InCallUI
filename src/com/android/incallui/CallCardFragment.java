@@ -345,7 +345,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         }
 
         // States other than disconnected not yet supported
-        callStateLabel = getCallStateLabelFromState(state, cause);
+        callStateLabel = getCallStateLabelFromState(state, cause, CallUtils.isVideoCall(callType));
 
         updateVBbyCall(state);
 
@@ -481,7 +481,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
      * Gets the call state label based on the state of the call and
      * cause of disconnect
      */
-    private String getCallStateLabelFromState(int state, Call.DisconnectCause cause) {
+    private String getCallStateLabelFromState(int state, Call.DisconnectCause cause, boolean isVideoCall) {
         final Context context = getView().getContext();
         String callStateLabel = null;  // Label to display as part of the call banner
 
@@ -499,8 +499,11 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         } else if (Call.State.REDIALING == state) {
             callStateLabel = context.getString(R.string.card_title_redialing);
         } else if (Call.State.INCOMING == state || Call.State.CALL_WAITING == state) {
-            callStateLabel = context.getString(R.string.card_title_incoming_call);
-
+            if (isVideoCall) {
+                callStateLabel = context.getString(R.string.card_title_incoming_video_call);
+            } else {
+                callStateLabel = context.getString(R.string.card_title_incoming_call);
+            }
         } else if (Call.State.DISCONNECTING == state) {
             // While in the DISCONNECTING state we display a "Hanging up"
             // message in order to make the UI feel more responsive.  (In

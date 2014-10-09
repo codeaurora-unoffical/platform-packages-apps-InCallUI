@@ -61,6 +61,8 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
 
     private static ContactInfoCache sCache = null;
 
+    private static int sFakeCallId = 100;
+
     public static synchronized ContactInfoCache getInstance(Context mContext) {
         if (sCache == null) {
             sCache = new ContactInfoCache(mContext);
@@ -151,6 +153,13 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
                 mContext, identification, new FindInfoCallback(isIncoming));
 
         findInfoQueryComplete(identification, callerInfo, isIncoming, false);
+    }
+
+    public void findInfo(final String number, final boolean isIncoming,
+            ContactInfoCacheCallback callback){
+        CallIdentification identification = new CallIdentification(sFakeCallId++);
+        identification.setNumber(number);
+        findInfo(identification,isIncoming, callback);
     }
 
     private void findInfoQueryComplete(CallIdentification identification,
@@ -299,6 +308,7 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
      * Blows away the stored cache values.
      */
     public void clearCache() {
+        sFakeCallId = 100;
         mInfoMap.clear();
         mCallBacks.clear();
     }

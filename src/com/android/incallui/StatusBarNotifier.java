@@ -36,6 +36,7 @@ import com.android.incallui.ContactInfoCache.ContactInfoCacheCallback;
 import com.android.incallui.InCallApp.NotificationBroadcastReceiver;
 import com.android.incallui.InCallPresenter.InCallState;
 import com.android.services.telephony.common.Call;
+import com.android.services.telephony.common.CallDetails;
 
 /**
  * This class adds Notifications to the status bar for the in-call experience.
@@ -464,13 +465,39 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
         if (call.getState() == Call.State.ONHOLD) {
             return R.drawable.stat_sys_phone_call_on_hold;
         }
+        if (isIMSVTCall(call)) {
+            return R.drawable.answer_video_call;
+        }
+
         return R.drawable.stat_sys_phone_call;
+    }
+
+    private boolean isIMSVTCall(Call call){
+        int calltype = call.getCallDetails().getCallType();
+        int calldomain = call.getCallDetails().getCallDomain();
+        if (calldomain != CallDetails.CALL_DOMAIN_PS){
+            return false;
+        }
+        return (calltype == CallDetails.CALL_TYPE_VT
+                || calltype == CallDetails.CALL_TYPE_VT_TX
+                || calltype == CallDetails.CALL_TYPE_VT_RX);
     }
 
     /**
      * Returns the message to use with the notification.
      */
     private int getContentString(Call call) {
+        if (isIMSVTCall(call)){
+			int resId = R.string.notification_ongoing_video_call;
+			if (call.getState() == Call.State.INCOMING || call.getState() == Call.State.CALL_WAITING) {
+				resId = R.string.notification_incoming_video_call;
+			} else if (call.getState() == Call.State.ONHOLD) {
+				resId = R.string.notification_on_hold;
+			} else if (Call.State.isDialing(call.getState())) {
+				resId = R.string.notification_dialing_video;
+			}
+			return resId;
+        }
         int resId = R.string.notification_ongoing_call;
 
         if (call.getState() == Call.State.INCOMING || call.getState() == Call.State.CALL_WAITING) {

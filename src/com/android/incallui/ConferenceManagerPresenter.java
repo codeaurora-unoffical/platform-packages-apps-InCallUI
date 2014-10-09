@@ -18,6 +18,8 @@
 
 package com.android.incallui;
 
+import java.util.Map;
+
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -44,7 +46,9 @@ public class ConferenceManagerPresenter
     private int mNumCallersInConference;
     private Integer[] mCallerIds;
     private String[] mParticipantList;
+    private Map<String, String[]> mConferenceDetails;
     private Context mContext;
+    private StringBuffer mExistedParticipants;
     private static String LOG_TAG = "ConferenceManagerPresenter";
 
     @Override
@@ -94,15 +98,19 @@ public class ConferenceManagerPresenter
 
     private void initParticipantList(CallList callList) {
         mParticipantList = null;
+        mExistedParticipants = new StringBuffer();
         Call call = callList.getActiveOrBackgroundCall();
 
         if (isImsCall(call)) {
             String[] confParticipantList = call.getCallDetails().getConfParticipantList();
+            Log.v(this, "initParticipantList call=" + call);
             // If conference refresh info xml is present use that information
             if (confParticipantList != null
                     && confParticipantList.length > 0) {
                 mParticipantList = confParticipantList;
                 mNumCallersInConference = mParticipantList.length;
+                mConferenceDetails = call.getCallDetails().getConfDetails();
+                Log.v(this, "mConferenceDetails = " + mConferenceDetails);
                 return;
             }
         }
@@ -139,6 +147,7 @@ public class ConferenceManagerPresenter
                 updateManageConferenceRow(i, null, false);
             }
         }
+        getUi().hideAddParticipant(mNumCallersInConference == MAX_CALLERS_IN_CONFERENCE);
     }
 
     /**
@@ -162,14 +171,15 @@ public class ConferenceManagerPresenter
 
             final String name = contactCacheEntry.name;
             final String number = contactCacheEntry.number;
+            mExistedParticipants.append(number).append(";");
 
             if (canSeparate) {
                 getUi().setCanSeparateButtonForRow(i, canSeparate);
             }
             // display the CallerInfo.
             getUi().setupEndButtonForRow(i);
-            getUi().displayCallerInfoForImsConferenceRow(i, name, number, contactCacheEntry.label,
-                    contactCacheEntry.photo);
+            getUi().displayCallerInfoForConferenceRow(i, name, number, contactCacheEntry.label,
+                    contactCacheEntry.photo, "");
 
         } else {
             // Disable this row of the Manage conference panel:
@@ -181,26 +191,46 @@ public class ConferenceManagerPresenter
         if (url != null) {
             getUi().setRowVisible(i, true);
             getUi().setupEndButtonForRowWithUrl(i, url);
-            getUi().displayCallerInfoForConferenceRow(i, "", url, "");
+            String state;
+            if (mConferenceDetails != null){
+                state = getValueForKeyFromEntry(mConferenceDetails.get(url),
+                    CallDetails.CONFERENCE_DETATILS_STATE);
+            }else{
+                state = "";
+            }
+            getUi().displayCallerInfoForConferenceRow(i, "", url, "", null, state);
+            mExistedParticipants.append(url).append(";");
         } else {
             // Disable this row of the Manage conference panel:
             getUi().setRowVisible(i, false);
         }
     }
 
+    private String getValueForKeyFromEntry(String[] entry, String key) {
+        for (int i = 0; entry != null && i < entry.length; i++) {
+            if (entry[i] != null) {
+                String[] currKey = entry[i].split("=");
+                if (currKey.length == 2 && currKey[0].equals(key)) {
+                    return currKey[1];
+                }
+            }
+        }
+        return null;
+    }
+
     public void manageConferenceDoneClicked() {
         getUi().setVisible(false);
     }
 
-    public void manageAddParticipants(){
-        Intent intent = new Intent(Intent.ACTION_DIAL);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        // when we request the dialer come up, we also want to inform
-        // it that we're going through the "add participant" option from the
-        // InCallScreen.
-        intent.putExtra(InCallApp.ADD_CALL_MODE_KEY, true);
+    public void manageAddParticipants() {
+        Intent intent = new Intent("android.intent.action.ADDPARTICIPANT");
         intent.putExtra(InCallApp.ADD_PARTICIPANT_KEY, true);
+
+        if (mExistedParticipants != null) {
+            Log.d(LOG_TAG,
+                    "manageAddParticipants existingParticipants=" + mExistedParticipants.toString());
+            intent.putExtra(InCallApp.CURRENT_PARTICIPANT_LIST, mExistedParticipants.toString());
+        }
         try {
             mContext.startActivity(intent);
         } catch (ActivityNotFoundException e) {
@@ -234,14 +264,13 @@ public class ConferenceManagerPresenter
         boolean isFragmentVisible();
         void setRowVisible(int rowId, boolean on);
         void displayCallerInfoForConferenceRow(int rowId, String callerName, String callerNumber,
-                String callerNumberType);
-        void displayCallerInfoForImsConferenceRow(int rowId, String callerName, String callerNumber,
-                String callerNumberType, Drawable photo);
+                String callerNumberType, Drawable photo, String state);
         void setCanSeparateButtonForRow(int rowId, boolean canSeparate);
         void setupEndButtonForRow(int rowId);
 
         void setupEndButtonForRowWithUrl(int rowId, String url);
         void startConferenceTime(long base);
         void stopConferenceTime();
+        void hideAddParticipant(boolean hide);
     }
 }
