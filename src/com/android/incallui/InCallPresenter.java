@@ -558,7 +558,7 @@ public class InCallPresenter implements CallList.Listener {
     }
 
     public void onPostDialCharWait(int callId, String chars) {
-        if (isActivityStarted()) {
+        if (isShowingInCallUi()) {
             mInCallActivity.showPostCharWaitDialog(callId, chars);
         }
     }
