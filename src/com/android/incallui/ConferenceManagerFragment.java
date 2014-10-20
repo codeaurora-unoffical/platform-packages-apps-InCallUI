@@ -268,10 +268,15 @@ public class ConferenceManagerFragment
     @Override
     public void hideAddParticipant(boolean hide){
         Log.v(this, "hideAddParticipant hide = " + hide);
+        if (mAddParticipants == null) return;
         View icon = mAddParticipants.findViewById(R.id.addParticipantIcon);
         View text = mAddParticipants.findViewById(R.id.addParticipantText);
         mAddParticipants.setEnabled(!hide);
-        icon.setEnabled(!hide);
-        text.setEnabled(!hide);
+        if (icon != null){
+            icon.setEnabled(!hide);
+        }
+        if (text != null){
+            text.setEnabled(!hide);
+        }
     }
 }
