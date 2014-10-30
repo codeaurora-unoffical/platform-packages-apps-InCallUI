@@ -42,7 +42,7 @@ typedef int16_t (*VtImplSetSurfFun)(JNIEnv *, jobject);
 typedef void (*VtImplSetDeviceOrient)(uint32_t);
 typedef int16_t (*VtImplDeinitFun)(void);
 typedef uint32_t (*VtImplUint32VoidFunc)(void);
-typedef int16_t (*VtImplGetRtpDataUsageFunc)(uint32_t);
+typedef uint32_t (*VtImplGetRtpDataUsageFunc)(uint16_t);
 
 struct VtImplApis {
     VtImplRegisterCbFun registerAppEventCallback;
