@@ -677,6 +677,22 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
     }
 
     /**
+     * Handles a change to the call data usage
+     *
+     * @param dataUsage call data usage value
+     */
+    @Override
+    public void onCallDataUsageChange(long dataUsage) {
+        Log.d(this, "onCallDataUsageChange dataUsage=" + dataUsage);
+        VideoCallUi ui = getUi();
+        if (ui == null) {
+            Log.e(this, "onCallDataUsageChange: VideoCallUi is null");
+            return;
+        }
+        ui.setCallDataUsage(mContext, dataUsage);
+    }
+
+    /**
      * Handles hanges to the device orientation.
      * See: {@link Configuration.ORIENTATION_LANDSCAPE}, {@link Configuration.ORIENTATION_PORTRAIT}
      * @param orientation The device orientation.
@@ -716,15 +732,15 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         } else {
             call.setSessionModificationState(Call.SessionModificationState.REQUEST_FAILED);
 
+            final Call modifyCall = call;
             // Start handler to change state from REQUEST_FAILED to NO_REQUEST after an interval.
             mSessionModificationResetHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    if (mPrimaryCall == null){
-                        return;
-                    }
-                    mPrimaryCall
+                    if (modifyCall != null) {
+                        modifyCall
                             .setSessionModificationState(Call.SessionModificationState.NO_REQUEST);
+                    }
                 }
             }, SESSION_MODIFICATION_RESET_DELAY_MS);
         }
@@ -803,6 +819,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         void setPreviewSize(int width, int height);
         void setPreviewSurfaceSize(int width, int height);
         void setDisplayVideoSize(int width, int height);
+        void setCallDataUsage(Context context, long dataUsage);
         Point getScreenSize();
         void cleanupSurfaces();
         boolean isActivityRestart();
