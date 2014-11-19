@@ -117,6 +117,8 @@
     <string name="card_title_video_call_requesting">Requesting video</string>
     <!-- In-call screen: status label when there is a problem connecting a video call. -->
     <string name="card_title_video_call_error">Cannot connect video call</string>
+    <!-- In-call screen: status label when in a paused video call. -->
+    <string name="card_title_video_call_paused">Video call (Paused)</string>
 
     <!-- In-call screen: string shown to the user when their outgoing number is different than the
          number reported by TelephonyManager#getLine1Number() -->
@@ -570,6 +572,9 @@
     <!-- This can be used in any application wanting to disable the text "Emergency number" -->
     <string name="emergency_call_dialog_number_for_display">Emergency number</string>
 
+    <!-- message displayed when missing voicemail number -->
+    <string name="incall_error_missing_voicemail_number">No voicemail number is set up, set now?</string>
+
     <!-- Title for Select Account Dialog [CHAR LIMIT=30] -->
     <string name="select_account_dialog_title">Select Account</string>
     <!-- Set Subscription screen: label sub 1 -->
@@ -582,4 +587,13 @@
 	<string name="modify_call_prompt_yes">Yes</string>
 	<string name="modify_call_prompt_no">No</string>
 	<string name="connecting_for_modify">Connecting...</string>
+
+    <!-- Call substate label for call resumed -->
+    <string name="call_substate_call_resumed">Call Resumed</string>
+    <!-- Call substate label for call connected suspended (audio) -->
+    <string name="call_substate_connected_suspended_audio">Call Connected Suspended (Audio)</string>
+    <!-- Call substate label for call connected suspended (video) -->
+    <string name="call_substate_connected_suspended_video">Call Connected Suspended (Video)</string>
+    <!-- Call substate label for avp retry -->
+    <string name="call_substate_avp_retry">Avp Retry</string>
 </resources>
