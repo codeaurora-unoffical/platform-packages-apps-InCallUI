@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.drawable.LayerDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.SystemProperties;
@@ -549,6 +548,8 @@ public class CallButtonFragment
             case R.id.audio_mode_bluetooth:
                 mode = AudioState.ROUTE_BLUETOOTH;
                 break;
+
+
 
             default:
                 Log.e(this, "onMenuItemClick:  unexpected View ID " + item.getItemId()

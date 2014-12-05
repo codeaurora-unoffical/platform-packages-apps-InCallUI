@@ -376,6 +376,30 @@ public final class Call {
         return hasProperty(CallProperties.CONFERENCE);
     }
 
+    public boolean isForwarded() {
+        return hasProperty(CallProperties.WAS_FORWARDED);
+    }
+
+    public boolean isWaitingForRemoteSide() {
+        if (mState == State.ACTIVE && hasProperty(CallProperties.HELD_REMOTELY)) {
+            return true;
+        }
+        if (mState == State.DIALING && hasProperty(CallProperties.DIALING_IS_WAITING)) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean wasUnansweredForwarded() {
+        return getDisconnectCause().getCode() == DisconnectCause.MISSED
+                && hasProperty(CallProperties.ADDITIONAL_CALL_FORWARDED);
+    }
+
+    public boolean missedBecauseIncomingCallsBarredRemotely() {
+        return getDisconnectCause().getCode() == DisconnectCause.RESTRICTED
+                && hasProperty(CallProperties.REMOTE_INCOMING_CALLS_BARRED);
+    }
+
     public GatewayInfo getGatewayInfo() {
         return mTelecommCall.getDetails().getGatewayInfo();
     }
@@ -386,16 +410,17 @@ public final class Call {
 
     public long getSubId() {
         PhoneAccountHandle ph = getAccountHandle();
-        if (ph != null) {
-            if (ph.getId() != null && !ph.getId().toLowerCase().contains("sip")
-                    && !ph.getId().equals("E")) {
-                return Long.parseLong(getAccountHandle().getId());
-            } else {
-                return SubscriptionManager.getDefaultVoiceSubId();
-            }
-        } else {
+        if (ph == null) {
             return SubscriptionManager.INVALID_SUB_ID;
         }
+        if (ph.getId() != null) {
+            try {
+                return Long.parseLong(getAccountHandle().getId());
+            } catch (NumberFormatException e) {
+                // fall through
+            }
+        }
+        return SubscriptionManager.getDefaultVoiceSubId();
     }
 
     public VideoCall getVideoCall() {
