@@ -23,6 +23,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import com.android.incallui.CallList.SrvccListener;
+import com.android.services.telephony.common.AudioMode;
 import com.android.services.telephony.common.Call;
 import com.android.services.telephony.common.Call.State;
 import com.android.services.telephony.common.CallDetails;
@@ -143,6 +144,9 @@ public class InCallActivity extends Activity {
         @Override
         public void onSrvcc() {
             Log.d(this, "onSrvcc");
+            if (AudioModeProvider.getInstance().getAudioMode() == AudioMode.SPEAKER){
+                CallCommandClient.getInstance().setAudioMode(AudioMode.WIRED_OR_EARPIECE);
+            }
             handleSrvcc();
         }};
 
