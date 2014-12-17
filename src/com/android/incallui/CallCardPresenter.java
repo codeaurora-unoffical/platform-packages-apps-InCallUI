@@ -183,6 +183,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
                     mPrimary.getIdentification(), mPrimary.getState() == Call.State.INCOMING);
             updatePrimaryDisplayInfo(mPrimaryContactInfo, isConference(mPrimary));
             maybeStartSearch(mPrimary, true);
+            checkAndBuildConfParticipantsInfo(mPrimary);
         }
 
         if (mSecondary == null) {
@@ -195,6 +196,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
                     mSecondary.getIdentification(), mSecondary.getState() == Call.State.INCOMING);
             updateSecondaryDisplayInfo(mSecondary.isConferenceCall());
             maybeStartSearch(mSecondary, false);
+            checkAndBuildConfParticipantsInfo(mSecondary);
         }
 
         // Start/Stop the call time update timer
@@ -292,6 +294,41 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         if (call != null && !call.isConferenceCall()) {
             startContactInfoSearch(call.getIdentification(), isPrimary,
                     call.getState() == Call.State.INCOMING);
+        }
+    }
+
+    /**
+     * Check if the call passed is a conference call and build the
+     * contact info entries for it's child calls if they are not available
+     * in the cache. This is useful in case of IMS conf SRVCC where child
+     * calls after SRVCC appear as phantom calls on CS.
+     */
+    private void checkAndBuildConfParticipantsInfo(Call call) {
+        Log.d(TAG, "checkAndBuildConfParticipantsInfo: call = " + call);
+        if (call != null && call.isConferenceCall()) {
+            Integer[] childIds = call.getChildCallIds().toArray(new Integer[0]);
+            final ContactInfoCache cache = ContactInfoCache.getInstance(mContext);
+            if (childIds != null && childIds.length > 0) {
+                for (Integer id: childIds) {
+                    Call childCall = CallList.getInstance().getCall(id);
+                    if (cache.getInfo(id) == null && childCall != null) {
+                        Log.d(TAG, "No cache entry for call id = " + id + ". Find info.");
+                        boolean isIncoming = (childCall.getState() == Call.State.INCOMING);
+                        cache.findInfo(childCall.getIdentification(), isIncoming,
+                                new ContactInfoCacheCallback() {
+                                    @Override
+                                    public void onContactInfoComplete(int callId,
+                                            ContactCacheEntry entry) {
+                                    }
+
+                                    @Override
+                                    public void onImageLoadComplete(int callId,
+                                            ContactCacheEntry entry) {
+                                    }
+                                });
+                    }
+                }
+            }
         }
     }
 
