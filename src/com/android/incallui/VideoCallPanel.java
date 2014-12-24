@@ -771,14 +771,11 @@ public class VideoCallPanel extends RelativeLayout implements TextureView.Surfac
     }
 
     public void onShowSecondary(boolean show) {
-        if (show) {
-            this.mLocalView.offsetTopAndBottom(-65);
-            mLocalViewMargined = true;
-        } else if (mLocalViewMargined){
-            mLocalView.offsetTopAndBottom(65);
-            mLocalViewMargined = false;
+        log("onShowSecondary=" + show);
+        View panel = findViewById(R.id.local_view_panel);
+        if (panel != null) {
+            panel.setVisibility(show ? View.VISIBLE : View.GONE);
         }
-
     }
 
     private void log(String msg) {
