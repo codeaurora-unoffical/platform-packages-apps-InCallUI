@@ -517,6 +517,7 @@ public class InCallActivity extends Activity {
             }
 
             ft.commitAllowingStateLoss();
+            getFragmentManager().executePendingTransactions();
         }
         InCallPresenter.getInstance().getProximitySensor().onDialpadVisible(showDialpad);
     }
