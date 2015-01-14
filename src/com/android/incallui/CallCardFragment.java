@@ -1209,7 +1209,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         view.setAlpha(1);
     }
 
-    private void setViewStatePostAnimation(OnLayoutChangeListener layoutChangeListener) {
+    void setViewStatePostAnimation(OnLayoutChangeListener layoutChangeListener) {
         setViewStatePostAnimation(mCallButtonsContainer);
         setViewStatePostAnimation(mCallStateLabel);
         setViewStatePostAnimation(mPrimaryName);
@@ -1217,7 +1217,6 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         setViewStatePostAnimation(mCallNumberAndLabel);
         setViewStatePostAnimation(mCallStateIcon);
 
-        mPrimaryCallCardContainer.removeOnLayoutChangeListener(layoutChangeListener);
         mPrimaryCallInfo.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
         mFloatingActionButtonController.scaleIn(AnimUtils.NO_DELAY);
     }

@@ -1133,7 +1133,7 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         Log.i(this, "Start UI " + " anyOtherSubActive:" + anyOtherSubActive);
         if (isCallWaiting || anyOtherSubActive) {
             if (mProximitySensor.isScreenReallyOff() && isActivityStarted()) {
-                mInCallActivity.finish();
+                mInCallActivity.finishActivity();
                 // When the activity actually finishes, we will start it again if there are
                 // any active calls, so we do not need to start it explicitly here. Note, we
                 // actually get called back on this function to restart it.
