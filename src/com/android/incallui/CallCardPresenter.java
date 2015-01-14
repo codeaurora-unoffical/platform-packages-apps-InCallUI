@@ -289,8 +289,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         /* Hide the end call button instantly if we're receiving an incoming call
            or when receiving a modify request */
         getUi().setEndCallButtonEnabled(
-                enableEndCallButton, callState != Call.State.INCOMING &&
-                !isModifyRequest /* animate */);
+                enableEndCallButton, false /* animate */);
     }
 
     @Override
