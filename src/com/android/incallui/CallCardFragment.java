@@ -25,6 +25,9 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -34,10 +37,13 @@ import android.telephony.MSimTelephonyManager;
 import android.telephony.TelephonyManager;
 import android.os.SystemProperties;
 import android.provider.Settings;
+import android.provider.Telephony.Sms;
 import android.text.format.DateUtils;
 import android.text.TextUtils;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -45,8 +51,10 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,6 +62,8 @@ import com.android.services.telephony.common.AudioMode;
 import com.android.services.telephony.common.Call;
 
 import java.util.List;
+
+import com.android.incallui.RcsApiManager;
 
 /**
  * Fragment for call card.
@@ -80,6 +90,8 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
     private int mVBToastPosition;
     private TextView mRecordingTimeLabel;
     private TextView mRecordingIcon;
+    private View mSendMessageView;
+    private TextView mUnreadMessageCount;
 
     // Secondary caller info
     private ViewStub mSecondaryCallInfo;
@@ -122,6 +134,11 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
     static final String PROPERTY_IMS_AUDIO_OUTPUT =
                                 "persist.radio.ims.audio.output";
 
+    private RcsRichScreen mRcsRichScreen = null;
+    private boolean misEhanceScreenApkInstalled = false;
+    private boolean mIsRcsServiceInstalled = false;
+    private static final String ENHANCE_SCREEN_APK_NAME = "com.cmdm.rcs";
+
     @Override
     CallCardPresenter.CallCardUi getUi() {
         return this;
@@ -146,6 +163,8 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         filter.addAction(ACTION_RECORD_STOP);
         filter.addAction(ACTION_RECORD_TIME_CHANGED);
         getActivity().registerReceiver(recorderStateReceiver, filter);
+        misEhanceScreenApkInstalled = isEnhanceScreenInstalled();
+        mIsRcsServiceInstalled = RcsApiManager.isRcsServiceInstalled();
     }
 
 
@@ -167,7 +186,11 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         if (CallUtils.hasImsCall(CallList.getInstance())){
             return inflater.inflate(R.layout.ims_call_card, container, false);
         }
-        return inflater.inflate(R.layout.call_card, container, false);
+        if (!isRcsAvailable()) {
+            return inflater.inflate(R.layout.call_card, container, false);
+        } else {
+            return inflater.inflate(R.layout.rcs_call_card_content, container, false);
+        }
     }
 
     @Override
@@ -195,6 +218,60 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         }
         mRecordingTimeLabel = (TextView) view.findViewById(R.id.recordingTime);
         mRecordingIcon = (TextView) view.findViewById(R.id.recordingIcon);
+
+        if(isRcsAvailable()){
+            TextView rcsmissdnAddress = (TextView)view.findViewById(R.id.missdnaddress);
+            TextView rcsgreeting = (TextView)view.findViewById(R.id.greeting);
+            SurfaceView rcssurface = (SurfaceView)view.findViewById(R.id.surface);
+            ImageView rcsPhoto = (ImageView) view.findViewById(R.id.rcs_photo);
+            GifMovieView rcsGifMovieView = (GifMovieView) view.findViewById(R.id.incallgifview);
+            mRcsRichScreen = new RcsRichScreen(getActivity(),
+                rcsPhoto,rcsgreeting,rcsmissdnAddress,rcsGifMovieView,rcssurface);
+        }
+        if (mIsRcsServiceInstalled) {
+            mSendMessageView = view.findViewById(R.id.sendMessage);
+            mSendMessageView.setOnClickListener(new OnClickListener() {
+                public void onClick(View v) {
+                    getPresenter().sendSmsClicked();
+                }
+            });
+            mUnreadMessageCount = (TextView) view.findViewById(R.id.unreadMessageCount);
+            updateUnReadSmsCount();
+        } else {
+            mSendMessageView = view.findViewById(R.id.sendMessage);
+            mSendMessageView.setVisibility(View.GONE);
+        }
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Sms.Intents.SMS_RECEIVED_ACTION);
+        getActivity().registerReceiver(mSmsReceiver, filter);
+    }
+
+    private void updateUnReadSmsCount() {
+        if (!mIsRcsServiceInstalled) {
+            return;
+        }
+        int unRead = getPresenter().getUnReadMessageCount(getActivity());
+        Log.d("RCS_UI", "CallCardFragment: updateUnReadMessageCount(" + unRead + ")");
+        setUnReadMessageCount(unRead);
+    }
+
+    public void setUnReadMessageCount(int count) {
+        if ( null == mUnreadMessageCount) {
+            return;
+        }
+        if (count > 0) {
+            mUnreadMessageCount.setBackgroundResource(R.drawable.rcs_incall_message_count);
+            mUnreadMessageCount.setText(String.valueOf(count));
+        } else {
+            mUnreadMessageCount.setBackgroundResource(R.drawable.rcs_incall_message);
+            mUnreadMessageCount.setText("");
+        }
+    }
+
+    public void onDestroyView() {
+        getActivity().unregisterReceiver(mSmsReceiver);
+        super.onDestroyView();
     }
 
     @Override
@@ -291,6 +368,16 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             }
         }
 
+        if (isRcsAvailable()) {
+            String rcsnumber = null;
+            if(!nameIsNumber){
+                rcsnumber = number;
+            } else {
+                rcsnumber = name;
+            }
+            mRcsRichScreen.setNumber(rcsnumber);
+        }
+
         if (! isVideo) {
             setDrawableToImageView(mPhoto, photo);
         }
@@ -362,6 +449,11 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         if (skipAnimation) {
             transition = mSupplementaryInfoContainer.getLayoutTransition();
             mSupplementaryInfoContainer.setLayoutTransition(null);
+        }
+
+        // update Rcs RichScreen by call state
+        if (isRcsAvailable()) {
+           mRcsRichScreen.updateRichScreenByCallState(state, callType);
         }
 
         // Update the call state label.
@@ -928,4 +1020,35 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             }
         }
     };
+
+    private boolean isRcsAvailable() {
+        return RcsApiManager.isRcsServiceInstalled()
+                && RcsApiManager.isRcsOnline() && misEhanceScreenApkInstalled;
+    }
+
+    private boolean isEnhanceScreenInstalled() {
+        boolean installed = false;
+        try {
+            ApplicationInfo info = getActivity().getPackageManager().getApplicationInfo(
+                ENHANCE_SCREEN_APK_NAME, PackageManager.GET_PROVIDERS);
+            installed = (info != null);
+        } catch (NameNotFoundException e) {
+        }
+        Log.i(this, "Is Enhance Screen installed ? " + installed);
+        return installed;
+    }
+
+    private BroadcastReceiver mSmsReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent data) {
+            updateUnReadSmsCount();
+        };
+    };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mIsRcsServiceInstalled) {
+            updateUnReadSmsCount();
+        }
+    }
 }
