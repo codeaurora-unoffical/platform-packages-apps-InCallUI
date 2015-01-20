@@ -25,6 +25,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.graphics.Bitmap;
+import android.os.SystemClock;
 import android.provider.MediaStore.Audio;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
@@ -61,6 +62,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
     private ContactCacheEntry mSecondaryContactInfo;
     private CallTimer mCallTimer;
     private Context mContext;
+    private long mBaseChronometerTime = 0;
 
     public CallCardPresenter() {
         // create the call timer
@@ -198,10 +200,13 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         // Start/Stop the call time update timer
         if (mPrimary != null && mPrimary.getState() == Call.State.ACTIVE) {
             Log.d(this, "Starting the calltime timer");
+            mBaseChronometerTime = mPrimary.getConnectTime() + (SystemClock.elapsedRealtime()
+                    - System.currentTimeMillis());
             mCallTimer.start(CALL_TIME_UPDATE_INTERVAL);
         } else {
             Log.d(this, "Canceling the calltime timer");
             mCallTimer.cancel();
+            mBaseChronometerTime = 0;
             ui.setPrimaryCallElapsedTime(false, null);
         }
 
@@ -245,9 +250,9 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
                 ui.setPrimaryCallElapsedTime(false, null);
             }
             mCallTimer.cancel();
-        } else {
-            final long callStart = mPrimary.getConnectTime();
-            final long duration = System.currentTimeMillis() - callStart;
+            mBaseChronometerTime = 0;
+        } else if (mBaseChronometerTime > 0){
+            final long duration = SystemClock.elapsedRealtime() - mBaseChronometerTime;
             ui.setPrimaryCallElapsedTime(true, DateUtils.formatElapsedTime(duration / 1000));
         }
     }
