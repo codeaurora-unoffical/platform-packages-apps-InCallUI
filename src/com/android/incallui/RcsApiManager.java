@@ -97,6 +97,11 @@ public class RcsApiManager {
     }
 
     public static RichScreenApi getRichScreenApi() {
+        if (mRichScreenApi == null) {
+            mRichScreenApi = new RichScreenApi(null);
+            mRichScreenApi.init(mContext, null);
+            Log.d(TAG, "_______mRichScreenApi init______");
+        }
         return mRichScreenApi;
     }
 
