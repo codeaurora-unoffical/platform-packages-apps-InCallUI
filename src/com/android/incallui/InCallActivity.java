@@ -215,12 +215,27 @@ public class InCallActivity extends Activity {
         CallList.getInstance().removeSrvccListener(mSrvccListener);
         Log.d(this, "onDestroy()...  restartTag = " + restartTag);
         if (restartTag){
-            Intent i = InCallPresenter.getInstance().getInCallIntent(false);
+            Intent i = getInCallIntent();
             startActivity(i);
             restartTag = false;
         }
     }
 
+    private Intent getInCallIntent(){
+        boolean hasImsCall = CallUtils.hasImsCall(CallList.getInstance());
+        final Intent intent = new Intent(Intent.ACTION_MAIN, null);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                | Intent.FLAG_ACTIVITY_NO_USER_ACTION);
+        if (MSimTelephonyManager.getDefault().getMultiSimConfiguration()
+                == MSimTelephonyManager.MultiSimVariants.DSDA) {
+            intent.setClass(getApplicationContext(), MSimInCallActivity.class);
+        } else {
+            intent.setClass(getApplicationContext(), InCallActivity.class);
+        }
+        intent.putExtra(InCallActivity.LAUNCH_IMS_UI, hasImsCall);
+        return intent;
+    }
     /**
      * Returns true when theActivity is in foreground (between onResume and onPause).
      */
