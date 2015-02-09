@@ -763,6 +763,32 @@ public class InCallActivity extends Activity {
         return super.dispatchPopulateAccessibilityEvent(event);
     }
 
+    public void showCsRedialDialogOnDisconnect(String dialString) {
+        final String number = dialString;
+        Log.d(this, "showCsRedialDialogOnDisconnect for " + number);
+
+        dismissPendingDialogs();
+        mDialog = new AlertDialog.Builder(this).setTitle(R.string.cs_redial_option)
+                .setMessage(R.string.cs_redial_msg)
+                .setPositiveButton(R.string.cs_redial_yes, new OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        InCallPresenter.getInstance().dialCsCall(number);
+                        onDialogDismissed();
+                    }
+                })
+                .setNegativeButton(R.string.cs_redial_no, new OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        onDialogDismissed();
+                    }
+                })
+                .create();
+
+        mDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        mDialog.show();
+    }
+
     public void maybeShowErrorDialogOnDisconnect(Call call) {
         Log.d(this, "maybeShowErrorDialogOnDisconnect");
 
