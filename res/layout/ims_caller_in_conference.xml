@@ -111,7 +111,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
          android:src="@drawable/ic_in_call_phone_hangup"
          android:background="@drawable/end_call_background"
          android:scaleType="center"
-         android:visibility="gone"
          android:contentDescription="@string/onscreenEndCallText" />
 
 </LinearLayout>  <!-- End of single list element -->
