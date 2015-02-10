@@ -693,16 +693,10 @@ public class InCallActivity extends Activity {
         Log.d(this, "maybeShowErrorDialogOnDisconnect: Call=" + call);
 
         if (!isFinishing() && call != null) {
-            if (CallUtils.isImsCall(call)
-                    && (getResIdForDisconnectCause(call.getDisconnectCause(),
-                            call.getSuppServNotification())) != INVALID_RES_ID) {
-                showRedialDialog(call.getNumber());
-            } else {
-                final int resId = getResIdForDisconnectCause(call.getDisconnectCause(),
-                        call.getSuppServNotification());
-                if (resId != INVALID_RES_ID) {
-                    showErrorDialog(resId);
-                }
+            final int resId = getResIdForDisconnectCause(call.getDisconnectCause(),
+                    call.getSuppServNotification());
+            if (resId != INVALID_RES_ID) {
+                showErrorDialog(resId);
             }
         }
     }
