@@ -99,21 +99,51 @@
                       android:singleLine="true"
                       android:ellipsize="end"/>
 
-            <!-- Name (or the phone number, if we don't have a name to display). -->
-            <TextView android:id="@+id/name"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentStart="true"
+            <RelativeLayout
+                android:id="@+id/layout_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingEnd="@dimen/call_banner_name_number_right_padding"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@color/incall_call_banner_text_color"
-                android:singleLine="true"
-                android:textAlignment="viewStart"/>
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:paddingEnd="@dimen/call_banner_name_number_right_padding" >
+
+                <!-- Name (or the phone number, if we don't have a name to display). -->
+
+                <TextView
+                    android:id="@+id/name"
+                    android:layout_toLeftOf="@+id/sendMessage"
+                    android:layout_alignParentStart="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/incall_call_banner_text_color"
+                    android:singleLine="true"
+                    android:textAlignment="viewStart" />
+
+                <LinearLayout
+                    android:id="@+id/sendMessage"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center" >
+
+                    <TextView
+                        android:id="@+id/unreadMessageCount"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:background="@drawable/rcs_incall_message"
+                        android:gravity="center"
+                        android:textColor="#0085d3"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </RelativeLayout>
 
             <!-- Label (like "Mobile" or "Work", if present) and phone number, side by side -->
             <LinearLayout android:id="@+id/labelAndNumber"
-                android:layout_below="@id/name"
+                android:layout_below="@id/layout_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingEnd="@dimen/call_banner_name_number_right_padding"

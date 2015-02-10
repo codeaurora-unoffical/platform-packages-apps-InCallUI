@@ -140,4 +140,7 @@
 
     <!-- Height of translucent shadow effect -->
     <dimen name="translucent_shadow_height">2dp</dimen>
+
+    <!-- RCS -->
+    <dimen name="call_label_text_size">18sp</dimen>
 </resources>

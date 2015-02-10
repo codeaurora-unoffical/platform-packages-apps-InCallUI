@@ -645,4 +645,7 @@
     <string name="dialpad_7_number" msgid="277455349526398354">"7"</string>
     <string name="dialpad_8_number" msgid="4764964930466503513">"8"</string>
     <string name="dialpad_9_number" msgid="4023642800448238950">"9"</string>
+    <string name="display_rich_screen">显示增强屏显？</string>
+    <string name="rcs_missdnaddress_string">归属地：</string>
+    <string name="rcs_greeting_string">问候语：</string>
 </resources>
