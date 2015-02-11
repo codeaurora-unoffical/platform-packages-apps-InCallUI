@@ -112,6 +112,8 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
 
     private int mVideoAnimationDuration;
 
+    private static final int DEFAULT_VIEW_OFFSET_Y = 0;
+
     @Override
     CallCardPresenter.CallCardUi getUi() {
         return this;
@@ -415,15 +417,8 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
 
     @Override
     public void setPrimary(String number, String name, boolean nameIsNumber, String label,
-            Drawable photo, boolean isConference, boolean canManageConference, boolean isSipCall) {
+            Drawable photo, boolean isSipCall) {
         Log.d(this, "Setting primary call");
-
-        if (isConference) {
-            name = getConferenceString(canManageConference);
-            photo = getConferencePhoto(canManageConference);
-            photo.setAutoMirrored(true);
-            nameIsNumber = false;
-        }
 
         // set the name field.
         setPrimaryName(name, nameIsNumber);
@@ -446,8 +441,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
 
     @Override
     public void setSecondary(boolean show, String name, boolean nameIsNumber, String label,
-            String providerLabel, Drawable providerIcon, boolean isConference,
-            boolean canManageConference) {
+            String providerLabel, Drawable providerIcon, boolean isConference) {
 
         if (show != mSecondaryCallInfo.isShown()) {
             updateFabPositionForSecondaryCallInfo();
@@ -457,13 +451,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             boolean hasProvider = !TextUtils.isEmpty(providerLabel);
             showAndInitializeSecondaryCallInfo(hasProvider);
 
-            if (isConference) {
-                name = getConferenceString(canManageConference);
-                nameIsNumber = false;
-                mSecondaryCallConferenceCallIcon.setVisibility(View.VISIBLE);
-            } else {
-                mSecondaryCallConferenceCallIcon.setVisibility(View.GONE);
-            }
+            mSecondaryCallConferenceCallIcon.setVisibility(isConference ? View.VISIBLE : View.GONE);
 
             mSecondaryCallName.setText(name);
             if (hasProvider) {
@@ -535,10 +523,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
                 mCallStateIcon.startAnimation(mPulseAnimation);
             }
         } else {
-            Animation callStateAnimation = mCallStateLabel.getAnimation();
-            if (callStateAnimation != null) {
-                callStateAnimation.cancel();
-            }
+            mCallStateLabel.clearAnimation();
             mCallStateLabel.setText(null);
             mCallStateLabel.setAlpha(0);
             mCallStateLabel.setVisibility(View.GONE);
@@ -612,19 +597,6 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             InCallAnimationUtils.startCrossFade(view, current, photo);
             view.setVisibility(View.VISIBLE);
         }
-    }
-
-    private String getConferenceString(boolean canManageConference) {
-        Log.v(this, "canManageConferenceString: " + canManageConference);
-        final int resId = canManageConference
-                ? R.string.card_title_conf_call : R.string.card_title_in_call;
-        return getView().getResources().getString(resId);
-    }
-
-    private Drawable getConferencePhoto(boolean canManageConference) {
-        Log.v(this, "canManageConferencePhoto: " + canManageConference);
-        final int resId = canManageConference ? R.drawable.img_conference : R.drawable.img_phone;
-        return getView().getResources().getDrawable(resId);
     }
 
     /**
@@ -794,6 +766,16 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         mManageConferenceCallButton.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
+    /**
+     * Determines the current visibility of the manage conference button.
+     *
+     * @return {@code true} if the button is visible.
+     */
+    @Override
+    public boolean isManageConferenceVisible() {
+        return mManageConferenceCallButton.getVisibility() == View.VISIBLE;
+    }
+
     private void dispatchPopulateAccessibilityEvent(AccessibilityEvent event, View view) {
         if (view == null) return;
         final List<CharSequence> eventText = event.getText();
@@ -924,8 +906,26 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
                         observer.removeOnGlobalLayoutListener(this);
 
                         onDialpadVisiblityChange(mIsDialpadShowing);
+                        updateVideoCallViews();
                     }
                 });
+    }
+
+    private void updateVideoCallViews() {
+        Log.d(this, "updateVideoCallViews");
+        View previewVideoView = getView().findViewById(R.id.previewVideo);
+        View zoomControlView = getView().findViewById(R.id.zoom_control);
+
+        final float secondaryCallInfoHeight = mSecondaryCallInfo.getHeight();
+        final boolean isSecondaryCallInfoShown = mSecondaryCallInfo.isShown();
+        if (previewVideoView != null) {
+            previewVideoView.setTranslationY(isSecondaryCallInfoShown ?
+                -secondaryCallInfoHeight : DEFAULT_VIEW_OFFSET_Y);
+        }
+        if (zoomControlView != null) {
+            zoomControlView.setTranslationY(isSecondaryCallInfoShown ?
+                -secondaryCallInfoHeight : DEFAULT_VIEW_OFFSET_Y);
+        }
     }
 
     /**
