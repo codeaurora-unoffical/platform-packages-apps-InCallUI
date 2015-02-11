@@ -189,17 +189,21 @@ public class ConferenceManagerPresenter
 
     public void updateManageConferenceRow(final int i, final String url) {
         if (url != null) {
-            getUi().setRowVisible(i, true);
-            getUi().setupEndButtonForRowWithUrl(i, url);
             String state;
-            if (mConferenceDetails != null){
+            if (mConferenceDetails != null) {
                 state = getValueForKeyFromEntry(mConferenceDetails.get(url),
-                    CallDetails.CONFERENCE_DETATILS_STATE);
-            }else{
+                        CallDetails.CONFERENCE_DETATILS_STATE);
+            } else {
                 state = "";
             }
-            getUi().displayCallerInfoForConferenceRow(i, "", url, "", null, state);
-            mExistedParticipants.append(url).append(";");
+            if ("disconnected".compareToIgnoreCase(state) == 0) {
+                getUi().setRowVisible(i, false);
+            } else {
+                getUi().setRowVisible(i, true);
+                getUi().setupEndButtonForRowWithUrl(i, url);
+                getUi().displayCallerInfoForConferenceRow(i, "", url, "", null, state);
+                mExistedParticipants.append(url).append(";");
+            }
         } else {
             // Disable this row of the Manage conference panel:
             getUi().setRowVisible(i, false);
