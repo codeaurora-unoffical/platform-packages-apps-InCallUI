@@ -37,6 +37,7 @@
     <string name="callFailed_outOfService" msgid="4825791466557236225">"不在服务区"</string>
     <string name="callFailed_fdn_only" msgid="2850204579765430641">"外拨电话受固定拨号限制。"</string>
     <string name="callFailed_cb_enabled" msgid="3686963693629739680">"您无法在已启用通话限制的情况下拨出电话。"</string>
+    <string name="callUnanswered_forwarded">呼叫未应答并已被转移</string>
     <string name="callFailed_dsac_restricted" msgid="2180223622768522345">"所有通话都受访问控制限制。"</string>
     <string name="callFailed_dsac_restricted_emergency" msgid="4353654268813314466">"急救或报警电话受访问控制限制。"</string>
     <string name="callFailed_dsac_restricted_normal" msgid="2680774510252408620">"正常通话受访问控制限制。"</string>
