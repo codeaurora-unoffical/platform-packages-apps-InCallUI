@@ -22,15 +22,14 @@
  */
 
 package com.android.incallui;
-
 import android.content.Context;
 import android.os.RemoteException;
 import android.util.Log;
 import com.suntek.mway.rcs.client.api.autoconfig.RcsAccountApi;
 import com.suntek.mway.rcs.client.api.capability.impl.CapabilityApi;
 import com.suntek.mway.rcs.client.api.impl.groupchat.ConfApi;
-import com.suntek.mway.rcs.client.api.support.RcsSupportApi;
 import com.suntek.mway.rcs.client.api.RCSServiceListener;
+import com.suntek.mway.rcs.client.api.support.RcsSupportApi;
 import com.suntek.mway.rcs.client.api.util.ServiceDisconnectedException;
 import com.suntek.mway.rcs.client.api.voip.impl.RichScreenApi;
 

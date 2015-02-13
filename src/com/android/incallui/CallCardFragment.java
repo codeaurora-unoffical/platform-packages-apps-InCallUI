@@ -137,6 +137,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
     private RcsRichScreen mRcsRichScreen = null;
     private boolean misEhanceScreenApkInstalled = false;
     private boolean mIsRcsServiceInstalled = false;
+    private boolean mIsRCSAvailable = false;
     private static final String ENHANCE_SCREEN_APK_NAME = "com.cmdm.rcs";
 
     @Override
@@ -165,6 +166,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         getActivity().registerReceiver(recorderStateReceiver, filter);
         misEhanceScreenApkInstalled = isEnhanceScreenInstalled();
         mIsRcsServiceInstalled = RcsApiManager.isRcsServiceInstalled();
+        mIsRCSAvailable = isRcsAvailable();
     }
 
 
@@ -186,7 +188,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         if (CallUtils.hasImsCall(CallList.getInstance())){
             return inflater.inflate(R.layout.ims_call_card, container, false);
         }
-        if (!isRcsAvailable()) {
+        if (!mIsRCSAvailable) {
             return inflater.inflate(R.layout.call_card, container, false);
         } else {
             return inflater.inflate(R.layout.rcs_call_card_content, container, false);
@@ -219,7 +221,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         mRecordingTimeLabel = (TextView) view.findViewById(R.id.recordingTime);
         mRecordingIcon = (TextView) view.findViewById(R.id.recordingIcon);
 
-        if(isRcsAvailable()){
+        if(mIsRCSAvailable){
             TextView rcsmissdnAddress = (TextView)view.findViewById(R.id.missdnaddress);
             TextView rcsgreeting = (TextView)view.findViewById(R.id.greeting);
             SurfaceView rcssurface = (SurfaceView)view.findViewById(R.id.surface);
@@ -368,7 +370,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             }
         }
 
-        if (isRcsAvailable()) {
+        if (mRcsRichScreen != null && mIsRCSAvailable) {
             String rcsnumber = null;
             if(!nameIsNumber){
                 rcsnumber = number;
@@ -452,7 +454,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         }
 
         // update Rcs RichScreen by call state
-        if (isRcsAvailable()) {
+        if (mRcsRichScreen != null && mIsRCSAvailable) {
            mRcsRichScreen.updateRichScreenByCallState(state, callType);
         }
 
