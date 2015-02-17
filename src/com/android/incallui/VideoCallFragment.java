@@ -71,6 +71,15 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
      */
     public static final int INVALID_RESOURCE_ID = -1;
 
+    private static final int DEFAULT_CAMERA_ZOOM_VALUE = 0;
+
+    private static final int DEFAULT_CAMERA_ZOOM_MAX = 0;
+
+    private static final String ZOOM_INDEX_KEY = "zoomIndex";
+
+    private static final String MAX_ZOOM_KEY = "maxZoom";
+
+    private static final String ZOOM_VISIBILITY_KEY = "zoomVisibility";
 
     // Static storage used to retain the video surfaces across Activity restart.
     // TextureViews are not parcelable, so it is not possible to store them in the saved state.
@@ -91,6 +100,8 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
      */
     private View mVideoViews;
 
+    private ZoomControlBar mZoomControl;
+
     /**
      * {@code True} when the entering the activity again after a restart due to orientation change.
      */
@@ -105,6 +116,17 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
      * {@code True} if in landscape mode.
      */
     private boolean mIsLandscape;
+
+    /**
+     * This class implements the zoom listener for zoom control
+     */
+    private class ZoomChangeListener implements ZoomControl.OnZoomChangedListener {
+        @Override
+        public void onZoomValueChanged(int index) {
+            Log.d("this", "onZoomValueChanged:  index = " + index);
+            VideoCallFragment.this.onZoomValueChanged(index);
+        }
+    }
 
     /**
      * Inner-class representing a {@link TextureView} and its associated {@link SurfaceTexture} and
@@ -446,6 +468,36 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
         return view;
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        if (outState == null || mZoomControl == null) {
+            Log.d(this, "onSaveInstanceState: outState or zoom control is null");
+            return;
+        }
+
+        outState.putInt(ZOOM_INDEX_KEY, mZoomControl.getZoomIndex());
+        outState.putInt(MAX_ZOOM_KEY, mZoomControl.getZoomMax());
+        outState.putBoolean(ZOOM_VISIBILITY_KEY, mZoomControl.getVisibility() == View.VISIBLE);
+        Log.d(this, "onSaveInstanceState: savedInstanceState = " + outState);
+    }
+
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        Log.d(this, "onViewStateRestored : savedInstanceState = " + savedInstanceState);
+
+        if (savedInstanceState == null || mZoomControl == null) {
+            Log.d(this, "onViewStateRestored: saved Instance or zoom control is null");
+            return;
+        }
+
+        mZoomControl.setZoomMax(savedInstanceState.getInt(MAX_ZOOM_KEY));
+        mZoomControl.setZoomIndex(savedInstanceState.getInt(ZOOM_INDEX_KEY));
+        showZoomControl(savedInstanceState.getBoolean(ZOOM_VISIBILITY_KEY));
+    }
+
     /**
      * Centers the display view vertically for portrait orientation, and horizontally for
      * lanscape orientations.  The view is centered within the available space not occupied by
@@ -454,7 +506,6 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
      * @param displayVideo The video view to center.
      */
     private void centerDisplayView(View displayVideo) {
-        Log.d(this, "centerDisplayView: IsLandscape=" + mIsLandscape);
         // In a lansdcape layout we need to ensure we horizontally center the view based on whether
         // the layout is left-to-right or right-to-left.
         // In a left-to-right locale, the space for the video view is to the right of the call card
@@ -463,9 +514,13 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
         // so we need to translate it in the -X direction.
         final boolean isLayoutRtl = InCallPresenter.isRtl();
 
+        ViewGroup.LayoutParams params = displayVideo.getLayoutParams();
         float spaceBesideCallCard = InCallPresenter.getInstance().getSpaceBesideCallCard();
+        Log.d(this, "centerDisplayView: IsLandscape= " + mIsLandscape + " Layout width: " +
+                params.width + " height: " + params.height + " spaceBesideCallCard: "
+                + spaceBesideCallCard);
         if (mIsLandscape) {
-            float videoViewTranslation = displayVideo.getWidth() / 2
+            float videoViewTranslation = params.width / 2
                     - spaceBesideCallCard / 2;
             if (isLayoutRtl) {
                 displayVideo.setTranslationX(-videoViewTranslation);
@@ -473,7 +528,7 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
                 displayVideo.setTranslationX(videoViewTranslation);
             }
         } else {
-            float videoViewTranslation = displayVideo.getHeight() / 2
+            float videoViewTranslation = params.height / 2
                     - spaceBesideCallCard / 2;
             displayVideo.setTranslationY(videoViewTranslation);
         }
@@ -539,13 +594,11 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
     }
 
     /**
-     * Toggles visibility of the video UI.
+     * Inflate video surfaces.
      *
      * @param show {@code True} if the video surfaces should be shown.
      */
-    @Override
-    public void showVideoUi(boolean show) {
-        Log.d(this, "showVideoUi " + show);
+    private void inflateVideoUi(boolean show) {
         int visibility = show ? View.VISIBLE : View.GONE;
         getView().setVisibility(visibility);
 
@@ -553,9 +606,69 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
             inflateVideoCallViews();
         }
 
-        if (mVideoViews != null ) {
+        if (mVideoViews != null) {
             mVideoViews.setVisibility(visibility);
         }
+    }
+
+    /**
+     * Show Tranmission UI and hide Reception UI.
+     */
+    public void showVideoTransmissionUi() {
+        inflateVideoUi(true);
+
+        View incomingVideoView = mVideoViews.findViewById(R.id.incomingVideo);
+        View previewVideoView = mVideoViews.findViewById(R.id.previewVideo);
+
+        if (incomingVideoView != null) {
+            incomingVideoView.setVisibility(View.INVISIBLE);
+        }
+        if (previewVideoView != null) {
+            previewVideoView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * Show Reception UI and hide Tranmission UI.
+     */
+    public void showVideoReceptionUi() {
+        inflateVideoUi(true);
+
+        View incomingVideoView = mVideoViews.findViewById(R.id.incomingVideo);
+        View previewVideoView = mVideoViews.findViewById(R.id.previewVideo);
+
+        if (incomingVideoView != null) {
+            incomingVideoView.setVisibility(View.VISIBLE);
+        }
+        if (previewVideoView != null) {
+            previewVideoView.setVisibility(View.INVISIBLE);
+        }
+        showZoomControl(false);
+    }
+
+    /**
+     * Show all video views.
+     */
+    public void showVideoBidrectionalUi() {
+        inflateVideoUi(true);
+
+        View incomingVideoView = mVideoViews.findViewById(R.id.incomingVideo);
+        View previewVideoView = mVideoViews.findViewById(R.id.previewVideo);
+
+        if (incomingVideoView != null) {
+            incomingVideoView.setVisibility(View.VISIBLE);
+        }
+        if (previewVideoView != null) {
+            previewVideoView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * Hide all video views.
+     */
+    public void hideVideoUi() {
+        inflateVideoUi(false);
+        showZoomControl(false);
     }
 
     /**
@@ -611,27 +724,87 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
 
         final Resources resources = context.getResources();
 
-        int callSubstateResourceId = INVALID_RESOURCE_ID;
-        switch (callSubstate) {
-            case Connection.CALL_SUBSTATE_NONE:
-                callSubstateResourceId = R.string.call_substate_call_resumed;
-                break;
-            case Connection.CALL_SUBSTATE_AUDIO_CONNECTED_SUSPENDED:
-                callSubstateResourceId = R.string.call_substate_connected_suspended_audio;
-                break;
-            case Connection.CALL_SUBSTATE_VIDEO_CONNECTED_SUSPENDED:
-                callSubstateResourceId = R.string.call_substate_connected_suspended_video;
-                break;
-            case Connection.CALL_SUBSTATE_AVP_RETRY:
-                callSubstateResourceId = R.string.call_substate_avp_retry;
-                break;
-            default:
-                break;
+        String callSubstateChangedText = "";
+
+        if (isEnabled(Connection.CALL_SUBSTATE_AUDIO_CONNECTED_SUSPENDED, callSubstate)) {
+            callSubstateChangedText +=
+                resources.getString(R.string.call_substate_connected_suspended_audio);
         }
-        if (callSubstateResourceId != INVALID_RESOURCE_ID) {
-            Toast.makeText(context, resources.getString(callSubstateResourceId),
+
+        if (isEnabled(Connection.CALL_SUBSTATE_VIDEO_CONNECTED_SUSPENDED, callSubstate)) {
+            callSubstateChangedText +=
+                resources.getString(R.string.call_substate_connected_suspended_video);
+        }
+
+        if (isEnabled(Connection.CALL_SUBSTATE_AVP_RETRY, callSubstate)) {
+            callSubstateChangedText +=
+                resources.getString(R.string.call_substate_avp_retry);
+        }
+
+        if (isNotEnabled(Connection.CALL_SUBSTATE_ALL, callSubstate)) {
+            callSubstateChangedText = resources.getString(R.string.call_substate_call_resumed);
+        }
+
+        if (!callSubstateChangedText.isEmpty()) {
+            String callSubstateLabelText = resources.getString(R.string.call_substate_label);
+            Toast.makeText(context, callSubstateLabelText + callSubstateChangedText,
                 Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public void showZoomControl(boolean show) {
+        Log.d(this, "Show zoom control = " + show);
+
+        if (mZoomControl == null) {
+            Log.d(this, "Zoom control null. Can't show zoom control");
+            return;
+        }
+
+        mZoomControl.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public boolean isZoomControlShowing() {
+        return mZoomControl != null && mZoomControl.getVisibility() == View.VISIBLE;
+    }
+
+    /**
+     * This method get the zoom related parameters from the camera and
+     * initializes/updates the zoom control parameters.
+     */
+    @Override
+    public void updateZoomParams(float maxZoom) {
+        Log.d(this, "updateZoomParams: maxZoom = " + maxZoom);
+
+        if (mZoomControl == null) {
+            Log.d(this, "Zoom control is null. Can't update zoom params");
+            return;
+        }
+
+        mZoomControl.setZoomMax((int) maxZoom);
+        mZoomControl.setOnZoomChangeListener(new ZoomChangeListener());
+    }
+
+    public void enableZoomControl(boolean enable) {
+        if (mZoomControl == null) {
+            Log.d(this, "Zoom control is null. Can't reset zoom control");
+            return;
+        }
+
+        mZoomControl.setEnabled(enable);
+        if (!enable) {
+            mZoomControl.setZoomIndex(DEFAULT_CAMERA_ZOOM_VALUE);
+            mZoomControl.setZoomMax(DEFAULT_CAMERA_ZOOM_MAX);
+        }
+    }
+
+    boolean isEnabled(int mask, int callSubstate) {
+        return (mask & callSubstate) == mask;
+    }
+
+    boolean isNotEnabled(int mask, int callSubstate) {
+        return (mask & callSubstate) == 0;
     }
 
     /**
@@ -853,7 +1026,11 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
         if (mVideoViews != null) {
             TextureView displaySurface = (TextureView) mVideoViews.findViewById(R.id.incomingVideo);
 
+            mZoomControl = (ZoomControlBar) mVideoViews.findViewById(R.id.zoom_control);
+            mZoomControl.setEnabled(false);
+
             Log.d(this, "inflateVideoCallViews: sVideoSurfacesInUse=" + sVideoSurfacesInUse);
+
             //If peer adjusted screen size is not available, set screen size to default display size
             Point screenSize = sDisplaySize == null ? getScreenSize() : sDisplaySize;
             setSurfaceSizeAndTranslation(displaySurface, screenSize);
@@ -900,9 +1077,13 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
         // It is only after layout is complete that the dimensions of the Call Card has been
         // established, which is a prerequisite to centering the view.
         // Incoming video calls will center the view
-        if (mIsLayoutComplete && ((mIsLandscape && textureView.getTranslationX() == 0) || (
-                !mIsLandscape && textureView.getTranslationY() == 0))) {
+        if (mIsLayoutComplete) {
             centerDisplayView(textureView);
         }
+    }
+
+    public void onZoomValueChanged(int index) {
+        Log.d(this, "onZoomValueChanged: zoom index = " + index);
+        getPresenter().setZoom(index);
     }
 }
