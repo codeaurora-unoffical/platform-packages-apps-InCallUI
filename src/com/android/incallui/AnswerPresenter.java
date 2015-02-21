@@ -21,6 +21,7 @@ import android.app.KeyguardManager;
 import android.content.Context;
 import android.os.SystemProperties;
 import android.telecom.VideoProfile;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -131,12 +132,20 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
             Log.d(this, "onUpgradeToVideo ui is null");
             return;
         }
+        Context context = getUi().getContext();
         boolean isUpgradePending = isVideoUpgradePending(call);
+        boolean isLowBattery = CallUtils.isLowBatteryVideoCallSupported(context) &&
+                CallUtils.isLowBattery(context);
         InCallPresenter inCallPresenter = InCallPresenter.getInstance();
-        if (isUpgradePending
-                && inCallPresenter.getInCallState() == InCallPresenter.InCallState.INCOMING) {
+        if ((isUpgradePending
+                && inCallPresenter.getInCallState() == InCallPresenter.InCallState.INCOMING)
+                || isLowBattery) {
             Log.d(this, "declining upgrade request");
             inCallPresenter.declineUpgradeRequest(getUi().getContext());
+            if (isLowBattery) {
+                Toast.makeText(context, context.getResources().getString(R.string.
+                        cannot_upgrade_due_to_low_battery), Toast.LENGTH_SHORT).show();
+            }
         } else if (isUpgradePending) {
             Log.d(this, "process upgrade request as no MT call");
             processVideoUpgradeRequestCall(call);
