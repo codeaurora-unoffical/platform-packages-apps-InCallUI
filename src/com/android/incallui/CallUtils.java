@@ -28,6 +28,10 @@
 
 package com.android.incallui;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.BatteryManager;
 import android.telecom.VideoProfile;
 
 import com.google.common.base.Preconditions;
@@ -90,5 +94,24 @@ public class CallUtils {
     public static boolean isPendingModifyRequest(Call call) {
         return (call != null && call.getSessionModificationState() ==
                 Call.SessionModificationState.RECEIVED_UPGRADE_TO_VIDEO_REQUEST);
+    }
+
+    public static boolean isLowBattery(Context context) {
+        Intent batteryStatus = context.registerReceiver(null,
+                new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+
+        final int batteryLevel = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        final int plugType = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, 1);
+
+        final boolean isChargerPlugged = plugType != 0;
+        final int lowBatteryWarningLevel = context.getResources().getInteger(
+                com.android.internal.R.integer.config_lowBatteryWarningLevel);
+
+        return (batteryLevel <= lowBatteryWarningLevel && !isChargerPlugged);
+    }
+
+    public static boolean isLowBatteryVideoCallSupported(Context context) {
+        return context.getResources().getBoolean(
+                com.android.internal.R.bool.config_low_battery_video_calling_supported);
     }
 }
