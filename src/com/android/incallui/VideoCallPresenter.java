@@ -45,6 +45,7 @@ import com.google.common.base.Preconditions;
 import java.util.Objects;
 
 import android.os.SystemProperties;
+import android.content.pm.ActivityInfo;
 
 /**
  * Logic related to the {@link VideoCallFragment} and for managing changes to the video calling
@@ -631,7 +632,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         }
 
         showVideoUi(newVideoState);
-        InCallPresenter.getInstance().setInCallAllowsOrientationChange(true);
+        setInCallAllowsOrientationChange(true);
 
         // Communicate the current camera to telephony and make a request for the camera
         // capabilities.
@@ -758,7 +759,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
     private void exitVideoMode() {
         Log.d(this, "exitVideoMode");
 
-        InCallPresenter.getInstance().setInCallAllowsOrientationChange(false);
+        setInCallAllowsOrientationChange(false);
 
         showVideoUi(VideoProfile.VideoState.AUDIO_ONLY);
         enableCamera(mVideoCall, false);
@@ -858,6 +859,46 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
 
         // Display a video quality changed message on UI.
         ui.showVideoQualityChanged(videoQuality);
+    }
+
+   /**
+     * Handles any orientation mode changes in the call.
+     *
+     * @param orientationMode The new orientation mode of the device
+     */
+    @Override
+    public void onOrientationModeChanged(int orientationMode) {
+        Log.d(this, "onOrientationModeChanged orientation mode=" + orientationMode);
+        InCallPresenter.getInstance().setOrientationMode(toUiOrientationMode(orientationMode));
+    }
+
+    /**
+     * Configures the in-call UI activity so it can change orientations or not.
+     *
+     * @param allowOrientationChange {@code True} if the in-call UI can change between portrait
+     *      and landscape.  {@Code False} if the in-call UI should be locked in portrait.
+     */
+    private void setInCallAllowsOrientationChange(boolean allowOrientationChange) {
+        if (!allowOrientationChange) {
+            InCallPresenter.getInstance().setOrientationMode(
+                    ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+        } else {
+            InCallPresenter.getInstance().setOrientationMode(
+                    ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+        }
+    }
+
+    private static int toUiOrientationMode(int orientationMode) {
+        switch(orientationMode) {
+            case Connection.ORIENTATION_MODE_LANDSCAPE:
+                return ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+            case Connection.ORIENTATION_MODE_PORTRAIT:
+                return ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+            case Connection.ORIENTATION_MODE_DYNAMIC:
+                return ActivityInfo.SCREEN_ORIENTATION_SENSOR;
+            default:
+                return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+        }
     }
 
     /**
