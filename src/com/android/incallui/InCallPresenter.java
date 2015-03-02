@@ -1279,25 +1279,6 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         }
     }
 
-    /**
-     * Configures the in-call UI activity so it can change orientations or not.
-     *
-     * @param allowOrientationChange {@code True} if the in-call UI can change between portrait
-     *      and landscape.  {@Code False} if the in-call UI should be locked in portrait.
-     */
-    public void setInCallAllowsOrientationChange(boolean allowOrientationChange) {
-        if (mInCallActivity == null) {
-            Log.e(this, "InCallActivity is null. Can't set requested orientation.");
-            return;
-        }
-
-        if (!allowOrientationChange) {
-            mInCallActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
-        } else {
-            mInCallActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-        }
-    }
-
     /* returns TRUE if screen is turned ON else false */
     private boolean isScreenInteractive() {
         return mPowerManager.isInteractive();
@@ -1324,6 +1305,39 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         if (mWakeLock != null && mWakeLock.isHeld()) {
             mWakeLock.release();
         }
+    }
+
+   /**
+     * Sets the orientation on the device to the orientation mode passed in
+     *
+     * @param orientationMode - The preferred screen orientation.
+     * @see ActivityInfo#ScreenOrientation
+     *
+     * Valid values are:
+     * {@link ActivityInfo#SCREEN_ORIENTATION_UNSPECIFIED},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_LANDSCAPE},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_PORTRAIT},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_USER},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_BEHIND},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_SENSOR},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_NOSENSOR},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_SENSOR_LANDSCAPE},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_SENSOR_PORTRAIT},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_REVERSE_LANDSCAPE},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_REVERSE_PORTRAIT},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_FULL_SENSOR},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_USER_LANDSCAPE},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_USER_PORTRAIT},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_FULL_USER},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_LOCKED}
+     */
+    public void setOrientationMode(int orientationMode) {
+       if (mInCallActivity == null) {
+            Log.e(this, "InCallActivity is null. Can't set requested orientation mode");
+            return;
+        }
+
+        mInCallActivity.setRequestedOrientation(orientationMode);
     }
 
     public void enableScreenTimeout(boolean v) {
