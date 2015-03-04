@@ -142,9 +142,9 @@ public class InCallActivity extends Activity {
     private SrvccListener mSrvccListener = new SrvccListener(){
 
         @Override
-        public void onSrvcc() {
-            Log.d(this, "onSrvcc");
-            if (AudioModeProvider.getInstance().getAudioMode() == AudioMode.SPEAKER){
+        public void onSrvcc(boolean isVideo) {
+            Log.d(this, "onSrvcc isVoice=" + isVideo);
+            if (isVideo && (AudioModeProvider.getInstance().getAudioMode() == AudioMode.SPEAKER)) {
                 CallCommandClient.getInstance().setAudioMode(AudioMode.WIRED_OR_EARPIECE);
             }
             handleSrvcc();
