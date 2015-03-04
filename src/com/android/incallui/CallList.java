@@ -383,7 +383,7 @@ public class CallList {
                     mCallMap.remove(id);
                     updated = false;
                     for (SrvccListener listener : mSrvccListeners) {
-                        listener.onSrvcc();
+                        listener.onSrvcc(CallUtils.isVideoCall(call));
                     }
                 } else {
 
@@ -650,7 +650,7 @@ public class CallList {
     }
 
     public interface SrvccListener {
-        public void onSrvcc();
+        public void onSrvcc(boolean isVideo);
     }
 
     public void addSrvccListener(SrvccListener listener){
