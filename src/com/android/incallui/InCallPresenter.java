@@ -1279,6 +1279,12 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         return false;
     }
 
+    public void setCallCardFragmentVisible(boolean visible) {
+        if (mInCallActivity != null) {
+            mInCallActivity.getCallCardFragment().setVisible(visible);
+        }
+    }
+
     /**
      * @return True if the application is currently running in a right-to-left locale.
      */
