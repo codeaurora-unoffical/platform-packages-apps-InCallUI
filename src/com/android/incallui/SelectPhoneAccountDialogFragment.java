@@ -249,4 +249,9 @@ public class SelectPhoneAccountDialogFragment extends DialogFragment {
         }
         super.onPause();
     }
+
+    public void onCancel(DialogInterface dialog) {
+        InCallPresenter.getInstance().setCallCardFragmentVisible(true);
+        InCallPresenter.getInstance().cancelAccountSelection();
+    }
 }
