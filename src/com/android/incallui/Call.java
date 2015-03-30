@@ -246,6 +246,7 @@ public final class Call {
     private int mSessionModificationState;
     private final List<String> mChildCallIds = new ArrayList<>();
     private final VideoSettings mVideoSettings = new VideoSettings();
+    private int mModifyToVideoState = VideoProfile.VideoState.AUDIO_ONLY;
 
     private InCallVideoCallListener mVideoCallListener;
 
@@ -394,11 +395,11 @@ public final class Call {
                         mTelecommCall.getConferenceableCalls();
                 boolean hasConfenceableCall = false;
                 if (!conferenceableCalls.isEmpty()){
-                    long subId = getSubId();
+                    int subId = getSubId();
                     for (android.telecom.Call call : conferenceableCalls) {
                         PhoneAccountHandle phHandle = call.getDetails().getAccountHandle();
                         if (phHandle != null) {
-                            if((Long.parseLong(phHandle.getId())) == subId) {
+                            if(Integer.parseInt(phHandle.getId()) == subId) {
                                 hasConfenceableCall = true;
                                 break;
                             }
@@ -410,11 +411,13 @@ public final class Call {
                     // Cannot merge calls if there are no calls to merge with.
                     return false;
                 }
-            } else if (mTelecommCall.getConferenceableCalls().isEmpty() &&
+            } else if (mTelecommCall.getConferenceableCalls().isEmpty() ||
                     ((PhoneCapabilities.MERGE_CONFERENCE & supportedCapabilities) == 0)) {
-                // Cannot merge calls if there are no calls to merge with.
+                // Cannot merge calls if there are no calls to merge with or
+                // capability to merge is missing
                 return false;
             }
+            // Clearing this bit means this capability is available
             capabilities &= ~PhoneCapabilities.MERGE_CONFERENCE;
         }
         return (capabilities == (capabilities & mTelecommCall.getDetails().getCallCapabilities()));
@@ -441,19 +444,19 @@ public final class Call {
         return mTelecommCall.getDetails().getAccountHandle();
     }
 
-    public long getSubId() {
+    public int getSubId() {
         PhoneAccountHandle ph = getAccountHandle();
         if (ph != null) {
             try {
                 if (ph.getId() != null ) {
-                    return Long.parseLong(getAccountHandle().getId());
+                    return Integer.parseInt(getAccountHandle().getId());
                 }
             } catch (NumberFormatException e) {
                 Log.w(this,"sub Id is not a number " + e);
             }
             return SubscriptionManager.getDefaultVoiceSubId();
         } else {
-            return SubscriptionManager.INVALID_SUB_ID;
+            return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         }
     }
 
@@ -486,19 +489,58 @@ public final class Call {
                 VideoProfile.VideoState.isVideo(getVideoState());
     }
 
+    /**
+     * This method is called when we request for a video upgrade or downgrade. This handles the
+     * session modification state RECEIVED_UPGRADE_TO_VIDEO_REQUEST and sets the video state we
+     * want to upgrade/downgrade to.
+     */
+    public void setSessionModificationTo(int videoState) {
+        Log.d(this, "setSessionModificationTo - video state= " + videoState);
+        if (videoState == getVideoState()) {
+            mSessionModificationState = Call.SessionModificationState.NO_REQUEST;
+            Log.w(this,"setSessionModificationTo - Clearing session modification state");
+        } else {
+            mSessionModificationState =
+                Call.SessionModificationState.RECEIVED_UPGRADE_TO_VIDEO_REQUEST;
+            setModifyToVideoState(videoState);
+            CallList.getInstance().onUpgradeToVideo(this);
+        }
+
+        Log.d(this, "setSessionModificationTo - mSessionModificationState="
+            + mSessionModificationState + " video state= " + videoState);
+        update();
+    }
+
+    /**
+     * This method is called to handle any other session modification states other than
+     * RECEIVED_UPGRADE_TO_VIDEO_REQUEST. We set the modification state and reset the video state
+     * when an upgrade request has been completed or failed.
+     */
     public void setSessionModificationState(int state) {
+        if (state == Call.SessionModificationState.RECEIVED_UPGRADE_TO_VIDEO_REQUEST) {
+            Log.e(this,
+            "setSessionModificationState not to be called for RECEIVED_UPGRADE_TO_VIDEO_REQUEST");
+            return;
+        }
+
         boolean hasChanged = mSessionModificationState != state;
         mSessionModificationState = state;
         Log.d(this, "setSessionModificationState" + state + " mSessionModificationState="
                 + mSessionModificationState);
-
-        if (state == Call.SessionModificationState.RECEIVED_UPGRADE_TO_VIDEO_REQUEST) {
-            CallList.getInstance().onUpgradeToVideo(this);
+        if (state != Call.SessionModificationState.WAITING_FOR_RESPONSE) {
+            setModifyToVideoState(VideoProfile.VideoState.AUDIO_ONLY);
         }
-
         if (hasChanged) {
             update();
         }
+    }
+
+    private void setModifyToVideoState(int newVideoState) {
+        mModifyToVideoState = newVideoState;
+    }
+
+    public int getModifyToVideoState() {
+        return mModifyToVideoState;
     }
 
     public static boolean areSame(Call call1, Call call2) {

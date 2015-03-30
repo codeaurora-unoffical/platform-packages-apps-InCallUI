@@ -20,6 +20,7 @@ import android.telecom.PhoneCapabilities;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.os.SystemProperties;
+import android.telecom.VideoProfile;
 
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
             processVideoUpgradeRequestCall(call);
         }
         for (int i = 0; i < CallList.PHONE_COUNT; i++) {
-            long[] subId = CallList.getInstance().getSubId(i);
+            int[] subId = CallList.getInstance().getSubId(i);
             call = calls.getCallWithState(Call.State.INCOMING, 0, subId[0]);
             if (call == null) {
                 call = calls.getCallWithState(Call.State.CALL_WAITING, 0, subId[0]);
@@ -93,7 +94,7 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
 
     @Override
     public void onIncomingCall(Call call) {
-        long subId = call.getSubId();
+        int subId = call.getSubId();
         int phoneId = CallList.getInstance().getPhoneId(subId);
         // TODO: Ui is being destroyed when the fragment detaches.  Need clean up step to stop
         // getting updates here.
@@ -143,7 +144,7 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
     }
 
     private void processIncomingCall(Call call) {
-        long subId = call.getSubId();
+        int subId = call.getSubId();
         int phoneId = CallList.getInstance().getPhoneId(subId);
         mCallId[phoneId] = call.getId();
         mCall[phoneId] = call;
@@ -159,22 +160,59 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
 
     private void processVideoUpgradeRequestCall(Call call) {
         Log.d(this, " processVideoUpgradeRequestCall call=" + call);
-        long subId = call.getSubId();
+        final int currentVideoState = call.getVideoState();
+        final int modifyToVideoState = call.getModifyToVideoState();
+
+        if (currentVideoState == modifyToVideoState) {
+            Log.w(this, "processVideoUpgradeRequestCall: Video states are same. Return.");
+            return;
+        }
+
+        int subId = call.getSubId();
         int phoneId = CallList.getInstance().getPhoneId(subId);
         mCallId[phoneId] = call.getId();
         mCall[phoneId] = call;
 
         // Listen for call updates for the current call.
         CallList.getInstance().addCallUpdateListener(mCallId[phoneId], this);
-        getUi().showAnswerUi(true);
-        getUi().showTargets(AnswerFragment.TARGET_SET_FOR_VIDEO_UPGRADE_REQUEST);
+        AnswerUi ui = getUi();
+
+        if (ui == null) {
+            Log.e(this, "Ui is null. Can't process upgrade request");
+            return;
+        }
+        ui.showAnswerUi(true);
+        ui.showTargets(getUiTarget(currentVideoState, modifyToVideoState));
+
+    }
+
+    private int getUiTarget(int currentVideoState, int modifyToVideoState) {
+        if (showVideoUpgradeOptions(currentVideoState, modifyToVideoState)) {
+            return AnswerFragment.TARGET_SET_FOR_VIDEO_UPGRADE_REQUEST;
+        } else if (isEnabled(modifyToVideoState, VideoProfile.VideoState.BIDIRECTIONAL)) {
+            return AnswerFragment.TARGET_SET_FOR_BIDIRECTIONAL_VIDEO_ACCEPT_REJECT_REQUEST;
+        }  else if (isEnabled(modifyToVideoState, VideoProfile.VideoState.TX_ENABLED)) {
+            return AnswerFragment.TARGET_SET_FOR_VIDEO_TRANSMIT_ACCEPT_REJECT_REQUEST;
+        }  else if (isEnabled(modifyToVideoState, VideoProfile.VideoState.RX_ENABLED)) {
+            return AnswerFragment.TARGET_SET_FOR_VIDEO_RECEIVE_ACCEPT_REJECT_REQUEST;
+        }
+        return AnswerFragment.TARGET_SET_FOR_VIDEO_UPGRADE_REQUEST;
+    }
+
+    private boolean showVideoUpgradeOptions(int currentVideoState, int modifyToVideoState) {
+        return currentVideoState == VideoProfile.VideoState.AUDIO_ONLY &&
+            isEnabled(modifyToVideoState, VideoProfile.VideoState.BIDIRECTIONAL);
+    }
+
+    private boolean isEnabled(int videoState, int mask) {
+        return (videoState & mask) == mask;
     }
 
     @Override
     public void onCallChanged(Call call) {
         Log.d(this, "onCallStateChange() " + call + " " + this);
         if (call.getState() != Call.State.INCOMING) {
-            long subId = call.getSubId();
+            int subId = call.getSubId();
             int phoneId = CallList.getInstance().getPhoneId(subId);
 
             boolean isUpgradePending = isVideoUpgradePending(call);
@@ -206,7 +244,7 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
     private int getActivePhoneId() {
         int phoneId = -1;
         if (CallList.getInstance().isDsdaEnabled()) {
-            long subId = CallList.getInstance().getActiveSubscription();
+            int subId = CallList.getInstance().getActiveSubscription();
             phoneId = CallList.getInstance().getPhoneId(subId);
         } else {
             for (int i = 0; i < mCall.length; i++) {
@@ -332,7 +370,7 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
     }
 
     @Override
-    public void onActiveSubChanged(long subId) {
+    public void onActiveSubChanged(int subId) {
         final CallList calls = CallList.getInstance();
         final Call call = calls.getIncomingCall();
         int phoneId = CallList.getInstance().getPhoneId(subId);

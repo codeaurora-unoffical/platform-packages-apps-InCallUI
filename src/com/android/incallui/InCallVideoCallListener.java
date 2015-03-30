@@ -59,7 +59,8 @@ public class InCallVideoCallListener extends VideoCall.Listener {
         if (wasVideoCall && !isVideoCall) {
             InCallVideoCallListenerNotifier.getInstance().downgradeToAudio(mCall);
         } else if (previousVideoState != newVideoState) {
-            InCallVideoCallListenerNotifier.getInstance().upgradeToVideoRequest(mCall);
+            InCallVideoCallListenerNotifier.getInstance().upgradeToVideoRequest(mCall,
+                newVideoState);
         }
     }
 
@@ -132,7 +133,7 @@ public class InCallVideoCallListener extends VideoCall.Listener {
      * @param dataUsage The updated data usage.
      */
     @Override
-    public void onCallDataUsageChanged(long dataUsage) {
+    public void onCallDataUsageChanged(int dataUsage) {
         Log.d(this, "onCallDataUsageChanged: dataUsage = " + dataUsage);
         InCallVideoCallListenerNotifier.getInstance().callDataUsageChanged(dataUsage);
     }

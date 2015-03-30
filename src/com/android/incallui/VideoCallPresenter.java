@@ -936,7 +936,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
      * @param dataUsage call data usage value
      */
     @Override
-    public void onCallDataUsageChange(long dataUsage) {
+    public void onCallDataUsageChange(int dataUsage) {
         Log.d(this, "onCallDataUsageChange dataUsage=" + dataUsage);
         VideoCallUi ui = getUi();
         if (ui == null) {
@@ -958,8 +958,8 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
     }
 
     @Override
-    public void onUpgradeToVideoRequest(Call call) {
-        Log.d(this, "onUpgradeToVideoRequest call=" + call);
+    public void onUpgradeToVideoRequest(Call call, int videoState) {
+        Log.d(this, "onUpgradeToVideoRequest call = " + call + " new video state = " + videoState);
         if (mPrimaryCall == null || !Call.areSame(mPrimaryCall, call)) {
             Log.w(this, "UpgradeToVideoRequest received for non-primary call");
         }
@@ -968,8 +968,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
             return;
         }
 
-        call.setSessionModificationState(
-                Call.SessionModificationState.RECEIVED_UPGRADE_TO_VIDEO_REQUEST);
+        call.setSessionModificationTo(videoState);
     }
 
     @Override
@@ -1180,7 +1179,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         void setPreviewSize(int width, int height);
         void setPreviewSurfaceSize(int width, int height);
         void setDisplayVideoSize(int width, int height);
-        void setCallDataUsage(Context context, long dataUsage);
+        void setCallDataUsage(Context context, int dataUsage);
         void displayCallSessionEvent(int event);
         Point getScreenSize();
         void cleanupSurfaces();
