@@ -29,6 +29,7 @@ import android.telecom.Connection.VideoProvider;
 import android.telecom.InCallService.VideoCall;
 import android.telecom.VideoProfile;
 import android.view.Surface;
+import android.os.Bundle;
 
 import com.android.contacts.common.CallUtil;
 import com.android.incallui.InCallPresenter.InCallDetailsListener;
@@ -448,6 +449,25 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         } else if (isVideoMode()) {
             InCallPresenter.getInstance().showDowngradeToast();
             exitVideoMode();
+        }
+        showSessionModificationReasonInfo(getSessionModificationCause(call));
+    }
+
+    private static int getSessionModificationCause(Call call) {
+        if (call == null) {
+            return Connection.CAUSE_CODE_UNSPECIFIED;
+        }
+
+        final Bundle extras = call.getTelecommCall().getDetails().getExtras();
+        return extras != null ? extras.getInt(
+                Connection.KEY_SESSION_MODIFICATION_CAUSE, Connection.CAUSE_CODE_UNSPECIFIED) :
+                Connection.CAUSE_CODE_UNSPECIFIED;
+    }
+
+    private void showSessionModificationReasonInfo(int sessionModificationCause) {
+        VideoCallUi ui = getUi();
+        if (ui != null) {
+            ui.showSessionModificationReasonInfo(sessionModificationCause);
         }
     }
 
@@ -1250,5 +1270,6 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         void updateZoomParams(float maxZoom);
         void enableZoomControl(boolean enable);
         boolean isZoomControlShowing();
+        void showSessionModificationReasonInfo(int sessionModificationCause);
     }
 }
