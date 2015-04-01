@@ -753,6 +753,57 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
     }
 
     @Override
+    public void showSessionModificationReasonInfo(int sessionModificationCause) {
+        Log.d(this, "showSessionModificationReasonInfo - call modified due to "  +
+                sessionModificationCause);
+
+        final Context context = getActivity();
+        if (context == null) {
+            Log.e(this, "showSessionModificationReasonInfo - Activity is null. Return");
+            return;
+        }
+
+        final Resources resources = context.getResources();
+        int sessionModificationCauseResId = getSessionModificationCauseResourceId(
+                sessionModificationCause);
+        String sessionModificationCauseText = resources.getString(sessionModificationCauseResId);
+        if (!sessionModificationCauseText.isEmpty()) {
+            Log.v(this, sessionModificationCauseText);
+            Toast.makeText(context, sessionModificationCauseText, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private static int getSessionModificationCauseResourceId(int cause) {
+        switch(cause) {
+            case Connection.CAUSE_CODE_UNSPECIFIED:
+                return R.string.session_modify_cause_unspecified;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_UPGRADE_LOCAL_REQ:
+                return R.string.session_modify_cause_upgrade_local_request;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_UPGRADE_REMOTE_REQ:
+                return R.string.session_modify_cause_upgrade_remote_request;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_DOWNGRADE_LOCAL_REQ:
+                return R.string.session_modify_cause_downgrade_local_request;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_DOWNGRADE_REMOTE_REQ:
+                return R.string.session_modify_cause_downgrade_remote_request;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_DOWNGRADE_RTP_TIMEOUT:
+                return R.string.session_modify_cause_downgrade_rtp_timeout;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_DOWNGRADE_QOS:
+                return R.string.session_modify_cause_downgrade_qos;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_DOWNGRADE_PACKET_LOSS:
+                return R.string.session_modify_cause_downgrade_packet_loss;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_DOWNGRADE_LOW_THRPUT:
+                return R.string.session_modify_cause_downgrade_low_thrput;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_DOWNGRADE_THERM_MITIGATION:
+                return R.string.session_modify_cause_downgrade_thermal_mitigation;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_DOWNGRADE_LIPSYNC:
+                return R.string.session_modify_cause_downgrade_lipsync;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_DOWNGRADE_GENERIC_ERROR:
+            default:
+                return R.string.session_modify_cause_downgrade_generic_error;
+        }
+    }
+
+    @Override
     public void showZoomControl(boolean show) {
         Log.d(this, "Show zoom control = " + show);
 
