@@ -395,11 +395,11 @@ public final class Call {
                         mTelecommCall.getConferenceableCalls();
                 boolean hasConfenceableCall = false;
                 if (!conferenceableCalls.isEmpty()){
-                    long subId = getSubId();
+                    int subId = getSubId();
                     for (android.telecom.Call call : conferenceableCalls) {
                         PhoneAccountHandle phHandle = call.getDetails().getAccountHandle();
                         if (phHandle != null) {
-                            if((Long.parseLong(phHandle.getId())) == subId) {
+                            if(Integer.parseInt(phHandle.getId()) == subId) {
                                 hasConfenceableCall = true;
                                 break;
                             }
@@ -411,11 +411,13 @@ public final class Call {
                     // Cannot merge calls if there are no calls to merge with.
                     return false;
                 }
-            } else if (mTelecommCall.getConferenceableCalls().isEmpty() &&
+            } else if (mTelecommCall.getConferenceableCalls().isEmpty() ||
                     ((PhoneCapabilities.MERGE_CONFERENCE & supportedCapabilities) == 0)) {
-                // Cannot merge calls if there are no calls to merge with.
+                // Cannot merge calls if there are no calls to merge with or
+                // capability to merge is missing
                 return false;
             }
+            // Clearing this bit means this capability is available
             capabilities &= ~PhoneCapabilities.MERGE_CONFERENCE;
         }
         return (capabilities == (capabilities & mTelecommCall.getDetails().getCallCapabilities()));
@@ -442,19 +444,19 @@ public final class Call {
         return mTelecommCall.getDetails().getAccountHandle();
     }
 
-    public long getSubId() {
+    public int getSubId() {
         PhoneAccountHandle ph = getAccountHandle();
         if (ph != null) {
             try {
                 if (ph.getId() != null ) {
-                    return Long.parseLong(getAccountHandle().getId());
+                    return Integer.parseInt(getAccountHandle().getId());
                 }
             } catch (NumberFormatException e) {
                 Log.w(this,"sub Id is not a number " + e);
             }
             return SubscriptionManager.getDefaultVoiceSubId();
         } else {
-            return SubscriptionManager.INVALID_SUB_ID;
+            return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         }
     }
 
