@@ -177,8 +177,9 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
             Log.d(this, "Message received: what = " + msg.what);
             switch (msg.what) {
                 case EVENT_CLEAR_SESSION_MODIFY_REQUEST:
-                    if (msg.obj != null && msg.obj instanceof Call) {
-                        Call call = (Call) msg.obj;
+                    AsyncResult ar = (AsyncResult) msg.obj;
+                    if (ar != null && ar.exception != null && ar.userObj instanceof Call) {
+                        Call call = (Call) ar.userObj;
                         Log.d(this, "Clearing sessionModificationState to NO_REQUEST");
                         call.setSessionModificationState(Call.SessionModificationState.NO_REQUEST);
                     }
