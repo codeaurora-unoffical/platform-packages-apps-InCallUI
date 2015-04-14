@@ -320,7 +320,7 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
         if (isVideoUpgradeRequest) {
             builder.setUsesChronometer(false);
             addDismissUpgradeRequestAction(builder);
-            addMoreAction(builder);
+            addAcceptUpgradeRequestAction(builder);
         } else {
             createIncomingCallNotification(call, state, builder);
         }
@@ -571,11 +571,20 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
                 answerVoicePendingIntent);
     }
 
+    private void addAcceptUpgradeRequestAction(Notification.Builder builder) {
+        Log.i(this, "Will show \"accept\" action in the incoming call Notification");
+
+        PendingIntent acceptVideoPendingIntent = createNotificationPendingIntent(
+                mContext, InCallApp.ACTION_ANSWER_VOICE_INCOMING_CALL);
+        builder.addAction(0, mContext.getText(R.string.notification_action_accept),
+        acceptVideoPendingIntent);
+    }
+
     private void addDismissUpgradeRequestAction(Notification.Builder builder) {
         Log.i(this, "Will show \"dismiss\" action in the incoming call Notification");
 
         PendingIntent declineVideoPendingIntent = createNotificationPendingIntent(
-                mContext, InCallApp.ACTION_DECLINE_VIDEO_UPGRADE_REQUEST);
+                mContext, InCallApp.ACTION_ANSWER_VOICE_INCOMING_CALL);
         builder.addAction(0, mContext.getText(R.string.notification_action_dismiss),
                 declineVideoPendingIntent);
     }
