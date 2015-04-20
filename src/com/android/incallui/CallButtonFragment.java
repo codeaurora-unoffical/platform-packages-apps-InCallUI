@@ -206,6 +206,7 @@ public class CallButtonFragment
                         !mPauseVideoButton.isSelected() /* pause */);
                 break;
             case R.id.overflowButton:
+                updateEndActiveAcceptMtMenu();
                 mOverflowPopup.show();
                 break;
             case R.id.manageVideoCallConferenceButton:
@@ -236,7 +237,10 @@ public class CallButtonFragment
         mAddCallButton.setEnabled(isEnabled);
         mMergeButton.setEnabled(isEnabled);
         mPauseVideoButton.setEnabled(isEnabled);
-        mOverflowButton.setEnabled(isEnabled);
+        boolean canShowMenuBtn =
+                getResources().getBoolean(R.bool.config_end_active_accept_incoming)
+                && ((InCallActivity)getActivity()).canEndActiveAcceptMT();
+        mOverflowButton.setEnabled(isEnabled || canShowMenuBtn);
         mAddParticipantButton.setEnabled(isEnabled);
         mManageVideoCallConferenceButton.setEnabled(isEnabled);
     }
@@ -487,6 +491,9 @@ public class CallButtonFragment
                     case R.id.overflow_manage_conference_menu_item:
                         onManageVideoCallConferenceClicked();
                         break;
+                    case R.id.overflow_end_active_accept_incoming_menu_item:
+                        ((InCallActivity)getActivity()).endActiveAcceptMT();
+                        break;
                     default:
                         Log.wtf(this, "onMenuItemClick: unexpected overflow menu click");
                         break;
@@ -519,7 +526,7 @@ public class CallButtonFragment
         menu.findItem(R.id.overflow_add_participant_menu_item).setVisible(showAddParticipantOption);
         menu.findItem(R.id.overflow_manage_conference_menu_item).setVisible(
             showManageConferenceVideoCallOption);
-
+        updateEndActiveAcceptMtMenu();
         mOverflowButton.setEnabled(menu.hasVisibleItems());
     }
 
@@ -824,6 +831,16 @@ public class CallButtonFragment
     @Override
     public Context getContext() {
         return getActivity();
+    }
+
+    private void updateEndActiveAcceptMtMenu() {
+        if(mOverflowPopup == null) {
+            return;
+        }
+        Menu menu = mOverflowPopup.getMenu();
+        menu.findItem(R.id.overflow_end_active_accept_incoming_menu_item).setVisible(
+            getResources().getBoolean(R.bool.config_end_active_accept_incoming)
+            && ((InCallActivity)getActivity()).canEndActiveAcceptMT());
     }
 
     private void maybeSendAccessibilityEvent(View view, int stringId) {
