@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ActivityNotFoundException;
 import android.content.pm.ActivityInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.telecom.DisconnectCause;
 import android.telecom.PhoneAccount;
@@ -40,6 +41,7 @@ import android.os.PowerManager;
 
 import com.google.common.base.Preconditions;
 import com.android.incalluibind.ObjectFactory;
+import com.android.internal.telephony.TelephonyProperties;
 
 import java.util.Collections;
 import java.util.List;
@@ -625,6 +627,19 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         }
     }
 
+    public void acceptUpgradeRequest(Context context) {
+       if (mCallList != null) {
+           Call call = mCallList.getVideoUpgradeRequestCall();
+           if (call != null) {
+               acceptUpgradeRequest(call.getModifyToVideoState(), context);
+           } else {
+               Log.e(this, "acceptUpgradeRequest Call is null");
+           }
+       } else {
+           Log.e(this, " acceptUpgradeRequest mCallList is empty");
+       }
+    }
+
     public void declineUpgradeRequest(Context context) {
         Log.d(this, " declineUpgradeRequest");
         // Bail if we have been shut down and the call list is null.
@@ -850,6 +865,25 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
     }
 
     /**
+     * Initiate a CS call.
+     */
+    public void dialCsCall(String number) {
+        Uri uri = Uri.fromParts("tel", number, null);
+        final Intent intent = new Intent(Intent.ACTION_CALL, uri);
+        intent.putExtra(TelephonyProperties.EXTRA_CALL_DOMAIN, true);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        try {
+            mContext.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            // This is rather rare but possible.
+            // Note: this method is used even when the phone is encrypted. At
+            // that moment
+            // the system may not find any Activity which can accept this Intent
+            Log.e(this, "Activity for dialing new call isn't found.");
+        }
+    }
+
+    /**
      * For some disconnected causes, we show a dialog.  This calls into the activity to show
      * the dialog if appropriate for the call.
      */
@@ -859,7 +893,16 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
             if (call.getAccountHandle() == null && !call.isConferenceCall()) {
                 setDisconnectCauseForMissingAccounts(call);
             }
-            mInCallActivity.maybeShowErrorDialogOnDisconnect(call);
+
+            int cause = call.getDisconnectCause().getCode();
+            if (cause == DisconnectCause.CALL_RETRY_BY_SILENT_REDIAL)
+            {
+                dialCsCall(call.getNumber());
+            } else if (cause == DisconnectCause.CALL_RETRY_BY_USER_CONSENT) {
+                mInCallActivity.showCsRedialDialogOnDisconnect(call.getNumber());
+            } else {
+                mInCallActivity.maybeShowErrorDialogOnDisconnect(call);
+            }
         }
     }
 
