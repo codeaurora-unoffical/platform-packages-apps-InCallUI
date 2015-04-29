@@ -726,8 +726,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
                 && mPrimary.getState() == Call.State.ACTIVE) {
             return mContext.getResources().getDrawable(R.drawable.ic_hd_audio);
         }
-
-        return null;
+        return getCallProviderIcon(mPrimary);
     }
 
     private boolean hasOutgoingGatewayCall() {
@@ -782,8 +781,9 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
 
         Log.i(this, "Disconnecting call: " + mPrimary);
         mPrimary.setState(Call.State.DISCONNECTING);
+        Call temp = mPrimary;
         CallList.getInstance().onUpdate(mPrimary);
-        TelecomAdapter.getInstance().disconnectCall(mPrimary.getId());
+        TelecomAdapter.getInstance().disconnectCall(temp.getId());
     }
 
     private String getNumberFromHandle(Uri handle) {

@@ -370,21 +370,9 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         if (!mIsRcsServiceInstalled) {
             return;
         }
-        final Handler handler = new Handler();
-        Thread t = new Thread() {
-            @Override
-            public void run() {
-                final int unRead = getPresenter().getUnReadMessageCount(mInCallActivity);
-                Log.d(LOG_TAG, "CallCardFragment: updateUnReadMessageCount(" + unRead + ")");
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        setUnReadMessageCount(unRead);
-                    }
-                });
-            }
-        };
-        t.start();
+        int unRead = getPresenter().getUnReadMessageCount(mInCallActivity);
+        Log.d(LOG_TAG, "CallCardFragment: updateUnReadMessageCount(" + unRead + ")");
+        setUnReadMessageCount(unRead);
     }
 
     public void onDestroyView() {
