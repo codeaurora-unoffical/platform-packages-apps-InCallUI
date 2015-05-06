@@ -155,4 +155,17 @@ public class InCallVideoCallListener extends VideoCall.Listener {
         InCallVideoCallListenerNotifier.getInstance().cameraZoomCapabilitiesChanged(
                 mCall, cameraCapabilities.isZoomSupported(),cameraCapabilities.getMaxZoom());
     }
+
+    /**
+     * Handles changes to orientation mode.
+     *
+     * @param orientationMode The changed orientation mode.
+     * Valid values: {@link Connection#ORIENTATION_MODE_PORTRAIT},
+     * {@link Connection#ORIENTATION_MODE_LANDSCAPE},
+     * {@link Connection#ORIENTATION_MODE_DYNAMIC}.
+     */
+    @Override
+    public void onOrientationModeChanged(int orientationMode) {
+        InCallVideoCallListenerNotifier.getInstance().orientationModeChanged(orientationMode);
+    }
 }
