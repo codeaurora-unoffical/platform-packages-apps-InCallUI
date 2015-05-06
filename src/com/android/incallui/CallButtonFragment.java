@@ -387,6 +387,12 @@ public class CallButtonFragment
             return;
         }
 
+        if (CallUtils.isLowBatteryVideoCallSupported(context) && CallUtils.isLowBattery(context)) {
+            Toast.makeText(context, context.getResources().getString(R.string.
+                    cannot_upgrade_due_to_low_battery), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         final ArrayList<CharSequence> items = new ArrayList<CharSequence>();
         final ArrayList<Integer> itemToCallType = new ArrayList<Integer>();
         final Resources res = ui.getContext().getResources();
