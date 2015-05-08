@@ -895,6 +895,10 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
 
         String cameraId = cameraManager.getActiveCameraId();
         if (cameraId != null) {
+            final int cameraDir = cameraManager.isUsingFrontFacingCamera()
+                    ? Call.VideoSettings.CAMERA_DIRECTION_FRONT_FACING
+                    : Call.VideoSettings.CAMERA_DIRECTION_BACK_FACING;
+            mPrimary.getVideoSettings().setCameraDir(cameraDir);
             videoCall.setCamera(cameraId);
             videoCall.requestCameraCapabilities();
         }
