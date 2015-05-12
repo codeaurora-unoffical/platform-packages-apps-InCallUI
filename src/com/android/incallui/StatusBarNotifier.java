@@ -31,6 +31,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneCapabilities;
+import android.telecom.VideoProfile;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.TelephonyManager;
@@ -184,6 +185,9 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
                 state == InCallState.OUTGOING &&
                 !InCallPresenter.getInstance().isActivityPreviouslyStarted();
 
+        final boolean isVideoUpgradeRequest = (call != null && call.getSessionModificationState()
+                == Call.SessionModificationState.RECEIVED_UPGRADE_TO_VIDEO_REQUEST);
+
         // Whether to show a notification immediately.
         boolean showNotificationNow =
 
@@ -195,9 +199,11 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
                 state.isConnectingOrConnected() &&
 
                 // If the UI is already showing, then for most cases we do not want to show
-                // a notification since that would be redundant, unless it is an incoming call,
-                // in which case the notification is actually an important alert.
-                (!InCallPresenter.getInstance().isShowingInCallUi() || state.isIncoming()) &&
+                // a notification since that would be redundant, unless it is an incoming call or,
+                // a video upgrade request in which case the notification is actually
+                // an important alert.
+                (!InCallPresenter.getInstance().isShowingInCallUi() || state.isIncoming() ||
+                        isVideoUpgradeRequest) &&
 
                 // If we have an outgoing call with no UI but the timer has fired, we show
                 // a notification anyway.
@@ -285,8 +291,10 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
         final PendingIntent inCallPendingIntent = createLaunchPendingIntent();
         builder.setContentIntent(inCallPendingIntent);
 
-        // Set the intent as a full screen intent as well if a call is incoming
-        if ((state == Call.State.INCOMING || state == Call.State.CALL_WAITING) &&
+        // Set the intent as a full screen intent as well if a call is incoming or for a
+        // video upgrade request
+        if ((state == Call.State.INCOMING || state == Call.State.CALL_WAITING ||
+                isVideoUpgradeRequest) &&
                 !InCallPresenter.getInstance().isShowingInCallUi()) {
             configureFullScreenIntent(builder, inCallPendingIntent, call);
         }
@@ -313,7 +321,10 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
         if (isVideoUpgradeRequest) {
             builder.setUsesChronometer(false);
             addDismissUpgradeRequestAction(builder);
-            addMoreAction(builder);
+            addAcceptUpgradeRequestAction(builder);
+            if (isMoreOptionRequired(call)) {
+                addMoreAction(builder);
+            }
         } else {
             createIncomingCallNotification(call, state, builder);
         }
@@ -327,6 +338,11 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
         Log.d(this, "Notifying IN_CALL_NOTIFICATION: " + notification);
         mNotificationManager.notify(IN_CALL_NOTIFICATION, notification);
         mIsShowingNotification = true;
+    }
+
+    static private boolean isMoreOptionRequired(Call call) {
+        return VideoProfile.VideoState.isAudioOnly(call.getVideoState()) &&
+                VideoProfile.VideoState.isBidirectional(call.getModifyToVideoState());
     }
 
     private void createIncomingCallNotification(
@@ -562,6 +578,15 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
         builder.addAction(R.drawable.ic_call_white_24dp,
                 mContext.getText(R.string.notification_action_answer_voice),
                 answerVoicePendingIntent);
+    }
+
+    private void addAcceptUpgradeRequestAction(Notification.Builder builder) {
+        Log.i(this, "Will show \"accept\" video action in the incoming call Notification");
+
+        PendingIntent acceptVideoPendingIntent = createNotificationPendingIntent(
+                mContext, InCallApp.ACTION_ACCEPT_VIDEO_UPGRADE_REQUEST);
+        builder.addAction(0, mContext.getText(R.string.notification_action_accept),
+                acceptVideoPendingIntent);
     }
 
     private void addDismissUpgradeRequestAction(Notification.Builder builder) {

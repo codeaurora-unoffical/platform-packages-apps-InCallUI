@@ -625,6 +625,19 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         }
     }
 
+    public void acceptUpgradeRequest(Context context) {
+       if (mCallList != null) {
+           Call call = mCallList.getVideoUpgradeRequestCall();
+           if (call != null) {
+               acceptUpgradeRequest(call.getModifyToVideoState(), context);
+           } else {
+               Log.e(this, "acceptUpgradeRequest Call is null");
+           }
+       } else {
+           Log.e(this, " acceptUpgradeRequest mCallList is empty");
+       }
+    }
+
     public void declineUpgradeRequest(Context context) {
         Log.d(this, " declineUpgradeRequest");
         // Bail if we have been shut down and the call list is null.
@@ -948,7 +961,8 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         // user with a top-level notification.  Just show the call UI normally.
         final boolean mainUiNotVisible = !isShowingInCallUi() || !getCallCardFragmentVisible();
         final boolean showCallUi = ((InCallState.PENDING_OUTGOING == newState ||
-                InCallState.OUTGOING == newState) && mainUiNotVisible);
+                InCallState.OUTGOING == newState || ((newState == InCallState.INCALL) &&
+                (mInCallState == InCallState.WAITING_FOR_ACCOUNT))) && mainUiNotVisible);
 
         // TODO: Can we be suddenly in a call without it having been in the outgoing or incoming
         // state?  I havent seen that but if it can happen, the code below should be enabled.
