@@ -18,8 +18,10 @@ package com.android.incallui;
 
 import android.Manifest;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ActivityNotFoundException;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
@@ -96,6 +98,23 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
     private InCallCameraManager mInCallCameraManager = null;
     private PowerManager mPowerManager;
     private PowerManager.WakeLock mWakeLock = null;
+    private static boolean mIsScreenOff = false;
+
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            /*
+             * Handle screen turn on/off due to power button press
+             */
+            if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
+                Log.i(this, "onReceive : action screen on intent");
+                notifyVideoPauseController(true);
+            } else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+                Log.i(this, "onReceive : action screen off intent");
+                notifyVideoPauseController(false);
+            }
+        }
+    };
 
     private final Phone.Listener mPhoneListener = new Phone.Listener() {
         @Override
@@ -206,6 +225,10 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
 
         Preconditions.checkNotNull(context);
         mContext = context;
+
+        IntentFilter intentfilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+        intentfilter.addAction(Intent.ACTION_SCREEN_OFF);
+        mContext.registerReceiver(mReceiver, intentfilter);
 
         mContactInfoCache = ContactInfoCache.getInstance(context);
 
@@ -731,13 +754,39 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
     /*package*/
     void onActivityStarted() {
         Log.d(this, "onActivityStarted");
+        /*
+         * NOTE that activityManager onStart/onStop APIs are invoked only when
+         * Ambient Display (Settings --> Display --> Ambient Display) option is
+         * disabled. Below if check notifies VideoPauseController only when screen
+         * is interactive, thereby making power button interactions in a VT call
+         * independent of ActivityManager events and are taken care with
+         * ACTION_SCREEN_ON/ACTION_SCREEN_OFF intents.
+         */
+        if (mIsScreenOff) {
+            Log.d(this, "Ignore Activity Start as Screen is Off");
+            mIsScreenOff = false;
+            return;
+        }
         notifyVideoPauseController(true);
     }
 
     /*package*/
     void onActivityStopped() {
         Log.d(this, "onActivityStopped");
-        notifyVideoPauseController(false);
+        /*
+         * NOTE that activityManager onStart/onStop APIs are invoked only when
+         * Ambient Display (Settings --> Display --> Ambient Display) option is
+         * disabled. Below if check notifies VideoPauseController only when screen
+         * is interactive, thereby making power button interactions in a VT call
+         * independent of ActivityManager events and are taken care with
+         * ACTION_SCREEN_ON/ACTION_SCREEN_OFF intents.
+         */
+        if (isScreenInteractive()) {
+            notifyVideoPauseController(false);
+        } else {
+            Log.d(this, "Ignore Activity Stop as Screen is Off");
+            mIsScreenOff = true;
+        }
     }
 
     private void notifyVideoPauseController(boolean showing) {
@@ -1134,6 +1183,8 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
                 mCallList.removeListener(this);
             }
             mCallList = null;
+
+            mContext.unregisterReceiver(mReceiver);
 
             mContext = null;
             mInCallActivity = null;
