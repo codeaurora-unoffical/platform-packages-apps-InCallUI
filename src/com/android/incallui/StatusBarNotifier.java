@@ -191,6 +191,9 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
             voicePrivacy = true;
         }
 
+        final boolean isVideoUpgradeRequest = (call != null && call.getSessionModificationState()
+                == Call.SessionModificationState.RECEIVED_UPGRADE_TO_VIDEO_REQUEST);
+
         // Whether to show a notification immediately.
         boolean showNotificationNow =
 
@@ -202,10 +205,11 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
                 state.isConnectingOrConnected() &&
 
                 // If the UI is already showing, then for most cases we do not want to show
-                // a notification since that would be redundant, unless it is an incoming call,
-                // in which case the notification is actually an important alert.
+                // a notification since that would be redundant, unless it is an incoming call or,
+                // a video upgrade request in which case the notification is actually
+                // an important alert.
                 (!InCallPresenter.getInstance().isShowingInCallUi() || state.isIncoming() ||
-                        voicePrivacy) &&
+                        voicePrivacy || isVideoUpgradeRequest) &&
 
                 // If we have an outgoing call with no UI but the timer has fired, we show
                 // a notification anyway.
@@ -293,8 +297,10 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
         final PendingIntent inCallPendingIntent = createLaunchPendingIntent();
         builder.setContentIntent(inCallPendingIntent);
 
-        // Set the intent as a full screen intent as well if a call is incoming
-        if ((state == Call.State.INCOMING || state == Call.State.CALL_WAITING) &&
+        // Set the intent as a full screen intent as well if a call is incoming or for a
+        // video upgrade request
+        if ((state == Call.State.INCOMING || state == Call.State.CALL_WAITING ||
+                isVideoUpgradeRequest) &&
                 !InCallPresenter.getInstance().isShowingInCallUi()) {
             configureFullScreenIntent(builder, inCallPendingIntent, call);
         }
