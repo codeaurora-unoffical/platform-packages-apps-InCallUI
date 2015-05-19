@@ -27,6 +27,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.os.SystemProperties;
+import android.provider.Settings;
 import android.telecom.DisconnectCause;
 import android.telecom.InCallService.VideoCall;
 import android.telecom.PhoneCapabilities;
@@ -70,7 +72,9 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
     private static final String IDP_IDN = "+62";
     private static final String IDP_PLUS = "+";
     private static final String IDP_ZERO = "0";
-    private static final String IDP_PREFIX = "01033";
+    private static final String IDP_DEFAULT_PREFIX = "01033";
+    private static final String INTERNATIONAL_PREFIX_ENABLE = "international_prefix_enable";
+    private static final String INTERNATIONAL_PREFIX_NUMBER = "international_prefix_number";
 
     private Call mPrimary;
     private Call mSecondary;
@@ -547,7 +551,8 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
                 final boolean nameIsNumber = name != null
                         && name.equals(mPrimaryContactInfo.number);
                 boolean isIncoming = mPrimary.getState() == Call.State.INCOMING;
-                final String checkIdpName = checkIdp(name, nameIsNumber, isIncoming);
+                final String checkIdpName = checkIdp(name, nameIsNumber,
+                        mPrimary.getSubId(), isIncoming);
                 ui.setPrimary(number, checkIdpName, nameIsNumber, mPrimaryContactInfo.label,
                         mPrimaryContactInfo.photo, isConference, canManageConference,
                         mPrimaryContactInfo.isSipCall, isForwarded);
@@ -558,16 +563,51 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         }
     }
 
-    private final String checkIdp(String number, boolean nameIsNumber, boolean isIncoming) {
+    private String getIdpPrefixNumber(long subscription) {
+        String idpPrefix = Settings.System.getString(mContext.getContentResolver(),
+                INTERNATIONAL_PREFIX_NUMBER + subscription);
+        if (TextUtils.isEmpty(idpPrefix)) {
+            return IDP_DEFAULT_PREFIX;
+        }
+        return idpPrefix;
+    }
+
+    private boolean checkIdpEnable(int subscription) {
         if (mContext.getResources().getBoolean(R.bool.def_incallui_checkidp_enabled)
-                && isCDMAPhone(getActiveSubscription()) && isIncoming && nameIsNumber) {
-            if (number.indexOf(IDP_PREFIX) == 0) {
-                return IDP_PLUS + number.substring(IDP_PREFIX.length());
-            } else if ((number.indexOf(IDP_IDN) == 0) && (!isRoaming(getActiveSubscription()))) {
-                return IDP_ZERO + number.substring(IDP_IDN.length());
+                && Settings.System.getInt(mContext.getContentResolver(),
+                INTERNATIONAL_PREFIX_ENABLE + subscription, 1) == 1) {
+            return true;
+        }
+        return false;
+    }
+
+    private final String checkIdp(String number, boolean nameIsNumber,
+            int subscription, boolean isIncoming) {
+        String checkedNumber = number;
+        boolean checkEnabled = checkIdpEnable(subscription);
+        boolean isCDMA = isCDMAPhone(subscription);
+        if (checkEnabled && isCDMA && nameIsNumber) {
+            String idpPrefix = getIdpPrefixNumber(subscription);
+            if (!isIncoming) {
+                int indexIdn = number.indexOf(IDP_IDN);
+                int indexPlus = number.indexOf(IDP_PLUS);
+                if ((indexIdn != -1) && (!isRoaming(subscription))) {
+                    checkedNumber = number.substring(0, indexIdn) +
+                        IDP_ZERO + number.substring(indexIdn + IDP_IDN.length());
+                } else if (indexPlus != -1) {
+                    checkedNumber = number.substring(0, indexPlus) + idpPrefix
+                        + number.substring(indexPlus + IDP_PLUS.length());
+                }
+            } else {
+                if (number.indexOf(idpPrefix) == 0) {
+                    checkedNumber = IDP_PLUS + number.substring(idpPrefix.length());
+                }
             }
         }
-        return number;
+        Log.d(TAG, "checkIdp number = " + number + " CDMA phone = " + isCDMA
+                + " subscription = " + subscription + " checked number = " + checkedNumber +
+                " isIncoming = " + isIncoming + "enable = " + checkEnabled);
+        return checkedNumber;
     }
 
     private boolean isCDMAPhone(int subscription) {
@@ -582,11 +622,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
     }
 
     private boolean isRoaming(int subscription) {
-        if (TelephonyManager.getDefault().isMultiSimEnabled()) {
-            return TelephonyManager.getDefault().isNetworkRoaming(subscription);
-        } else {
-            return TelephonyManager.getDefault().isNetworkRoaming();
-        }
+        return TelephonyManager.getDefault().isNetworkRoaming(subscription);
     }
 
     private void updateSecondaryDisplayInfo() {
@@ -878,7 +914,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         void setProgressSpinnerVisible(boolean visible);
         void showManageConferenceCallButton(boolean visible);
         boolean isManageConferenceVisible();
-    }
+   }
 
     public int getActiveSubscription() {
         return SubscriptionManager.getDefaultSubId();
