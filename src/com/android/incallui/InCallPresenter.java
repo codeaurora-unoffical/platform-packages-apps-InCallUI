@@ -1023,6 +1023,13 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         // A dialog to show on top of the InCallUI to select a PhoneAccount
         final boolean showAccountPicker = (InCallState.WAITING_FOR_ACCOUNT == newState);
 
+        // Handle transition from InCallState.WAITING_FOR_ACCOUNT to InCallState.INCALL and
+        // and there is a call alive, this case can come for DSDA and hence we should show
+        // UI in such case.
+        final boolean showUiForDsda = (newState == InCallState.INCALL) &&
+                (mInCallState == InCallState.WAITING_FOR_ACCOUNT) && (mCallList.hasLiveCall() ||
+                (mCallList.getBackgroundCall() != null));
+
         // A new outgoing call indicates that the user just now dialed a number and when that
         // happens we need to display the screen immediately or show an account picker dialog if
         // no default is set. However, if the main InCallUI is already visible, we do not want to
@@ -1036,8 +1043,7 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         // user with a top-level notification.  Just show the call UI normally.
         final boolean mainUiNotVisible = !isShowingInCallUi() || !getCallCardFragmentVisible();
         final boolean showCallUi = ((InCallState.PENDING_OUTGOING == newState ||
-                InCallState.OUTGOING == newState || ((newState == InCallState.INCALL) &&
-                (mInCallState == InCallState.WAITING_FOR_ACCOUNT))) && mainUiNotVisible);
+                InCallState.OUTGOING == newState || showUiForDsda) && mainUiNotVisible);
 
         // TODO: Can we be suddenly in a call without it having been in the outgoing or incoming
         // state?  I havent seen that but if it can happen, the code below should be enabled.
