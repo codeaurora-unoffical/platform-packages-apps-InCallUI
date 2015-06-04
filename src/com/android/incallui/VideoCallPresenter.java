@@ -163,6 +163,8 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
 
     private static boolean mIsVideoMode = false;
 
+    // True if fragment/UI is not visible, false otherwise.
+    private boolean mIsInBackground = false;
     /**
      * Stores the current call substate.
      */
@@ -354,6 +356,11 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         }
     }
 
+    public void onFragmentUiShowing(boolean showing) {
+        Log.d(this, "onFragmentUiShowing showing = " + showing);
+        mIsInBackground = !showing;
+    }
+
     private void toggleFullScreen() {
         mAutoFullScreenPending = false;
         if (InCallPresenter.getInstance().isDialpadVisible()) {
@@ -513,7 +520,9 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
 
         String newCameraId = cameraManager.getActiveCameraId();
 
-        if (!Objects.equals(prevCameraId, newCameraId) && CallUtils.isActiveVideoCall(call)) {
+        if (!Objects.equals(prevCameraId, newCameraId) &&
+                CallUtils.isActiveVideoCall(call) &&
+                isCameraRequired(call.getVideoState())) {
             enableCamera(call.getVideoCall(), true);
         }
     }
@@ -653,9 +662,10 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         }
     }
 
-    private static boolean isCameraRequired(int videoState) {
-        return VideoProfile.VideoState.isBidirectional(videoState) ||
-                VideoProfile.VideoState.isTransmissionEnabled(videoState);
+    private boolean isCameraRequired(int videoState) {
+        return (VideoProfile.VideoState.isBidirectional(videoState) ||
+                VideoProfile.VideoState.isTransmissionEnabled(videoState)) &&
+                !mIsInBackground;
     }
 
     private boolean isCameraRequired() {
