@@ -44,6 +44,8 @@ import android.widget.PopupMenu.OnMenuItemClickListener;
 
 import java.util.ArrayList;
 
+import com.android.contacts.common.CallUtil;
+
 /**
  * Fragment for call control buttons
  */
@@ -195,6 +197,12 @@ public class CallButtonFragment
                 getPresenter().addParticipantClicked();
                 break;
             case R.id.changeToVideoButton:
+                Call call = CallList.getInstance().getFirstCall();
+                if (!CallUtil.isVideoCallNumValid(getActivity(), call.getNumber())) {
+                    Toast.makeText(this.getActivity(),
+                            R.string.toast_change_video_call_failed, Toast.LENGTH_LONG).show();
+                    return;
+                }
                 getPresenter().displayModifyCallOptions();
                 break;
             case R.id.switchCameraButton:
