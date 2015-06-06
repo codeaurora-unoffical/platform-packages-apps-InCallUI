@@ -415,9 +415,7 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         final boolean enableHoldOption = call.can(PhoneCapabilities.HOLD);
         final boolean supportHold = call.can(PhoneCapabilities.SUPPORT_HOLD);
 
-        boolean canVideoCall = call.can(PhoneCapabilities.SUPPORTS_VT_LOCAL)
-                && call.can(PhoneCapabilities.SUPPORTS_VT_REMOTE)
-                && call.can(PhoneCapabilities.CALL_TYPE_MODIFIABLE);
+        final boolean canVideoCall = call.can(PhoneCapabilities.CALL_TYPE_MODIFIABLE);
         ui.showChangeToVideoButton(canVideoCall);
 
         final boolean showMergeOption = call.can(PhoneCapabilities.MERGE_CONFERENCE);
@@ -506,6 +504,16 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
             ui.showSwapButton(showSwapOption);
 
         }
+    }
+
+    public boolean hasVideoCapabilities() {
+        return mCall !=null && mCall.can(PhoneCapabilities.SUPPORTS_VT_LOCAL)
+                && mCall.can(PhoneCapabilities.SUPPORTS_VT_REMOTE);
+    }
+
+    public boolean hasVoiceCapabilities() {
+        return mCall !=null && mCall.can(PhoneCapabilities.SUPPORTS_DOWNGRADE_TO_VOICE_LOCAL)
+                && mCall.can(PhoneCapabilities.SUPPORTS_DOWNGRADE_TO_VOICE_REMOTE);
     }
 
     public void refreshMuteState() {
