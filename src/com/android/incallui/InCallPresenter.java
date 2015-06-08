@@ -1023,6 +1023,13 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         // A dialog to show on top of the InCallUI to select a PhoneAccount
         final boolean showAccountPicker = (InCallState.WAITING_FOR_ACCOUNT == newState);
 
+        // Handle transition from InCallState.WAITING_FOR_ACCOUNT to InCallState.INCALL and
+        // and there is a call alive, this case can come for DSDA and hence we should show
+        // UI in such case.
+        final boolean showUiForDsda = (newState == InCallState.INCALL) &&
+                (mInCallState == InCallState.WAITING_FOR_ACCOUNT) && (mCallList.hasLiveCall() ||
+                (mCallList.getBackgroundCall() != null));
+
         // A new outgoing call indicates that the user just now dialed a number and when that
         // happens we need to display the screen immediately or show an account picker dialog if
         // no default is set. However, if the main InCallUI is already visible, we do not want to
@@ -1036,8 +1043,7 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         // user with a top-level notification.  Just show the call UI normally.
         final boolean mainUiNotVisible = !isShowingInCallUi() || !getCallCardFragmentVisible();
         final boolean showCallUi = ((InCallState.PENDING_OUTGOING == newState ||
-                InCallState.OUTGOING == newState || ((newState == InCallState.INCALL) &&
-                (mInCallState == InCallState.WAITING_FOR_ACCOUNT))) && mainUiNotVisible);
+                InCallState.OUTGOING == newState || showUiForDsda) && mainUiNotVisible);
 
         // TODO: Can we be suddenly in a call without it having been in the outgoing or incoming
         // state?  I havent seen that but if it can happen, the code below should be enabled.
@@ -1280,51 +1286,24 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
     }
 
     /**
-     * Handles changes to the device rotation.
+     * Notifies listeners of changes in orientation and notify calls of rotation angle change.
      *
-     * @param rotation The device rotation.
-     */
-    public void onDeviceRotationChange(int rotation) {
-        Log.d(this, "onDeviceRotationChange: rotation=" + rotation);
-        // First translate to rotation in degrees.
-        if (mCallList!=null) {
-            mCallList.notifyCallsOfDeviceRotation(toRotationAngle(rotation));
-        } else {
-            Log.w(this, "onDeviceRotationChange: CallList is null.");
-        }
-    }
-
-    /**
-     * Converts rotation constants to rotation in degrees.
-     * @param rotation Rotation constants.
-     */
-    public static int toRotationAngle(int rotation) {
-        int rotationAngle;
-        switch (rotation) {
-            case Surface.ROTATION_0:
-                rotationAngle = 0;
-                break;
-            case Surface.ROTATION_90:
-                rotationAngle = 90;
-                break;
-            case Surface.ROTATION_180:
-                rotationAngle = 180;
-                break;
-            case Surface.ROTATION_270:
-                rotationAngle = 270;
-                break;
-            default:
-                rotationAngle = 0;
-        }
-        return rotationAngle;
-    }
-
-    /**
-     * Notifies listeners of changes in orientation (e.g. portrait/landscape).
-     *
-     * @param orientation The orientation of the device.
+     * @param orientation The screen orientation of the device (one of :
+     * {@link InCallOrientationEventListener#SCREEN_ORIENTATION_0},
+     * {@link InCallOrientationEventListener#SCREEN_ORIENTATION_90},
+     * {@link InCallOrientationEventListener#SCREEN_ORIENTATION_180},
+     * {@link InCallOrientationEventListener#SCREEN_ORIENTATION_270}).
      */
     public void onDeviceOrientationChange(int orientation) {
+        Log.d(this, "onDeviceOrientationChange: orientation= " + orientation);
+
+        if (mCallList!=null) {
+            mCallList.notifyCallsOfDeviceRotation(orientation);
+        } else {
+            Log.w(this, "onDeviceOrientationChange: CallList is null.");
+        }
+
+        // Notify listeners of device orientation changed.
         for (InCallOrientationListener listener : mOrientationListeners) {
             listener.onDeviceOrientationChanged(orientation);
         }
@@ -1389,6 +1368,8 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         }
 
         mInCallActivity.setRequestedOrientation(orientationMode);
+        mInCallActivity.enableInCallOrientationEventListener(
+                orientationMode == ActivityInfo.SCREEN_ORIENTATION_SENSOR);
     }
 
     public void enableScreenTimeout(boolean v) {

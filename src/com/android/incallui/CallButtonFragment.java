@@ -396,18 +396,25 @@ public class CallButtonFragment
         final ArrayList<CharSequence> items = new ArrayList<CharSequence>();
         final ArrayList<Integer> itemToCallType = new ArrayList<Integer>();
         final Resources res = ui.getContext().getResources();
-        // Prepare the string array and mapping.
-        items.add(res.getText(R.string.modify_call_option_voice));
-        itemToCallType.add(VideoProfile.VideoState.AUDIO_ONLY);
+        // Prepare the string array for modify call options.
+        final boolean hasVideoCapabilities = getPresenter().hasVideoCapabilities();
+        final boolean hasVoiceCapabilities = getPresenter().hasVoiceCapabilities();
 
-        items.add(res.getText(R.string.modify_call_option_vt_rx));
-        itemToCallType.add(VideoProfile.VideoState.RX_ENABLED);
+        if(hasVideoCapabilities) {
+            items.add(res.getText(R.string.modify_call_option_vt_rx));
+            itemToCallType.add(VideoProfile.VideoState.RX_ENABLED);
 
-        items.add(res.getText(R.string.modify_call_option_vt_tx));
-        itemToCallType.add(VideoProfile.VideoState.TX_ENABLED);
+            items.add(res.getText(R.string.modify_call_option_vt_tx));
+            itemToCallType.add(VideoProfile.VideoState.TX_ENABLED);
 
-        items.add(res.getText(R.string.modify_call_option_vt));
-        itemToCallType.add(VideoProfile.VideoState.BIDIRECTIONAL);
+            items.add(res.getText(R.string.modify_call_option_vt));
+            itemToCallType.add(VideoProfile.VideoState.BIDIRECTIONAL);
+        }
+
+        if(hasVoiceCapabilities) {
+             items.add(res.getText(R.string.modify_call_option_voice));
+             itemToCallType.add(VideoProfile.VideoState.AUDIO_ONLY);
+        }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getUi().getContext());
         builder.setTitle(R.string.modify_call_option_title);
@@ -428,9 +435,7 @@ public class CallButtonFragment
         int currVideoState = getPresenter().getCurrentVideoState();
         int currUnpausedVideoState = CallUtils.toUnPausedVideoState(currVideoState);
         int index = itemToCallType.indexOf(currUnpausedVideoState);
-        if (index == INVALID_INDEX) {
-            return;
-        }
+
         builder.setSingleChoiceItems(items.toArray(new CharSequence[0]), index, listener);
         alert = builder.create();
         alert.show();
