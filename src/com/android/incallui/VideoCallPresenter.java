@@ -28,7 +28,9 @@ import android.telecom.Connection;
 import android.telecom.Connection.VideoProvider;
 import android.telecom.InCallService.VideoCall;
 import android.telecom.VideoProfile;
+import android.telephony.TelephonyManager;
 import android.view.Surface;
+import android.widget.Toast;
 import android.os.Bundle;
 
 import com.android.contacts.common.CallUtil;
@@ -871,6 +873,17 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         if (ui == null) {
             Log.e(this, "Error VideoCallUi is null. Return.");
             return;
+        }
+        if (mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_regional_noti_move_away_lte_video_call)) {
+            // When the VideoQuality changed, Check the network
+            TelephonyManager teleManager = (TelephonyManager) mContext
+                    .getSystemService(Context.TELEPHONY_SERVICE);
+            if (teleManager.getNetworkType() != TelephonyManager.NETWORK_TYPE_LTE) {
+                Toast.makeText(mContext,
+                        R.string.video_call_downgrade_without_lte_toast,
+                        Toast.LENGTH_SHORT).show();
+            }
         }
 
         // Display a video quality changed message on UI.
