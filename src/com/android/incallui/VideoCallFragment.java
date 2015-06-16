@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.widget.Toast;
+import android.widget.ImageView;
 
 import com.google.common.base.Objects;
 import android.widget.Toast;
@@ -546,6 +547,18 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
         Log.d(this, "onViewCreated: VideoSurfacesInUse=" + sVideoSurfacesInUse);
 
         mVideoViewsStub = (ViewStub) view.findViewById(R.id.videoCallViewsStub);
+        if (getActivity().getResources().getBoolean(
+                com.android.internal.R.bool.config_regional_display_contact_photo_video_call_off)) {
+            ImageView imageView = (ImageView) view
+                    .findViewById(R.id.incomingVideoBack);
+            if (imageView != null) {
+                imageView.setVisibility(View.VISIBLE);
+                CallerInfo info = CallerInfoUtils.buildCallerInfo(
+                        getActivity(), CallList.getInstance().getActiveCall());
+                imageView.setImageResource(info.photoResource == 0 ? R.drawable.img_no_image
+                                : info.photoResource);
+            }
+        }
 
         // If the surfaces are already in use, we have just changed orientation or otherwise
         // re-created the fragment.  In this case we need to inflate the video call views and

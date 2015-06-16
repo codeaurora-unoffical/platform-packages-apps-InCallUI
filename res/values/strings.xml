@@ -661,6 +661,7 @@
     <!-- Normal call UI will be shown for the emergency call
         for the numbers which is mentioned in mask_emergency_number-->
     <string name="mask_emergency_number"></string>
+    <string name="video_call_downgrade_without_lte_toast">Move out of LTE coverage area downgrade the call.</string>
     <!-- Title of the IMS to CS redial dialog -->
     <string name="cs_redial_option">Redial Option</string>
     <!-- Message text of the IMS to CS redial dialog -->
