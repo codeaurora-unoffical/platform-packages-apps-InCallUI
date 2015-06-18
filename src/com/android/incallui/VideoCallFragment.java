@@ -883,8 +883,8 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
 
         mZoomControl.setEnabled(enable);
         if (!enable) {
-            mZoomControl.setZoomIndex(DEFAULT_CAMERA_ZOOM_VALUE);
             mZoomControl.setZoomMax(DEFAULT_CAMERA_ZOOM_MAX);
+            mZoomControl.setZoomIndex(DEFAULT_CAMERA_ZOOM_VALUE);
         }
     }
 
