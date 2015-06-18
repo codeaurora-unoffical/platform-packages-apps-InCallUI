@@ -996,7 +996,9 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
             Log.e(this, "Call is not primary call");
             return;
         }
-        ui.updateZoomParams(maxZoom);
+        if (isZoomSupported) {
+            ui.updateZoomParams(maxZoom);
+        }
         enableZoomControl(isZoomSupported);
     }
 
