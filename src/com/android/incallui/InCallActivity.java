@@ -54,6 +54,7 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.content.pm.ActivityInfo;
 
 import com.android.phone.common.animation.AnimUtils;
 import com.android.phone.common.animation.AnimationListenerAdapter;
@@ -95,6 +96,7 @@ public class InCallActivity extends Activity {
     private SuppServFailureNotificationReceiver mReceiver;
     private boolean mIsForegroundActivity;
     private AlertDialog mDialog;
+    private InCallOrientationEventListener mInCallOrientationEventListener;
 
     /** Use to pass 'showDialpad' from {@link #onNewIntent} to {@link #onResume} */
     private boolean mShowDialpadRequested;
@@ -132,11 +134,6 @@ public class InCallActivity extends Activity {
     private enum SuppService {
         UNKNOWN, SWITCH, SEPARATE, TRANSFER, CONFERENCE, REJECT, HANGUP;
     }
-
-    /**
-     * Used to determine if a change in orientation has occurred.
-     */
-    private static int mCurrentOrientation = Configuration.ORIENTATION_UNDEFINED;
 
     @Override
     protected void onCreate(Bundle icicle) {
@@ -207,6 +204,9 @@ public class InCallActivity extends Activity {
             mAnimateDialpadOnShow = false;
             mDtmfText = icicle.getString(DIALPAD_TEXT_EXTRA);
         }
+
+        mInCallOrientationEventListener = new InCallOrientationEventListener(this);
+
         if (isDsdaEnabled ) {
             initializeDsdaSwitchTab();
         }
@@ -236,10 +236,10 @@ public class InCallActivity extends Activity {
 
         // setting activity should be last thing in setup process
         InCallPresenter.getInstance().setActivity(this);
+        if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_SENSOR) {
+            enableInCallOrientationEventListener(true);
+        }
 
-        // It is possible that the activity restarted because orientation changed.
-        // Notify listeners if orientation changed.
-        doOrientationChanged(getResources().getConfiguration().orientation);
         InCallPresenter.getInstance().onActivityStarted();
     }
 
@@ -288,6 +288,7 @@ public class InCallActivity extends Activity {
     protected void onStop() {
         Log.d(this, "onStop()...");
 
+        enableInCallOrientationEventListener(false);
         InCallPresenter.getInstance().updateIsChangingConfigurations();
         InCallPresenter.getInstance().onActivityStopped();
         super.onStop();
@@ -387,8 +388,8 @@ public class InCallActivity extends Activity {
             return;
         }
 
-        // Nothing special to do.  Fall back to the default behavior.
-        super.onBackPressed();
+        // Just move the task to back instead of finishing activity.
+        moveTaskToBack(true);
     }
 
     @Override
@@ -505,22 +506,7 @@ public class InCallActivity extends Activity {
         InCallPresenter.getInstance().getProximitySensor().onConfigurationChanged(config);
         Log.d(this, "onConfigurationChanged "+config.orientation);
 
-        doOrientationChanged(config.orientation);
         super.onConfigurationChanged(config);
-    }
-
-
-    private void doOrientationChanged(int orientation) {
-        Log.d(this, "doOrientationChanged prevOrientation=" + mCurrentOrientation +
-                " newOrientation=" + orientation);
-        // Check to see if the orientation changed to prevent triggering orientation change events
-        // for other configuration changes.
-        if (orientation != mCurrentOrientation) {
-            mCurrentOrientation = orientation;
-            InCallPresenter.getInstance().onDeviceRotationChange(
-                    getWindowManager().getDefaultDisplay().getRotation());
-            InCallPresenter.getInstance().onDeviceOrientationChange(mCurrentOrientation);
-        }
     }
 
     public CallButtonFragment getCallButtonFragment() {
@@ -761,6 +747,32 @@ public class InCallActivity extends Activity {
             mCallCardFragment.dispatchPopulateAccessibilityEvent(event);
         }
         return super.dispatchPopulateAccessibilityEvent(event);
+    }
+
+    public void showCsRedialDialogOnDisconnect(String dialString) {
+        final String number = dialString;
+        Log.d(this, "showCsRedialDialogOnDisconnect for " + number);
+
+        dismissPendingDialogs();
+        mDialog = new AlertDialog.Builder(this).setTitle(R.string.cs_redial_option)
+                .setMessage(R.string.cs_redial_msg)
+                .setPositiveButton(R.string.cs_redial_yes, new OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        InCallPresenter.getInstance().dialCsCall(number);
+                        onDialogDismissed();
+                    }
+                })
+                .setNegativeButton(R.string.cs_redial_no, new OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        onDialogDismissed();
+                    }
+                })
+                .create();
+
+        mDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        mDialog.show();
     }
 
     public void maybeShowErrorDialogOnDisconnect(Call call) {
@@ -1015,6 +1027,19 @@ public class InCallActivity extends Activity {
             int phoneId = CallList.getInstance().getPhoneId(CallList
                     .getInstance().getActiveSubscription());
             bar.selectTab(bar.getTabAt(phoneId));
+        }
+    }
+
+    /**
+     * Enables the OrientationEventListener if enable flag is true. Disables it if enable is
+     * false
+     * @param enable true or false.
+     */
+    public void enableInCallOrientationEventListener(boolean enable) {
+        if (enable) {
+            mInCallOrientationEventListener.enable(enable);
+        } else {
+            mInCallOrientationEventListener.disable();
         }
     }
 

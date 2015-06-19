@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.widget.Toast;
+import android.widget.ImageView;
 
 import com.google.common.base.Objects;
 import android.widget.Toast;
@@ -546,6 +547,18 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
         Log.d(this, "onViewCreated: VideoSurfacesInUse=" + sVideoSurfacesInUse);
 
         mVideoViewsStub = (ViewStub) view.findViewById(R.id.videoCallViewsStub);
+        if (getActivity().getResources().getBoolean(
+                com.android.internal.R.bool.config_regional_display_contact_photo_video_call_off)) {
+            ImageView imageView = (ImageView) view
+                    .findViewById(R.id.incomingVideoBack);
+            if (imageView != null) {
+                imageView.setVisibility(View.VISIBLE);
+                CallerInfo info = CallerInfoUtils.buildCallerInfo(
+                        getActivity(), CallList.getInstance().getActiveCall());
+                imageView.setImageResource(info.photoResource == 0 ? R.drawable.img_no_image
+                                : info.photoResource);
+            }
+        }
 
         // If the surfaces are already in use, we have just changed orientation or otherwise
         // re-created the fragment.  In this case we need to inflate the video call views and
@@ -556,9 +569,34 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(this, "onStart:");
+
+        if (getPresenter() != null) {
+            getPresenter().onFragmentUiShowing(true);
+        } else {
+            Log.e(this, "onStart: Presenter is null");
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(this, "onResume:");
+    }
+
+    @Override
     public void onStop() {
         super.onStop();
         Log.d(this, "onStop:");
+
+        if (getPresenter() != null) {
+            getPresenter().onFragmentUiShowing(false);
+        } else {
+            Log.e(this, "onStop: Presenter is null");
+        }
+
     }
 
     @Override
@@ -753,6 +791,57 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
     }
 
     @Override
+    public void showSessionModificationReasonInfo(int sessionModificationCause) {
+        Log.d(this, "showSessionModificationReasonInfo - call modified due to "  +
+                sessionModificationCause);
+
+        final Context context = getActivity();
+        if (context == null) {
+            Log.e(this, "showSessionModificationReasonInfo - Activity is null. Return");
+            return;
+        }
+
+        final Resources resources = context.getResources();
+        int sessionModificationCauseResId = getSessionModificationCauseResourceId(
+                sessionModificationCause);
+        String sessionModificationCauseText = resources.getString(sessionModificationCauseResId);
+        if (!sessionModificationCauseText.isEmpty()) {
+            Log.v(this, sessionModificationCauseText);
+            Toast.makeText(context, sessionModificationCauseText, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private static int getSessionModificationCauseResourceId(int cause) {
+        switch(cause) {
+            case Connection.CAUSE_CODE_UNSPECIFIED:
+                return R.string.session_modify_cause_unspecified;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_UPGRADE_LOCAL_REQ:
+                return R.string.session_modify_cause_upgrade_local_request;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_UPGRADE_REMOTE_REQ:
+                return R.string.session_modify_cause_upgrade_remote_request;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_DOWNGRADE_LOCAL_REQ:
+                return R.string.session_modify_cause_downgrade_local_request;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_DOWNGRADE_REMOTE_REQ:
+                return R.string.session_modify_cause_downgrade_remote_request;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_DOWNGRADE_RTP_TIMEOUT:
+                return R.string.session_modify_cause_downgrade_rtp_timeout;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_DOWNGRADE_QOS:
+                return R.string.session_modify_cause_downgrade_qos;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_DOWNGRADE_PACKET_LOSS:
+                return R.string.session_modify_cause_downgrade_packet_loss;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_DOWNGRADE_LOW_THRPUT:
+                return R.string.session_modify_cause_downgrade_low_thrput;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_DOWNGRADE_THERM_MITIGATION:
+                return R.string.session_modify_cause_downgrade_thermal_mitigation;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_DOWNGRADE_LIPSYNC:
+                return R.string.session_modify_cause_downgrade_lipsync;
+            case Connection.CAUSE_CODE_SESSION_MODIFY_DOWNGRADE_GENERIC_ERROR:
+            default:
+                return R.string.session_modify_cause_downgrade_generic_error;
+        }
+    }
+
+    @Override
     public void showZoomControl(boolean show) {
         Log.d(this, "Show zoom control = " + show);
 
@@ -901,13 +990,33 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
             params.width = width;
             params.height = height;
             preview.setLayoutParams(params);
+        }
+    }
 
-            int rotation = InCallPresenter.toRotationAngle(getCurrentRotation());
-            int rotationAngle = 360 - rotation;
-            preview.setRotation(rotationAngle);
-            Log.d(this, "setPreviewSize: rotation=" + rotation +
-                    " rotationAngle=" + rotationAngle);
+    /**
+     * Sets the rotation of the preview surface.  Called when the dimensions change due to a
+     * device orientation change.
+     *
+     * Please note that the screen orientation passed in is subtracted from 360 to get the actual
+     * preview rotation values.
+     *
+     * @param rotation The screen orientation. One of -
+     * {@link InCallOrientationEventListener#SCREEN_ORIENTATION_0},
+     * {@link InCallOrientationEventListener#SCREEN_ORIENTATION_90},
+     * {@link InCallOrientationEventListener#SCREEN_ORIENTATION_180},
+     * {@link InCallOrientationEventListener#SCREEN_ORIENTATION_270}).
+     */
+    @Override
+    public void setPreviewRotation(int orientation) {
+        Log.d(this, "setPreviewRotation: orientation=" + orientation);
+        if (sPreviewSurface != null) {
+            TextureView preview = sPreviewSurface.getTextureView();
 
+            if (preview == null ) {
+                return;
+            }
+
+            preview.setRotation(360 - orientation);
         }
     }
 

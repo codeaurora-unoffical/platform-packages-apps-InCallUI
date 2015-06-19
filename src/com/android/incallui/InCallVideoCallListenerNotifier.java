@@ -251,6 +251,17 @@ public class InCallVideoCallListenerNotifier {
     }
 
     /**
+     * Inform listeners of any change in the orientation mode of the device.
+     *
+     * @param orientationMode The new orientation mode.
+     */
+    public void orientationModeChanged(int orientationMode) {
+        for (SurfaceChangeListener listener : mSurfaceChangeListeners) {
+            listener.onOrientationModeChanged(orientationMode);
+        }
+    }
+
+    /**
      * Listener interface for any class that wants to be notified of upgrade to video and downgrade
      * to audio session modification requests.
      */
@@ -358,5 +369,12 @@ public class InCallVideoCallListenerNotifier {
          */
         public void onCameraZoomCapabilitiesChange(Call call, boolean isZoomSupported,
             float maxZoom);
+
+        /**
+         * Called when the local orientation mode changes
+         *
+         * @param orientationMode The new orientation mode of the device.
+         */
+        public void onOrientationModeChanged(int orientationMode);
     }
 }
