@@ -198,7 +198,7 @@ public class CallButtonFragment
                 break;
             case R.id.changeToVideoButton:
                 Call call = CallList.getInstance().getFirstCall();
-                if (!CallUtil.isVideoCallNumValid(getActivity(), call.getNumber())) {
+                if (call != null && !CallUtil.isVideoCallNumValid(getActivity(), call.getNumber())) {
                     Toast.makeText(this.getActivity(),
                             R.string.toast_change_video_call_failed, Toast.LENGTH_LONG).show();
                     return;
