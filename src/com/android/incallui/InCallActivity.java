@@ -737,9 +737,11 @@ public class InCallActivity extends Activity {
     public void maybeShowErrorDialogOnDisconnect(DisconnectCause disconnectCause) {
         Log.d(this, "maybeShowErrorDialogOnDisconnect");
 
-        if (!isFinishing() && !TextUtils.isEmpty(disconnectCause.getDescription())
+       if (!isFinishing() && !TextUtils.isEmpty(disconnectCause.getDescription())
                 && (disconnectCause.getCode() == DisconnectCause.ERROR ||
-                        disconnectCause.getCode() == DisconnectCause.RESTRICTED)) {
+                        disconnectCause.getCode() == DisconnectCause.RESTRICTED ||
+                        ((disconnectCause.getCode() == DisconnectCause.MISSED) &&
+                        !disconnectCause.getDescription().toString().equals("")))) {
             showErrorDialog(disconnectCause.getDescription());
         }
     }
