@@ -41,6 +41,7 @@ import android.widget.PopupMenu;
 import android.widget.Toast;
 import android.widget.PopupMenu.OnDismissListener;
 import android.widget.PopupMenu.OnMenuItemClickListener;
+import android.telephony.PhoneNumberUtils;
 
 import java.util.ArrayList;
 
@@ -198,7 +199,13 @@ public class CallButtonFragment
                 break;
             case R.id.changeToVideoButton:
                 Call call = CallList.getInstance().getFirstCall();
-                if (!CallUtil.isVideoCallNumValid(getActivity(), call.getNumber())) {
+                if (call == null)
+                {
+                    Log.i(this, "Call was null");
+                    return;
+                }
+                if (getResources().getBoolean(com.android.internal.R.bool.config_regional_number_patterns_video_call) &&
+                    !PhoneNumberUtils.isVideoCallNumValid(call.getNumber())) {
                     Toast.makeText(this.getActivity(),
                             R.string.toast_change_video_call_failed, Toast.LENGTH_LONG).show();
                     return;
