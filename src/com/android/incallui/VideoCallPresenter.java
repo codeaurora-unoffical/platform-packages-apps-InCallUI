@@ -165,10 +165,14 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
 
     private static boolean mIsVideoMode = false;
 
+    // True if fragment/UI is not visible, false otherwise.
+    private boolean mIsInBackground = false;
     /**
      * Stores the current call substate.
      */
     private int mCurrentCallSubstate;
+
+    private static int mOrientationMode = Connection.ORIENTATION_MODE_DYNAMIC;
 
     /** Handler which resets request state to NO_REQUEST after an interval. */
     VideoCallHandler mSessionModificationResetHandler;
@@ -346,6 +350,11 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         }
     }
 
+    public void onFragmentUiShowing(boolean showing) {
+        Log.d(this, "onFragmentUiShowing showing = " + showing);
+        mIsInBackground = !showing;
+    }
+
     private void toggleFullScreen() {
         mIsFullScreen = !mIsFullScreen;
         InCallPresenter.getInstance().setFullScreenVideoState(mIsFullScreen);
@@ -490,7 +499,9 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
 
         String newCameraId = cameraManager.getActiveCameraId();
 
-        if (!Objects.equals(prevCameraId, newCameraId) && CallUtils.isActiveVideoCall(call)) {
+        if (!Objects.equals(prevCameraId, newCameraId) &&
+                CallUtils.isActiveVideoCall(call) &&
+                isCameraRequired(call.getVideoState())) {
             enableCamera(call.getVideoCall(), true);
         }
     }
@@ -630,9 +641,10 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         }
     }
 
-    private static boolean isCameraRequired(int videoState) {
-        return VideoProfile.VideoState.isBidirectional(videoState) ||
-                VideoProfile.VideoState.isTransmissionEnabled(videoState);
+    private boolean isCameraRequired(int videoState) {
+        return (VideoProfile.VideoState.isBidirectional(videoState) ||
+                VideoProfile.VideoState.isTransmissionEnabled(videoState)) &&
+                !mIsInBackground;
     }
 
     private boolean isCameraRequired() {
@@ -885,7 +897,11 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
     @Override
     public void onOrientationModeChanged(int orientationMode) {
         Log.d(this, "onOrientationModeChanged orientation mode=" + orientationMode);
-        InCallPresenter.getInstance().setOrientationMode(toUiOrientationMode(orientationMode));
+        if (mOrientationMode != orientationMode) {
+            mOrientationMode = orientationMode;
+            InCallPresenter.getInstance().setOrientationMode(toUiOrientationMode(
+                    mOrientationMode));
+        }
     }
 
     /**
@@ -900,8 +916,8 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
             InCallPresenter.getInstance().setOrientationMode(
                     ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
         } else {
-            InCallPresenter.getInstance().setOrientationMode(
-                    ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+            InCallPresenter.getInstance().setOrientationMode(toUiOrientationMode(
+                    mOrientationMode));
         }
     }
 
