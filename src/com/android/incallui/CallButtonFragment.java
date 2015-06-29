@@ -495,19 +495,22 @@ public class CallButtonFragment
                     case R.id.overflow_add_participant_menu_item:
                         getPresenter().addParticipantClicked();
                         break;
-                        case R.id.menu_start_record:
-                            ((InCallActivity)getActivity()).startInCallRecorder();
-                            break;
+                    case R.id.menu_start_record:
+                        ((InCallActivity)getActivity()).startInCallRecorder();
+                        break;
 
-                        case R.id.menu_stop_record:
-                            ((InCallActivity)getActivity()).stopInCallRecorder();
-                            break;
+                    case R.id.menu_stop_record:
+                        ((InCallActivity)getActivity()).stopInCallRecorder();
+                        break;
 
                     case R.id.overflow_manage_conference_menu_item:
                         onManageVideoCallConferenceClicked();
                         break;
                     case R.id.overflow_end_active_accept_incoming_menu_item:
                         ((InCallActivity)getActivity()).endActiveAcceptMT();
+                        break;
+                    case R.id.overflow_modify_call_menu_item:
+                        getPresenter().displayModifyCallOptions();
                         break;
                     default:
                         Log.wtf(this, "onMenuItemClick: unexpected overflow menu click");
@@ -526,7 +529,8 @@ public class CallButtonFragment
     @Override
     public void configureOverflowMenu(boolean showMergeMenuOption, boolean showAddMenuOption,
             boolean showHoldMenuOption, boolean showSwapMenuOption,
-            boolean showAddParticipantOption, boolean showManageConferenceVideoCallOption) {
+            boolean showAddParticipantOption, boolean showManageConferenceVideoCallOption,
+            boolean showModifyCallOption) {
         if (mOverflowPopup == null) {
             createOverflowMenu();
         }
@@ -541,6 +545,7 @@ public class CallButtonFragment
         menu.findItem(R.id.overflow_add_participant_menu_item).setVisible(showAddParticipantOption);
         menu.findItem(R.id.overflow_manage_conference_menu_item).setVisible(
             showManageConferenceVideoCallOption);
+        menu.findItem(R.id.overflow_modify_call_menu_item).setVisible(showModifyCallOption);
         updateEndActiveAcceptMtMenu();
         mOverflowButton.setEnabled(menu.hasVisibleItems());
     }
