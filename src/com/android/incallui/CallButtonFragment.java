@@ -424,7 +424,8 @@ public class CallButtonFragment
     @Override
     public void configureOverflowMenu(boolean showMergeMenuOption, boolean showAddMenuOption,
             boolean showHoldMenuOption, boolean showSwapMenuOption,
-            boolean showAddParticipantOption, boolean showManageConferenceVideoCallOption) {
+            boolean showAddParticipantOption, boolean showManageConferenceVideoCallOption,
+            boolean showModifyCallOption) {
         if (mOverflowPopup == null) {
             final ContextThemeWrapper contextWrapper = new ContextThemeWrapper(getActivity(),
                     R.style.InCallPopupMenuStyle);
@@ -456,6 +457,9 @@ public class CallButtonFragment
                         case R.id.overflow_manage_conference_menu_item:
                             onManageVideoCallConferenceClicked();
                             break;
+                        case R.id.overflow_modify_call_menu_item:
+                            getPresenter().displayModifyCallOptions();
+                            break;
                         default:
                             Log.wtf(this, "onMenuItemClick: unexpected overflow menu click");
                             break;
@@ -482,6 +486,7 @@ public class CallButtonFragment
         menu.findItem(R.id.overflow_add_participant_menu_item).setVisible(showAddParticipantOption);
         menu.findItem(R.id.overflow_manage_conference_menu_item).setVisible(
             showManageConferenceVideoCallOption);
+        menu.findItem(R.id.overflow_modify_call_menu_item).setVisible(showModifyCallOption);
 
         mOverflowButton.setEnabled(menu.hasVisibleItems());
     }
