@@ -847,9 +847,11 @@ public class InCallActivity extends Activity {
     }
 
     private boolean isConferenceDialString(String number) {
-        String[] participantsArr = number.split(";");
-        if ((participantsArr != null) && (participantsArr.length > 1)) {
-            return true;
+        if (number != null) {
+            String[] participantsArr = number.split(";");
+            if ((participantsArr != null) && (participantsArr.length > 1)) {
+                return true;
+            }
         }
         return false;
     }
