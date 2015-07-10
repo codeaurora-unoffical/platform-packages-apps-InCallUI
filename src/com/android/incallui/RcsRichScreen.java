@@ -31,6 +31,7 @@ import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -39,13 +40,11 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.telecom.VideoProfile;
-import com.android.incallui.RcsApiManager;
 import com.suntek.mway.rcs.client.aidl.plugin.entity.richscrn.ResultInfo;
 import com.suntek.mway.rcs.client.aidl.plugin.entity.richscrn.RichScrnShowing;
-import com.suntek.mway.rcs.client.api.util.ServiceDisconnectedException;
-import com.suntek.mway.rcs.client.api.voip.impl.RichScreenApi;
-import com.suntek.mway.rcs.client.api.RCSServiceListener;
-import android.os.RemoteException;
+import com.suntek.mway.rcs.client.api.exception.ServiceDisconnectedException;
+import com.suntek.mway.rcs.client.api.richscreen.RichScreenApi;
+
 
 public class RcsRichScreen {
     private static String TAG = "RCS_UI_RcsRichScreen";
@@ -197,9 +196,11 @@ public class RcsRichScreen {
             try {
                 Log.i(TAG,
                         "getRichScreenApi" + mNumber);
-                result = RcsApiManager.getRichScreenApi().getRichScrnObj(
-                        mNumber, PhoneEevnt);
+                result = (RichScrnShowing)RichScreenApi.getInstance().getRichScrnObj(
+                        mNumber, PhoneEevnt).getResultObj();
                 Log.i(TAG, "result" + result);
+            } catch (RemoteException e) {
+                e.printStackTrace();
             } catch (ServiceDisconnectedException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -241,9 +242,8 @@ public class RcsRichScreen {
             missdnAddress.setVisibility(View.GONE);
             try {
                 Log.i(TAG, "getRichScreenApi.DownloadHomeLocRules"
-                        + RcsApiManager.getRichScreenApi());
-                RcsApiManager.getRichScreenApi().downloadHomeLocRules(
-                        mPhoneEevnt);
+                        + RichScreenApi.getInstance());
+                RichScreenApi.getInstance().downloadHomeLocRules(mPhoneEevnt);
             } catch (Exception e) {
                 Log.w(TAG,e);
             }
@@ -379,7 +379,7 @@ public class RcsRichScreen {
                     try {
                         Log.i(TAG, "getRichScreenApi.downloadRichScreen:"
                                 + mNumber);
-                        RcsApiManager.getRichScreenApi().downloadRichScrnObj(
+                        RichScreenApi.getInstance().downloadRichScrnObj(
                                 mNumber, mPhoneEevnt);
                     } catch (Exception e) {
                         // TODO Auto-generated catch block
@@ -389,8 +389,8 @@ public class RcsRichScreen {
             }, 1000);
         } else {
             String phoneEvent = getPhoneEventForRichScreen(state, videoState);
-            if (phoneEvent
-                    .equals(VIDEO_CALL_COMES_IN_THE_TERMINAL_STARTS_RINGING)) {
+            if (phoneEvent.equals(
+                    VIDEO_CALL_COMES_IN_THE_TERMINAL_STARTS_RINGING)) {
                 Log.i(TAG, "video call income do not set richscreen");
                 isGetRichScreenCompleted = true;
                 createComfirmDialogInVideCall(phoneEvent);
