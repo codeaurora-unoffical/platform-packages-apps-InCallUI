@@ -18,8 +18,10 @@ package com.android.incallui;
 
 import android.Manifest;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ActivityNotFoundException;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
@@ -96,6 +98,23 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
     private InCallCameraManager mInCallCameraManager = null;
     private PowerManager mPowerManager;
     private PowerManager.WakeLock mWakeLock = null;
+    private static boolean mIsScreenOff = false;
+
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            /*
+             * Handle screen turn on/off due to power button press
+             */
+            if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
+                Log.i(this, "onReceive : action screen on intent");
+                notifyVideoPauseController(true);
+            } else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+                Log.i(this, "onReceive : action screen off intent");
+                notifyVideoPauseController(false);
+            }
+        }
+    };
 
     private final Phone.Listener mPhoneListener = new Phone.Listener() {
         @Override
@@ -206,6 +225,10 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
 
         Preconditions.checkNotNull(context);
         mContext = context;
+
+        IntentFilter intentfilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+        intentfilter.addAction(Intent.ACTION_SCREEN_OFF);
+        mContext.registerReceiver(mReceiver, intentfilter);
 
         mContactInfoCache = ContactInfoCache.getInstance(context);
 
@@ -731,13 +754,39 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
     /*package*/
     void onActivityStarted() {
         Log.d(this, "onActivityStarted");
+        /*
+         * NOTE that activityManager onStart/onStop APIs are invoked only when
+         * Ambient Display (Settings --> Display --> Ambient Display) option is
+         * disabled. Below if check notifies VideoPauseController only when screen
+         * is interactive, thereby making power button interactions in a VT call
+         * independent of ActivityManager events and are taken care with
+         * ACTION_SCREEN_ON/ACTION_SCREEN_OFF intents.
+         */
+        if (mIsScreenOff) {
+            Log.d(this, "Ignore Activity Start as Screen is Off");
+            mIsScreenOff = false;
+            return;
+        }
         notifyVideoPauseController(true);
     }
 
     /*package*/
     void onActivityStopped() {
         Log.d(this, "onActivityStopped");
-        notifyVideoPauseController(false);
+        /*
+         * NOTE that activityManager onStart/onStop APIs are invoked only when
+         * Ambient Display (Settings --> Display --> Ambient Display) option is
+         * disabled. Below if check notifies VideoPauseController only when screen
+         * is interactive, thereby making power button interactions in a VT call
+         * independent of ActivityManager events and are taken care with
+         * ACTION_SCREEN_ON/ACTION_SCREEN_OFF intents.
+         */
+        if (isScreenInteractive()) {
+            notifyVideoPauseController(false);
+        } else {
+            Log.d(this, "Ignore Activity Stop as Screen is Off");
+            mIsScreenOff = true;
+        }
     }
 
     private void notifyVideoPauseController(boolean showing) {
@@ -974,6 +1023,13 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         // A dialog to show on top of the InCallUI to select a PhoneAccount
         final boolean showAccountPicker = (InCallState.WAITING_FOR_ACCOUNT == newState);
 
+        // Handle transition from InCallState.WAITING_FOR_ACCOUNT to InCallState.INCALL and
+        // and there is a call alive, this case can come for DSDA and hence we should show
+        // UI in such case.
+        final boolean showUiForDsda = (newState == InCallState.INCALL) &&
+                (mInCallState == InCallState.WAITING_FOR_ACCOUNT) && (mCallList.hasLiveCall() ||
+                (mCallList.getBackgroundCall() != null));
+
         // A new outgoing call indicates that the user just now dialed a number and when that
         // happens we need to display the screen immediately or show an account picker dialog if
         // no default is set. However, if the main InCallUI is already visible, we do not want to
@@ -987,8 +1043,7 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         // user with a top-level notification.  Just show the call UI normally.
         final boolean mainUiNotVisible = !isShowingInCallUi() || !getCallCardFragmentVisible();
         final boolean showCallUi = ((InCallState.PENDING_OUTGOING == newState ||
-                InCallState.OUTGOING == newState || ((newState == InCallState.INCALL) &&
-                (mInCallState == InCallState.WAITING_FOR_ACCOUNT))) && mainUiNotVisible);
+                InCallState.OUTGOING == newState || showUiForDsda) && mainUiNotVisible);
 
         // TODO: Can we be suddenly in a call without it having been in the outgoing or incoming
         // state?  I havent seen that but if it can happen, the code below should be enabled.
@@ -1135,6 +1190,8 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
             }
             mCallList = null;
 
+            mContext.unregisterReceiver(mReceiver);
+
             mContext = null;
             mInCallActivity = null;
 
@@ -1229,72 +1286,26 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
     }
 
     /**
-     * Handles changes to the device rotation.
+     * Notifies listeners of changes in orientation and notify calls of rotation angle change.
      *
-     * @param rotation The device rotation.
-     */
-    public void onDeviceRotationChange(int rotation) {
-        Log.d(this, "onDeviceRotationChange: rotation=" + rotation);
-        // First translate to rotation in degrees.
-        if (mCallList!=null) {
-            mCallList.notifyCallsOfDeviceRotation(toRotationAngle(rotation));
-        } else {
-            Log.w(this, "onDeviceRotationChange: CallList is null.");
-        }
-    }
-
-    /**
-     * Converts rotation constants to rotation in degrees.
-     * @param rotation Rotation constants.
-     */
-    public static int toRotationAngle(int rotation) {
-        int rotationAngle;
-        switch (rotation) {
-            case Surface.ROTATION_0:
-                rotationAngle = 0;
-                break;
-            case Surface.ROTATION_90:
-                rotationAngle = 90;
-                break;
-            case Surface.ROTATION_180:
-                rotationAngle = 180;
-                break;
-            case Surface.ROTATION_270:
-                rotationAngle = 270;
-                break;
-            default:
-                rotationAngle = 0;
-        }
-        return rotationAngle;
-    }
-
-    /**
-     * Notifies listeners of changes in orientation (e.g. portrait/landscape).
-     *
-     * @param orientation The orientation of the device.
+     * @param orientation The screen orientation of the device (one of :
+     * {@link InCallOrientationEventListener#SCREEN_ORIENTATION_0},
+     * {@link InCallOrientationEventListener#SCREEN_ORIENTATION_90},
+     * {@link InCallOrientationEventListener#SCREEN_ORIENTATION_180},
+     * {@link InCallOrientationEventListener#SCREEN_ORIENTATION_270}).
      */
     public void onDeviceOrientationChange(int orientation) {
+        Log.d(this, "onDeviceOrientationChange: orientation= " + orientation);
+
+        if (mCallList!=null) {
+            mCallList.notifyCallsOfDeviceRotation(orientation);
+        } else {
+            Log.w(this, "onDeviceOrientationChange: CallList is null.");
+        }
+
+        // Notify listeners of device orientation changed.
         for (InCallOrientationListener listener : mOrientationListeners) {
             listener.onDeviceOrientationChanged(orientation);
-        }
-    }
-
-    /**
-     * Configures the in-call UI activity so it can change orientations or not.
-     *
-     * @param allowOrientationChange {@code True} if the in-call UI can change between portrait
-     *      and landscape.  {@Code False} if the in-call UI should be locked in portrait.
-     */
-    public void setInCallAllowsOrientationChange(boolean allowOrientationChange) {
-        if (mInCallActivity == null) {
-            Log.e(this, "InCallActivity is null. Can't set requested orientation.");
-            return;
-        }
-
-        if (!allowOrientationChange) {
-            mInCallActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
-        } else {
-            mInCallActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
         }
     }
 
@@ -1324,6 +1335,41 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         if (mWakeLock != null && mWakeLock.isHeld()) {
             mWakeLock.release();
         }
+    }
+
+   /**
+     * Sets the orientation on the device to the orientation mode passed in
+     *
+     * @param orientationMode - The preferred screen orientation.
+     * @see ActivityInfo#ScreenOrientation
+     *
+     * Valid values are:
+     * {@link ActivityInfo#SCREEN_ORIENTATION_UNSPECIFIED},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_LANDSCAPE},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_PORTRAIT},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_USER},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_BEHIND},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_SENSOR},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_NOSENSOR},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_SENSOR_LANDSCAPE},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_SENSOR_PORTRAIT},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_REVERSE_LANDSCAPE},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_REVERSE_PORTRAIT},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_FULL_SENSOR},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_USER_LANDSCAPE},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_USER_PORTRAIT},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_FULL_USER},
+     * {@link ActivityInfo#SCREEN_ORIENTATION_LOCKED}
+     */
+    public void setOrientationMode(int orientationMode) {
+       if (mInCallActivity == null) {
+            Log.e(this, "InCallActivity is null. Can't set requested orientation mode");
+            return;
+        }
+
+        mInCallActivity.setRequestedOrientation(orientationMode);
+        mInCallActivity.enableInCallOrientationEventListener(
+                orientationMode == ActivityInfo.SCREEN_ORIENTATION_SENSOR);
     }
 
     public void enableScreenTimeout(boolean v) {

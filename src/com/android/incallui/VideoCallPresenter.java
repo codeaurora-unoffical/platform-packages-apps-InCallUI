@@ -28,7 +28,10 @@ import android.telecom.Connection;
 import android.telecom.Connection.VideoProvider;
 import android.telecom.InCallService.VideoCall;
 import android.telecom.VideoProfile;
+import android.telephony.TelephonyManager;
 import android.view.Surface;
+import android.widget.Toast;
+import android.os.Bundle;
 
 import com.android.contacts.common.CallUtil;
 import com.android.incallui.InCallPresenter.InCallDetailsListener;
@@ -45,6 +48,7 @@ import com.google.common.base.Preconditions;
 import java.util.Objects;
 
 import android.os.SystemProperties;
+import android.content.pm.ActivityInfo;
 
 /**
  * Logic related to the {@link VideoCallFragment} and for managing changes to the video calling
@@ -144,7 +148,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
     /**
      * Determines the device orientation (portrait/lanscape).
      */
-    private int mDeviceOrientation;
+    private int mDeviceOrientation = InCallOrientationEventListener.SCREEN_ORIENTATION_0;
 
     /**
      * Tracks the state of the preview surface negotiation with the telephony layer.
@@ -163,10 +167,14 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
 
     private static boolean mIsVideoMode = false;
 
+    // True if fragment/UI is not visible, false otherwise.
+    private boolean mIsInBackground = false;
     /**
      * Stores the current call substate.
      */
     private int mCurrentCallSubstate;
+
+    private static int mOrientationMode = Connection.ORIENTATION_MODE_DYNAMIC;
 
     /** Handler which resets request state to NO_REQUEST after an interval. */
     VideoCallHandler mSessionModificationResetHandler;
@@ -344,6 +352,11 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         }
     }
 
+    public void onFragmentUiShowing(boolean showing) {
+        Log.d(this, "onFragmentUiShowing showing = " + showing);
+        mIsInBackground = !showing;
+    }
+
     private void toggleFullScreen() {
         mIsFullScreen = !mIsFullScreen;
         InCallPresenter.getInstance().setFullScreenVideoState(mIsFullScreen);
@@ -448,6 +461,25 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
             InCallPresenter.getInstance().showDowngradeToast();
             exitVideoMode();
         }
+        showSessionModificationReasonInfo(getSessionModificationCause(call));
+    }
+
+    private static int getSessionModificationCause(Call call) {
+        if (call == null) {
+            return Connection.CAUSE_CODE_UNSPECIFIED;
+        }
+
+        final Bundle extras = call.getTelecommCall().getDetails().getExtras();
+        return extras != null ? extras.getInt(
+                Connection.KEY_SESSION_MODIFICATION_CAUSE, Connection.CAUSE_CODE_UNSPECIFIED) :
+                Connection.CAUSE_CODE_UNSPECIFIED;
+    }
+
+    private void showSessionModificationReasonInfo(int sessionModificationCause) {
+        VideoCallUi ui = getUi();
+        if (ui != null) {
+            ui.showSessionModificationReasonInfo(sessionModificationCause);
+        }
     }
 
     private void checkForCallStateChange(Call call) {
@@ -469,7 +501,9 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
 
         String newCameraId = cameraManager.getActiveCameraId();
 
-        if (!Objects.equals(prevCameraId, newCameraId) && CallUtils.isActiveVideoCall(call)) {
+        if (!Objects.equals(prevCameraId, newCameraId) &&
+                CallUtils.isActiveVideoCall(call) &&
+                isCameraRequired(call.getVideoState())) {
             enableCamera(call.getVideoCall(), true);
         }
     }
@@ -609,9 +643,10 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         }
     }
 
-    private static boolean isCameraRequired(int videoState) {
-        return VideoProfile.VideoState.isBidirectional(videoState) ||
-                VideoProfile.VideoState.isTransmissionEnabled(videoState);
+    private boolean isCameraRequired(int videoState) {
+        return (VideoProfile.VideoState.isBidirectional(videoState) ||
+                VideoProfile.VideoState.isTransmissionEnabled(videoState)) &&
+                !mIsInBackground;
     }
 
     private boolean isCameraRequired() {
@@ -631,7 +666,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         }
 
         showVideoUi(newVideoState);
-        InCallPresenter.getInstance().setInCallAllowsOrientationChange(true);
+        setInCallAllowsOrientationChange(true);
 
         // Communicate the current camera to telephony and make a request for the camera
         // capabilities.
@@ -641,11 +676,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
                 videoCall.setDisplaySurface(ui.getDisplayVideoSurface());
             }
 
-            final int rotation = ui.getCurrentRotation();
-            if (rotation != VideoCallFragment.ORIENTATION_UNKNOWN) {
-                videoCall.setDeviceOrientation(InCallPresenter.toRotationAngle(rotation));
-            }
-
+            videoCall.setDeviceOrientation(mDeviceOrientation);
             enableCamera(videoCall, isCameraRequired(newVideoState));
         }
         mCurrentVideoState = newVideoState;
@@ -758,7 +789,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
     private void exitVideoMode() {
         Log.d(this, "exitVideoMode");
 
-        InCallPresenter.getInstance().setInCallAllowsOrientationChange(false);
+        setInCallAllowsOrientationChange(false);
 
         showVideoUi(VideoProfile.VideoState.AUDIO_ONLY);
         enableCamera(mVideoCall, false);
@@ -855,9 +886,65 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
             Log.e(this, "Error VideoCallUi is null. Return.");
             return;
         }
+        if (mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_regional_noti_move_away_lte_video_call)) {
+            // When the VideoQuality changed, Check the network
+            TelephonyManager teleManager = (TelephonyManager) mContext
+                    .getSystemService(Context.TELEPHONY_SERVICE);
+            if (teleManager.getNetworkType() != TelephonyManager.NETWORK_TYPE_LTE) {
+                Toast.makeText(mContext,
+                        R.string.video_call_downgrade_without_lte_toast,
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
 
         // Display a video quality changed message on UI.
         ui.showVideoQualityChanged(videoQuality);
+    }
+
+   /**
+     * Handles any orientation mode changes in the call.
+     *
+     * @param orientationMode The new orientation mode of the device
+     */
+    @Override
+    public void onOrientationModeChanged(int orientationMode) {
+        Log.d(this, "onOrientationModeChanged orientation mode=" + orientationMode);
+        if (mOrientationMode != orientationMode) {
+            mOrientationMode = orientationMode;
+            InCallPresenter.getInstance().setOrientationMode(toUiOrientationMode(
+                    mOrientationMode));
+        }
+    }
+
+    /**
+     * Configures the in-call UI activity so it can change orientations or not. Also, enables
+     * or disables the in call orientation event listener based on allowOrientationChange
+     *
+     * @param allowOrientationChange {@code True} if the in-call UI can change between portrait
+     *      and landscape.  {@Code False} if the in-call UI should be locked in portrait.
+     */
+    private void setInCallAllowsOrientationChange(boolean allowOrientationChange) {
+        if (!allowOrientationChange) {
+            InCallPresenter.getInstance().setOrientationMode(
+                    ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+        } else {
+            InCallPresenter.getInstance().setOrientationMode(toUiOrientationMode(
+                    mOrientationMode));
+        }
+    }
+
+    private static int toUiOrientationMode(int orientationMode) {
+        switch(orientationMode) {
+            case Connection.ORIENTATION_MODE_LANDSCAPE:
+                return ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+            case Connection.ORIENTATION_MODE_PORTRAIT:
+                return ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+            case Connection.ORIENTATION_MODE_DYNAMIC:
+                return ActivityInfo.SCREEN_ORIENTATION_SENSOR;
+            default:
+                return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+        }
     }
 
     /**
@@ -922,7 +1009,9 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
             Log.e(this, "Call is not primary call");
             return;
         }
-        ui.updateZoomParams(maxZoom);
+        if (isZoomSupported) {
+            ui.updateZoomParams(maxZoom);
+        }
         enableZoomControl(isZoomSupported);
     }
 
@@ -972,13 +1061,22 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
 
     /**
      * Handles hanges to the device orientation.
-     * See: {@link Configuration.ORIENTATION_LANDSCAPE}, {@link Configuration.ORIENTATION_PORTRAIT}
-     * @param orientation The device orientation.
+     * @param orientation The screen orientation of the device (one of:
+     * {@link InCallOrientationEventListener#SCREEN_ORIENTATION_0},
+     * {@link InCallOrientationEventListener#SCREEN_ORIENTATION_90},
+     * {@link InCallOrientationEventListener#SCREEN_ORIENTATION_180},
+     * {@link InCallOrientationEventListener#SCREEN_ORIENTATION_270}).
      */
     @Override
     public void onDeviceOrientationChanged(int orientation) {
         Log.d(this, "onDeviceOrientationChanged: orientation=" + orientation);
         mDeviceOrientation = orientation;
+        VideoCallUi ui = getUi();
+        if (ui == null) {
+            Log.e(this, "onDeviceOrientationChanged: VideoCallUi is null");
+            return;
+        }
+        ui.setPreviewRotation(mDeviceOrientation);
     }
 
     @Override
@@ -1042,8 +1140,11 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
     }
 
     /**
-     * Sets the preview surface size based on the current device orientation.
-     * See: {@link Configuration.ORIENTATION_LANDSCAPE}, {@link Configuration.ORIENTATION_PORTRAIT}
+     * Sets the preview surface size and rotation based on the current device orientation.
+     * See: {@link InCallOrientationEventListener#SCREEN_ORIENTATION_0},
+     * {@link InCallOrientationEventListener#SCREEN_ORIENTATION_90},
+     * {@link InCallOrientationEventListener#SCREEN_ORIENTATION_180},
+     * {@link InCallOrientationEventListener#SCREEN_ORIENTATION_270}).
      *
      * @param orientation The device orientation.
      * @param aspectRatio The aspect ratio of the camera (width / height).
@@ -1057,7 +1158,8 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         int height;
         int width;
 
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        if (orientation == InCallOrientationEventListener.SCREEN_ORIENTATION_90 ||
+                orientation == InCallOrientationEventListener.SCREEN_ORIENTATION_270) {
             width = (int) (mMinimumVideoDimension * aspectRatio);
             height = (int) mMinimumVideoDimension;
         } else {
@@ -1209,5 +1311,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         void updateZoomParams(float maxZoom);
         void enableZoomControl(boolean enable);
         boolean isZoomControlShowing();
+        void showSessionModificationReasonInfo(int sessionModificationCause);
+        void setPreviewRotation(int orientation);
     }
 }

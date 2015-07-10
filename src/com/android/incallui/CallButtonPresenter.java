@@ -415,9 +415,7 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         final boolean enableHoldOption = call.can(PhoneCapabilities.HOLD);
         final boolean supportHold = call.can(PhoneCapabilities.SUPPORT_HOLD);
 
-        boolean canVideoCall = call.can(PhoneCapabilities.SUPPORTS_VT_LOCAL)
-                && call.can(PhoneCapabilities.SUPPORTS_VT_REMOTE)
-                && call.can(PhoneCapabilities.CALL_TYPE_MODIFIABLE);
+        final boolean canVideoCall = call.can(PhoneCapabilities.CALL_TYPE_MODIFIABLE);
         ui.showChangeToVideoButton(canVideoCall);
 
         final boolean showMergeOption = call.can(PhoneCapabilities.MERGE_CONFERENCE);
@@ -431,6 +429,8 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         //     (2) If the device doesn't have the concept of hold/swap, remove the button.
         final boolean showSwapOption = call.can(PhoneCapabilities.SWAP_CONFERENCE);
         final boolean showHoldOption = !showSwapOption && (enableHoldOption || supportHold);
+        ui.showHoldButton(showHoldOption);
+        ui.enableHold(enableHoldOption);
 
         boolean showRecordOption =
                 ((InCallActivity)((CallButtonFragment)ui).getActivity()).isCallRecorderEnabled();
@@ -464,7 +464,7 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         final boolean isOverflowScenario = !canVideoCall && showOverflowMenu;
 
         if (isVideoOverflowScenario) {
-            ui.showHoldButton(false);
+            ui.showChangeToVideoButton(false);
             ui.showSwapButton(false);
             ui.showAddCallButton(false);
             ui.showMergeButton(false);
@@ -474,10 +474,11 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
             ui.configureOverflowMenu(
                     showMergeOption,
                     showAddCallOption /* showAddMenuOption */,
-                    showHoldOption && enableHoldOption /* showHoldMenuOption */,
+                    false /* showHoldMenuOption */,
                     showSwapOption,
                     showAddParticipantOption,
-                    showManageVideoCallConferenceOption);
+                    showManageVideoCallConferenceOption,
+                    canVideoCall);
             ui.showOverflowButton(true);
         } else {
             if (isOverflowScenario) {
@@ -492,7 +493,8 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
                         false /* showHoldMenuOption */,
                         false /* showSwapMenuOption */,
                         showAddParticipantOption,
-                        showManageVideoCallConferenceOption);
+                        showManageVideoCallConferenceOption,
+                        false /* canVideoCall */);
             } else {
                 ui.showMergeButton(showMergeOption);
                 ui.showAddCallButton(showAddCallOption);
@@ -501,11 +503,18 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
             }
 
             ui.showOverflowButton(isOverflowScenario);
-            ui.showHoldButton(showHoldOption);
-            ui.enableHold(enableHoldOption);
             ui.showSwapButton(showSwapOption);
-
         }
+    }
+
+    public boolean hasVideoCapabilities() {
+        return mCall !=null && mCall.can(PhoneCapabilities.SUPPORTS_VT_LOCAL)
+                && mCall.can(PhoneCapabilities.SUPPORTS_VT_REMOTE);
+    }
+
+    public boolean hasVoiceCapabilities() {
+        return mCall !=null && mCall.can(PhoneCapabilities.SUPPORTS_DOWNGRADE_TO_VOICE_LOCAL)
+                && mCall.can(PhoneCapabilities.SUPPORTS_DOWNGRADE_TO_VOICE_REMOTE);
     }
 
     public void refreshMuteState() {
@@ -549,7 +558,8 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         void setSupportedAudio(int mask);
         void configureOverflowMenu(boolean showMergeMenuOption, boolean showAddMenuOption,
                 boolean showHoldMenuOption, boolean showSwapMenuOption,
-                boolean showAddParticipantOption, boolean showManageConferenceVideoCallOption);
+                boolean showAddParticipantOption, boolean showManageConferenceVideoCallOption,
+                boolean showModifyCallOption);
         Context getContext();
     }
 

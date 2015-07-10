@@ -131,7 +131,6 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
     private TextView mSecondaryCallName;
     private View mSecondaryCallProviderInfo;
     private TextView mSecondaryCallProviderLabel;
-    private ImageView mSecondaryCallProviderIcon;
     private View mSecondaryCallConferenceCallIcon;
     private View mProgressSpinner;
 
@@ -370,9 +369,21 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         if (!mIsRcsServiceInstalled) {
             return;
         }
-        int unRead = getPresenter().getUnReadMessageCount(mInCallActivity);
-        Log.d(LOG_TAG, "CallCardFragment: updateUnReadMessageCount(" + unRead + ")");
-        setUnReadMessageCount(unRead);
+        final Handler handler = new Handler();
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                final int unRead = getPresenter().getUnReadMessageCount(mInCallActivity);
+                Log.d(LOG_TAG, "CallCardFragment: updateUnReadMessageCount(" + unRead + ")");
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        setUnReadMessageCount(unRead);
+                    }
+                });
+            }
+        };
+        t.start();
     }
 
     public void onDestroyView() {
@@ -630,7 +641,6 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             mSecondaryCallName.setText(name);
             if (hasProvider) {
                 mSecondaryCallProviderLabel.setText(providerLabel);
-                mSecondaryCallProviderIcon.setImageDrawable(providerIcon);
             }
 
             int nameDirection = View.TEXT_DIRECTION_INHERIT;
@@ -823,9 +833,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             case Call.State.ACTIVE:
                 // We normally don't show a "call state label" at all in this state
                 // (but we can use the call state label to display the provider name).
-                if (isAccount) {
-                    callStateLabel = label;
-                } else if (sessionModificationState
+                if (sessionModificationState
                         == Call.SessionModificationState.REQUEST_FAILED) {
                     callStateLabel = context.getString(R.string.card_title_video_call_error);
                 } else if (sessionModificationState
@@ -834,10 +842,15 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
                 } else if (VideoProfile.VideoState.isVideo(videoState) &&
                         VideoProfile.VideoState.isPaused(videoState)) {
                     callStateLabel = context.getString(R.string.card_title_video_call_paused);
-                } else if (VideoProfile.VideoState.isBidirectional(videoState)) {
-                    callStateLabel = context.getString(R.string.card_title_video_call);
                 } else if (isWaitingForRemoteSide) {
                     callStateLabel = context.getString(R.string.accessibility_call_put_on_hold);
+                } else if (VideoProfile.VideoState.isBidirectional(videoState)) {
+                    callStateLabel = context.getString(R.string.card_title_video_call);
+                }
+
+                if (isAccount) {
+                   label += (callStateLabel != null) ? (" " + callStateLabel) : "";
+                   callStateLabel = label;
                 }
                 break;
             case Call.State.ONHOLD:
@@ -909,8 +922,6 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
                 mSecondaryCallProviderInfo.setVisibility(View.VISIBLE);
                 mSecondaryCallProviderLabel = (TextView) getView()
                         .findViewById(R.id.secondaryCallProviderLabel);
-                mSecondaryCallProviderIcon = (ImageView) getView()
-                        .findViewById(R.id.secondaryCallProviderIcon);
             }
         }
     }

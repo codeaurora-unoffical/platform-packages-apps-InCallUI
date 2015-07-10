@@ -184,6 +184,12 @@
     <string name="display_rich_screen">显示增强屏显？</string>
     <string name="rcs_missdnaddress_string">归属地：</string>
     <string name="rcs_greeting_string">问候语：</string>
+    <string name="call_state_dialing">正在拨号</string>
+    <string name="call_state_holding">保持</string>
+    <string name="call_state_active">正在通话</string>
+    <string name="call_state_unknown">未知</string>
+    <string name="call_state_disconnecting">正在挂断</string>
+    <string name="call_state_disconnected">通话结束</string>
     <string name="change_video_message">升级到视频电话。你希望视频通话吗</string>
     <string name="modify_call_option_title">通话类型</string>
     <string name="modify_call_prompt_yes">是</string>

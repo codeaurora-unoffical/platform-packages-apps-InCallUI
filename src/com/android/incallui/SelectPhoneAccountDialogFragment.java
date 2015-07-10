@@ -67,6 +67,9 @@ public class SelectPhoneAccountDialogFragment extends DialogFragment {
      */
     public static void showAccountDialog(FragmentManager fragmentManager,
             List<PhoneAccountHandle> accountHandles) {
+        if (fragmentManager.findFragmentByTag("selectAccount") != null) {
+            return;
+        }
         SelectPhoneAccountDialogFragment fragment =
                 new SelectPhoneAccountDialogFragment(accountHandles);
         fragment.show(fragmentManager, "selectAccount");
@@ -243,10 +246,10 @@ public class SelectPhoneAccountDialogFragment extends DialogFragment {
     }
 
     @Override
-    public void onPause() {
+    public void onStop() {
         if (!mIsSelected) {
             InCallPresenter.getInstance().cancelAccountSelection();
         }
-        super.onPause();
+        super.onStop();
     }
 }
