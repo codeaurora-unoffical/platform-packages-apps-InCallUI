@@ -791,7 +791,7 @@ public class InCallActivity extends Activity {
             showErrorDialog(getString(R.string.callFailed_incoming_cb_enabled));
         } else if (!TextUtils.isEmpty(disconnectCause.getDescription())
                 && (code == DisconnectCause.ERROR || code == DisconnectCause.RESTRICTED)) {
-            if (isConferenceDialString(call.getNumber())){
+            if (call.isConferenceCall()){
                 showErrorDialog(getString(R.string.dial_conference_call_error));
             } else {
                 final Context context = getApplicationContext();
@@ -844,16 +844,6 @@ public class InCallActivity extends Activity {
                         onDialogDismissed();
                     }}).create();
         mDialog.show();
-    }
-
-    private boolean isConferenceDialString(String number) {
-        if (number != null) {
-            String[] participantsArr = number.split(";");
-            if ((participantsArr != null) && (participantsArr.length > 1)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public void dismissPendingDialogs() {
