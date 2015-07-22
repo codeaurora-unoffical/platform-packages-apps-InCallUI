@@ -286,7 +286,6 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
                 }
             });
             mUnreadMessageCount = (TextView) view.findViewById(R.id.unreadMessageCount);
-            updateUnReadSmsCount();
         } else {
             mSendMessageView = view.findViewById(R.id.sendMessage);
             mSendMessageView.setVisibility(View.GONE);
@@ -360,9 +359,6 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         mRecordingTimeLabel = (TextView) view.findViewById(R.id.recordingTime);
         mRecordingIcon = (TextView) view.findViewById(R.id.recordingIcon);
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Sms.Intents.SMS_RECEIVED_ACTION);
-        mInCallActivity.registerReceiver(mSmsReceiver, filter);
     }
 
     private void updateUnReadSmsCount() {
@@ -387,7 +383,6 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
     }
 
     public void onDestroyView() {
-        mInCallActivity.unregisterReceiver(mSmsReceiver);
         super.onDestroyView();
     }
 
@@ -1108,9 +1103,6 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
                 updateFabPosition();
             }
         });
-        if (mIsRcsServiceInstalled) {
-            updateUnReadSmsCount();
-        }
         misEhanceScreenApkInstalled = isEnhanceScreenInstalled();
     }
 
@@ -1533,12 +1525,6 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         Log.i(this, "Is Enhance Screen installed ? " + installed);
         return installed;
     }
-
-    private BroadcastReceiver mSmsReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent data) {
-            updateUnReadSmsCount();
-        };
-    };
 
     private class MorePopupMenu extends PopupMenu implements PopupMenu.OnMenuItemClickListener {
         public MorePopupMenu(Context context, View anchor) {
