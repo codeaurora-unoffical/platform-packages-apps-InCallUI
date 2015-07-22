@@ -56,4 +56,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         Below config is used for the same
      -->
     <bool name="config_end_active_accept_incoming">false</bool>
+
+    <!-- When set to true, this config enables reading and displaying
+        the contents of EF_SDN present in SIM -->
+    <bool name="config_enable_displaying_sdn">false</bool>
 </resources>
