@@ -256,6 +256,10 @@ public class CallerInfoAsyncQuery {
                     } else {
                         mCallerInfo = CallerInfo.getCallerInfo(mQueryContext, mQueryUri, cursor);
                         Log.d(this, "==> Got mCallerInfo: " + mCallerInfo);
+                       // If caller info name not found in contacts callerInfoContactSearch
+                       // is true to continue search for fdn or sdn
+                        if (TextUtils.isEmpty(mCallerInfo.name))
+                            mCallerInfo.callerInfoContactSearch = true;
 
                         CallerInfo newCallerInfo = CallerInfo.doSecondaryLookupIfNecessary(
                                 mQueryContext, cw.number, mCallerInfo);
