@@ -31,24 +31,21 @@ import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.telecom.VideoProfile;
-import com.android.incallui.RcsApiManager;
 import com.suntek.mway.rcs.client.aidl.plugin.entity.richscrn.ResultInfo;
 import com.suntek.mway.rcs.client.aidl.plugin.entity.richscrn.RichScrnShowing;
-import com.suntek.mway.rcs.client.api.util.ServiceDisconnectedException;
-import com.suntek.mway.rcs.client.api.voip.impl.RichScreenApi;
-import com.suntek.mway.rcs.client.api.RCSServiceListener;
-import android.os.RemoteException;
+import com.suntek.mway.rcs.client.api.exception.ServiceDisconnectedException;
+import com.suntek.mway.rcs.client.api.richscreen.RichScreenApi;
+import com.suntek.rcs.ui.common.RcsLog;
 
 public class RcsRichScreen {
-    private static String TAG = "RCS_UI_RcsRichScreen";
     // those Strings is use for rcs enhance screen(phone event)
     // start a voice call
     private static String INITIATE_A_VOICE_CALL = "111 00 00000";
@@ -93,7 +90,7 @@ public class RcsRichScreen {
     private static final int RCS_VIDEO = 2;
 
     private static final int DEFAULT_NUMBER_LENGTH = 11;
-    // for RCS
+
     private SurfaceView msurface = null;
     MediaPlayer mediaPlayer;
     private SurfaceHolder surfaceholder;
@@ -126,7 +123,6 @@ public class RcsRichScreen {
 
             @Override
             public void surfaceDestroyed(SurfaceHolder arg0) {
-                // TODO Auto-generated method stub
                 if (mediaPlayer != null) {
                     mediaPlayer.release();
                 }
@@ -134,7 +130,6 @@ public class RcsRichScreen {
 
             @Override
             public void surfaceCreated(SurfaceHolder arg0) {
-                // TODO Auto-generated method stub
                 play(videoPath);
             }
 
@@ -164,7 +159,7 @@ public class RcsRichScreen {
             mediaPlayer.prepare();
             mediaPlayer.start();
         } catch (Exception e) {
-            Log.i(TAG, "play video wrong");
+            RcsLog.i("play video wrong");
         }
     }
 
@@ -180,7 +175,7 @@ public class RcsRichScreen {
         if(null == mediaPlayer){
             return ;
         }
-        Log.i(TAG, "stop the video");
+        RcsLog.i("stop the video");
         mediaPlayer.stop();
         mediaPlayer.release();
         mediaPlayer = null;
@@ -195,14 +190,14 @@ public class RcsRichScreen {
 
         if (mNumber != null) {
             try {
-                Log.i(TAG,
-                        "getRichScreenApi" + mNumber);
-                result = RcsApiManager.getRichScreenApi().getRichScrnObj(
-                        mNumber, PhoneEevnt);
-                Log.i(TAG, "result" + result);
-            } catch (ServiceDisconnectedException e) {
-                // TODO Auto-generated catch block
+                RcsLog.i("getRichScreenApi" + mNumber);
+                result = (RichScrnShowing)RichScreenApi.getInstance().getRichScrnObj(
+                        mNumber, PhoneEevnt).getResultObj();
+                RcsLog.i("result" + result);
+            } catch (RemoteException e) {
                 e.printStackTrace();
+            } catch (ServiceDisconnectedException e) {
+                RcsLog.w("ServiceDisconnectedException:" + e);
             }
         }
         getResultUtilInfo(result);
@@ -210,13 +205,13 @@ public class RcsRichScreen {
 
     private void getResultUtilInfo(final RichScrnShowing result) {
         if (result == null) {
-            Log.i(TAG, "getResultUtilInfo retult is null");
+            RcsLog.i("getResultUtilInfo retult is null");
             setRcsFragmentVisibleDefault();
             return;
         }
-        Log.i(TAG, "result.getGreeting()" + result.getGreeting());
-        Log.i(TAG, "result.getSourceType()" + result.getSourceType());
-        Log.i(TAG, "result.getSourceType()" + result.getLocalSourceUrl());
+        RcsLog.i("result.getGreeting()" + result.getGreeting());
+        RcsLog.i("result.getSourceType()" + result.getSourceType());
+        RcsLog.i("result.getSourceType()" + result.getLocalSourceUrl());
         mGreeting.setVisibility(View.GONE);
         mRcsPhoto.setVisibility(View.GONE);
         msurface.setVisibility(View.GONE);
@@ -240,12 +235,11 @@ public class RcsRichScreen {
         } else {
             missdnAddress.setVisibility(View.GONE);
             try {
-                Log.i(TAG, "getRichScreenApi.DownloadHomeLocRules"
-                        + RcsApiManager.getRichScreenApi());
-                RcsApiManager.getRichScreenApi().downloadHomeLocRules(
-                        mPhoneEevnt);
+                RcsLog.i("getRichScreenApi.DownloadHomeLocRules"
+                        + RichScreenApi.getInstance());
+                RichScreenApi.getInstance().downloadHomeLocRules(mPhoneEevnt);
             } catch (Exception e) {
-                Log.w(TAG,e);
+                RcsLog.w(e);
             }
         }
         String sorceType = result.getSourceType();
@@ -277,7 +271,7 @@ public class RcsRichScreen {
 
     public String getPhoneEventForRichScreen(int state, int videoState) {
         String phoneEevnt = INITIATE_A_VOICE_CALL;
-        Log.i(TAG, "PhoneEevnt:" + phoneEevnt);
+        RcsLog.i("PhoneEevnt:" + phoneEevnt);
         switch (state) {
         case Call.State.ACTIVE:
 
@@ -322,9 +316,9 @@ public class RcsRichScreen {
             }
             break;
         default:
-            Log.i(TAG, "updateCallStateWidgets: unexpected call: " + state);
+            RcsLog.i("updateCallStateWidgets: unexpected call: " + state);
         }
-        Log.i(TAG, "mPhoneEevnt:" + phoneEevnt);
+        RcsLog.i("mPhoneEevnt:" + phoneEevnt);
         return phoneEevnt;
     }
 
@@ -377,9 +371,9 @@ public class RcsRichScreen {
                 public void run() {
                     // TODO Auto-generated method stub
                     try {
-                        Log.i(TAG, "getRichScreenApi.downloadRichScreen:"
+                        RcsLog.i("getRichScreenApi.downloadRichScreen:"
                                 + mNumber);
-                        RcsApiManager.getRichScreenApi().downloadRichScrnObj(
+                        RichScreenApi.getInstance().downloadRichScrnObj(
                                 mNumber, mPhoneEevnt);
                     } catch (Exception e) {
                         // TODO Auto-generated catch block
@@ -389,9 +383,9 @@ public class RcsRichScreen {
             }, 1000);
         } else {
             String phoneEvent = getPhoneEventForRichScreen(state, videoState);
-            if (phoneEvent
-                    .equals(VIDEO_CALL_COMES_IN_THE_TERMINAL_STARTS_RINGING)) {
-                Log.i(TAG, "video call income do not set richscreen");
+            if (phoneEvent.equals(
+                    VIDEO_CALL_COMES_IN_THE_TERMINAL_STARTS_RINGING)) {
+                RcsLog.i("video call income do not set richscreen");
                 isGetRichScreenCompleted = true;
                 createComfirmDialogInVideCall(phoneEvent);
             }

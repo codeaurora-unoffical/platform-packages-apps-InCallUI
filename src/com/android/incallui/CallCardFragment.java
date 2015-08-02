@@ -75,12 +75,15 @@ import android.widget.Toast;
 
 import android.telecom.AudioState;
 import android.telecom.VideoProfile;
-import com.android.incallui.RcsApiManager;
 import com.android.contacts.common.widget.FloatingActionButtonController;
 import com.android.internal.telephony.util.BlacklistUtils;
 import com.android.phone.common.animation.AnimUtils;
 
 import java.util.List;
+
+import com.suntek.mway.rcs.client.api.basic.BasicApi;
+import com.suntek.mway.rcs.client.api.support.SupportApi;
+import com.suntek.rcs.ui.common.RcsLog;
 
 /**
  * Fragment for call card.
@@ -213,7 +216,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
 
         mInCallActivity = (InCallActivity)getActivity();
         misEhanceScreenApkInstalled = isEnhanceScreenInstalled();
-        mIsRcsServiceInstalled = RcsApiManager.isRcsServiceInstalled();
+        mIsRcsServiceInstalled = SupportApi.getInstance().isRcsSupported();
         if (mInCallActivity.isCallRecording()) {
             recorderHandler.sendEmptyMessage(MESSAGE_TIMER);
         }
@@ -1509,8 +1512,17 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
 
    // RCS support start
     private boolean isRcsAvailable() {
-        return RcsApiManager.isRcsServiceInstalled()
-                && RcsApiManager.isRcsOnline() && misEhanceScreenApkInstalled;
+        return SupportApi.getInstance().isRcsSupported()
+                && isRcsOnLine() && misEhanceScreenApkInstalled;
+    }
+
+    private boolean isRcsOnLine() {
+        try {
+            return BasicApi.getInstance().isOnline();
+        } catch (Exception e) {
+            RcsLog.w("Exception:" + e);
+            return false;
+        }
     }
 
     private boolean isEnhanceScreenInstalled() {
