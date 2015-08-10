@@ -675,7 +675,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         // connected and it's a video call.
         if (!isAudioRouteEnabled(currentAudioMode,
             AudioState.ROUTE_BLUETOOTH | AudioState.ROUTE_WIRED_HEADSET) &&
-            !isPrevAudioModeValid && enableSpeaker && CallUtils.isVideoCall(mPrimaryCall)) {
+            !isPrevAudioModeValid && enableSpeaker) {
             sPreVideoAudioMode = currentAudioMode;
 
             Log.d(this, "Routing audio to speaker");
