@@ -60,6 +60,8 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
     private final PhoneNumberService mPhoneNumberService;
     private final HashMap<String, ContactCacheEntry> mInfoMap = Maps.newHashMap();
     private final HashMap<String, Set<ContactInfoCacheCallback>> mCallBacks = Maps.newHashMap();
+    private final String FDN_URI = "content://icc/fdn";
+    private final String SDN_URI = "content://icc/sdn";
 
     private static ContactInfoCache sCache = null;
 
@@ -162,13 +164,12 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
      * callerinfo object.
      */
     private void findFdnContact(final Call call, final CallerInfo callerInfo,
-            final boolean isIncoming, final boolean didLocalLookup) {
+            final boolean isIncoming, final boolean didLocalLookup, final Uri uri) {
 
         AsyncQueryHandler queryHandler = new AsyncQueryHandler(mContext.getContentResolver()) {
 
             @Override
             protected void onQueryComplete(int token, Object cookie, Cursor c) {
-                callerInfo.fdnContactSearched = true;
                 if (c != null && c.getCount() > 0) {
                     c.moveToFirst();
                     String phoneNumber = getSeachableNumber(callerInfo.phoneNumber);
@@ -179,19 +180,26 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
                         if (phoneNumber.equals(number)) {
                             String name = c.getString(nameIndex);
                             Log.d(TAG, " found FDN contact name : " + name);
+                            callerInfo.isSdnSearch = true;
+                            callerInfo.callerInfoContactSearch = false;
                             callerInfo.name = name;
                             callerInfo.contactExists = true;
                             break;
                         }
                     } while (c.moveToNext());
                 }
+
+                if (!isIncoming) {
+                    callerInfo.isSdnSearch = true;
+                    callerInfo.callerInfoContactSearch = true;
+                }
+
                 if (c != null) {
                     c.close();
                 }
                 findInfoQueryComplete(call, callerInfo, isIncoming, didLocalLookup);
             }
         };
-        Uri uri = Uri.parse("content://icc/fdn");
         queryHandler.startQuery(0, null, uri, null, null, null, null);
     }
 
@@ -212,14 +220,30 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
 
     private void findInfoQueryComplete(Call call, CallerInfo callerInfo, boolean isIncoming,
             boolean didLocalLookup) {
-        if (!callerInfo.contactExists && !callerInfo.fdnContactSearched && isIncoming
-                && mContext.getResources()
-                    .getBoolean(com.android.internal.R.bool.config_fdn_contact_search)
-                && call.can(PhoneCapabilities.FDN_ENABLED)) {
-            Log.d(TAG, "Contact doesn't exist, initiating FDN contact search");
-            findFdnContact(call, callerInfo, isIncoming, didLocalLookup);
-            return;
+        if (TextUtils.isEmpty(callerInfo.name) && !callerInfo.contactExists
+                && callerInfo.callerInfoContactSearch) {
+            Uri uri = Uri.parse(FDN_URI);
+            if (isIncoming) {
+               if(call.can(PhoneCapabilities.FDN_ENABLED) && mContext.getResources()
+                            .getBoolean(com.android.internal.R.bool.config_fdn_contact_search)) {
+                   findFdnContact(call, callerInfo, isIncoming, didLocalLookup, uri);
+                   callerInfo.callerInfoContactSearch = false;
+                   return;
+               }
+            } else if (!callerInfo.isSdnSearch && mContext.getResources()
+                         .getBoolean(com.android.internal.R.bool.config_fdn_contact_search)){
+                findFdnContact(call, callerInfo, isIncoming, didLocalLookup, uri);
+                return;
+            } else if (callerInfo.isSdnSearch && mContext.getResources()
+                         .getBoolean(R.bool.config_enable_displaying_sdn)){
+                uri = Uri.parse(SDN_URI);
+                findFdnContact(call, callerInfo, isIncoming, didLocalLookup, uri);
+                callerInfo.callerInfoContactSearch = false;
+                callerInfo.isSdnSearch = false;
+                return;
+            }
         }
+
         final String callId = call.getId();
         int presentationMode = call.getNumberPresentation();
         if (callerInfo.contactExists || callerInfo.isEmergencyNumber() ||
