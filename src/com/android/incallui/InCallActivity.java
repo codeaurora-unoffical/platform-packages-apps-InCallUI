@@ -564,7 +564,7 @@ public class InCallActivity extends Activity {
                         touchPoint = (Point) extras.getParcelable(TouchPointManager.TOUCH_POINT);
                     }
                 }
-                mCallCardFragment.animateForNewOutgoingCall(touchPoint);
+                mCallCardFragment.setViewStatePostAnimation(null);
 
                 /*
                  * If both a phone account handle and a list of phone accounts to choose from are
