@@ -334,6 +334,10 @@ public class InCallActivity extends Activity {
     public void finish() {
         Log.d(this, "Skip finish().  Dialog showing: " + (mDialog != null));
 
+        if (mDialpadFragment != null) {
+            mDialpadFragment.setDtmfText(null);
+        }
+
         // skip finish if we are still showing a dialog.
         if (!hasPendingErrorDialog() && !mAnswerFragment.hasPendingDialogs()) {
             if (mDialpadFragment != null) {
