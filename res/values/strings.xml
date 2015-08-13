@@ -500,16 +500,16 @@
     <string name="accessibility_bluetooth_headset_selected">Bluetooth headset selected</string>
 
     <!-- String used by AccessibilityService to announce that the call has been muted [CHAR LIMIT=NONE]-->
-    <string name="accessibility_call_muted">Call muted.</string>
+    <string name="accessibility_call_muted">Call muted</string>
 
     <!-- String used by AccessibilityService to announce that the call has been unmuted [CHAR LIMIT=NONE]-->
-    <string name="accessibility_call_unmuted">Call unmuted.</string>
+    <string name="accessibility_call_unmuted">Call unmuted</string>
 
     <!-- String used by AccessibilityService to announce that the call has been put on hold [CHAR LIMIT=NONE]-->
-    <string name="accessibility_call_put_on_hold">Call put on hold.</string>
+    <string name="accessibility_call_put_on_hold">Call put on hold</string>
 
     <!-- String used by AccessibilityService to announce that the call has been removed from hold [CHAR LIMIT=NONE]-->
-    <string name="accessibility_call_removed_from_hold">Call removed from hold.</string>
+    <string name="accessibility_call_removed_from_hold">Call removed from hold</string>
 
     <!-- Description of the answer target in the Slide unlock screen of Phone. [CHAR LIMIT=12] -->
     <string name="description_target_answer">Answer</string>
