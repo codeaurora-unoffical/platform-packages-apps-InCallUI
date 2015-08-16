@@ -386,9 +386,10 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         CallList callList = CallList.getInstance();
         Call activeCall = callList.getActiveCall(), backgroundCall = callList.getBackgroundCall();
         boolean activeCallCanMerge  =
-                (activeCall != null) && activeCall.can(PhoneCapabilities.MERGE_CONFERENCE);
+                (activeCall != null) && activeCall.can(PhoneCapabilities.SHOW_MERGE_CONFERENCE);
         boolean backgroundCallCanMerge =
-                (backgroundCall != null) && backgroundCall.can(PhoneCapabilities.MERGE_CONFERENCE);
+                (backgroundCall != null) && backgroundCall.can(PhoneCapabilities.
+                SHOW_MERGE_CONFERENCE);
         String acId = (activeCall != null) ? activeCall.getId() : "null";
         String bcId = (backgroundCall != null) ? backgroundCall.getId() : "null";
         Log.v(this, "canShowMergeOption: " + acId + " " + activeCallCanMerge +
@@ -430,7 +431,8 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
                 && call.can(PhoneCapabilities.CALL_TYPE_MODIFIABLE);
         ui.showChangeToVideoButton(canVideoCall);
 
-        final boolean showMergeOption = canShowMergeOption();
+        final boolean showMergeOption = call.can(PhoneCapabilities.MERGE_CONFERENCE)
+                && canShowMergeOption();
         final boolean showAddCallOption = canAdd;
         final boolean showAddParticipantOption = call.can(PhoneCapabilities.ADD_PARTICIPANT);
         final boolean showManageVideoCallConferenceOption = call.can(
