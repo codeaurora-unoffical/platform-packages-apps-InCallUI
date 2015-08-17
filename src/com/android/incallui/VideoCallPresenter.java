@@ -350,6 +350,12 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         }
     }
 
+    public void validateAndOpenCamera() {
+        if (mPreviewSurfaceState == PreviewSurfaceState.NONE && isCameraRequired()){
+            enableCamera(mVideoCall, true);
+        }
+    }
+
     public void onFragmentUiShowing(boolean showing) {
         Log.d(this, "onFragmentUiShowing showing = " + showing);
         mIsInBackground = !showing;
