@@ -38,6 +38,19 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
     private Call mCall[] = new Call[CallList.PHONE_COUNT];
     private boolean mHasTextMessages = false;
 
+    void resetCallId () {
+        if (mCallId != null) {
+            for (int i = 0; i < mCallId.length; i++) {
+                mCallId[i] = null;
+            }
+        }
+        if (mCall != null) {
+            for (int i = 0; i < mCall.length; i++) {
+                mCall[i] = null;
+            }
+        }
+    }
+
     @Override
     public void onUiReady(AnswerUi ui) {
         Log.d(this, "onUiReady ui=" + ui);

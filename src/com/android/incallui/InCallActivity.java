@@ -340,6 +340,10 @@ public class InCallActivity extends Activity {
 
         // skip finish if we are still showing a dialog.
         if (!hasPendingErrorDialog() && !mAnswerFragment.hasPendingDialogs()) {
+            if (mDialpadFragment != null) {
+                mDialpadFragment.setDtmfText("");
+            }
+            mAnswerFragment.getPresenter().resetCallId();
             moveTaskToBack(true);
         }
     }
