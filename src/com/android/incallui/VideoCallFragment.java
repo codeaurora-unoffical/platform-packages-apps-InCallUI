@@ -571,6 +571,12 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
     public void onResume() {
         super.onResume();
         Log.d(this, "onResume:");
+
+        if (getPresenter() != null) {
+            getPresenter().validateAndOpenCamera();
+        } else {
+            Log.e(this, "onResume: Presenter is null");
+        }
     }
 
     @Override
