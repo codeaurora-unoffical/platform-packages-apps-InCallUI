@@ -175,18 +175,20 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
                     String phoneNumber = getSeachableNumber(callerInfo.phoneNumber);
                     int numberIndex = c.getColumnIndex("number");
                     int nameIndex = c.getColumnIndex("name");
-                    do {
-                        String number = getSeachableNumber(c.getString(numberIndex));
-                        if (phoneNumber.equals(number)) {
-                            String name = c.getString(nameIndex);
-                            Log.d(TAG, " found FDN contact name : " + name);
-                            callerInfo.isSdnSearch = true;
-                            callerInfo.callerInfoContactSearch = false;
-                            callerInfo.name = name;
-                            callerInfo.contactExists = true;
-                            break;
-                        }
-                    } while (c.moveToNext());
+                    if (!TextUtils.isEmpty(phoneNumber)) {
+                        do {
+                            String number = getSeachableNumber(c.getString(numberIndex));
+                            if (phoneNumber.equals(number)) {
+                                String name = c.getString(nameIndex);
+                                Log.d(TAG, " found FDN contact name : " + name);
+                                callerInfo.isSdnSearch = true;
+                                callerInfo.callerInfoContactSearch = false;
+                                callerInfo.name = name;
+                                callerInfo.contactExists = true;
+                                break;
+                            }
+                        } while (c.moveToNext());
+                    }
                 }
 
                 if (!isIncoming) {
