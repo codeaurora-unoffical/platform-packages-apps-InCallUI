@@ -454,6 +454,8 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         if (isActivityStarted()) {
             mInCallActivity.dismissKeyguard(false);
         }
+
+        wakeUpScreen();
     }
 
     /**
