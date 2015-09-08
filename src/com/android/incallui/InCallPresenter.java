@@ -1393,7 +1393,10 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
      * @return The space beside the call card.
      */
     public float getSpaceBesideCallCard() {
-        return mInCallActivity.getCallCardFragment().getSpaceBesideCallCard();
+        if (mInCallActivity != null && mInCallActivity.getCallCardFragment() != null) {
+            return mInCallActivity.getCallCardFragment().getSpaceBesideCallCard();
+        }
+        return 0;
     }
 
     /**
@@ -1402,14 +1405,14 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
      * @return True if the call card fragment is visible.
      */
     public boolean getCallCardFragmentVisible() {
-        if (mInCallActivity != null) {
+        if (mInCallActivity != null && mInCallActivity.getCallCardFragment() != null) {
             return mInCallActivity.getCallCardFragment().isVisible();
         }
         return false;
     }
 
     public void setCallCardFragmentVisible(boolean visible) {
-        if (mInCallActivity != null) {
+        if (mInCallActivity != null && mInCallActivity.getCallCardFragment() != null) {
             mInCallActivity.getCallCardFragment().setVisible(visible);
         }
     }
@@ -1495,10 +1498,14 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
     }
 
     public void showModifyCallConsentDialog() {
-        mInCallActivity.getCallCardFragment().showModifyCallConsentDialog();
+        if (mInCallActivity != null && mInCallActivity.getCallCardFragment() != null) {
+            mInCallActivity.getCallCardFragment().showModifyCallConsentDialog();
+        }
     }
 
     public void showDowngradeToast() {
-        mInCallActivity.getCallCardFragment().showDowngradeToast();
+        if (mInCallActivity != null && mInCallActivity.getCallCardFragment() != null) {
+            mInCallActivity.getCallCardFragment().showDowngradeToast();
+        }
     }
 }
