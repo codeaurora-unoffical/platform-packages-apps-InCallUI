@@ -912,7 +912,7 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
                 (mCallList.getDisconnectingCall() == null)) {
             isAutoAnswer = (mInCallState == InCallState.INCOMING) &&
                                (newState == InCallState.INCALL) &&
-                               (mInCallActivity == null);
+                               !isShowingInCallUi();
         }
 
         Log.d(this, "startOrFinishUi: " + isAutoAnswer);
