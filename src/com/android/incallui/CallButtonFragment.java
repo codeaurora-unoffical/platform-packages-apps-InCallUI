@@ -303,6 +303,11 @@ public class CallButtonFragment
     }
 
     @Override
+    public void enableAddCallButton(boolean enabled) {
+        mAddCallButton.setEnabled(enabled);
+    }
+
+    @Override
     public void showSwapButton(boolean show) {
         mSwapButton.setVisibility(show ? View.VISIBLE : View.GONE);
     }

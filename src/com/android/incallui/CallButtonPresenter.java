@@ -431,6 +431,8 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         final boolean showHoldOption = !showSwapOption && (enableHoldOption || supportHold);
         ui.showHoldButton(showHoldOption);
         ui.enableHold(enableHoldOption);
+        ui.enableAddCallButton((call.getState() == Call.State.ACTIVE)
+                || (call.getState() == Call.State.ONHOLD));
 
         boolean showRecordOption =
                 ((InCallActivity)((CallButtonFragment)ui).getActivity()).isCallRecorderEnabled();
@@ -539,6 +541,7 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         void setHold(boolean on);
         void showHoldButton(boolean show);
         void enableHold(boolean enabled);
+        void enableAddCallButton(boolean enabled);
         void showSwapButton(boolean show);
         void showChangeToVideoButton(boolean show);
         void showSwitchCameraButton(boolean show);
