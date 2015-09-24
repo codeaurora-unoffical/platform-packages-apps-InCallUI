@@ -376,9 +376,9 @@ public class CallerInfoAsyncQuery {
         boolean isEmergencyNumber = true;
         String maskEmergencyNumber = context.getResources()
                 .getString(R.string.mask_emergency_number);
-        if (!TextUtils.isEmpty(maskEmergencyNumber)) {
-            if(info.phoneNumber.equals(maskEmergencyNumber))
-                isEmergencyNumber = false;
+        if (!TextUtils.isEmpty(maskEmergencyNumber)
+                && info.phoneNumber.equals(maskEmergencyNumber)) {
+            isEmergencyNumber = false;
         } else {
             isEmergencyNumber = PhoneNumberUtils.isLocalEmergencyNumber(context, info.phoneNumber);
         }
