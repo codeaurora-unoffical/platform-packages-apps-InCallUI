@@ -30,6 +30,7 @@
         android:elevation="@dimen/primary_call_elevation"
         android:background="@color/incall_call_banner_background_color"
         android:paddingTop="@dimen/call_banner_primary_call_container_top_padding"
+        android:alpha="0.5"
         android:clipChildren="false"
         android:clipToPadding="false" >
 
