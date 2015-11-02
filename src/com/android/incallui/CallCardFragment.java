@@ -448,17 +448,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
                 float videoViewTranslation = 0f;
 
                 // Translate the call card to its pre-animation state.
-                if (mIsLandscape) {
-                    float translationX = mPrimaryCallCardContainer.getWidth();
-                    translationX *= isLayoutRtl ? 1 : -1;
-
-                    mPrimaryCallCardContainer.setTranslationX(visible ? translationX : 0);
-
-                    if (visible) {
-                        videoViewTranslation = videoView.getWidth() / 2 - spaceBesideCallCard / 2;
-                        videoViewTranslation *= isLayoutRtl ? -1 : 1;
-                    }
-                } else {
+                if (!mIsLandscape) {
                     mPrimaryCallCardContainer.setTranslationY(visible ?
                             -mPrimaryCallCardContainer.getHeight() : 0);
 
