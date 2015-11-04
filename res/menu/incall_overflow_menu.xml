@@ -50,4 +50,15 @@
 
     <item android:id="@+id/overflow_modify_call_menu_item"
           android:title="@string/overflowModifyCallMenuItemText" />
+
+    <!-- Add for enhance videocall ui-->
+    <item android:id="@+id/overflow_both_call_menu_item"
+          android:title="@string/overflowBothCallMenuItemText" />
+
+    <item android:id="@+id/overflow_rx_call_menu_item"
+          android:title="@string/overflowRXCallMenuItemText" />
+
+    <item android:id="@+id/overflow_vo_call_menu_item"
+          android:title="@string/overflowVOCallMenuItemText" />
+
 </menu>

@@ -89,6 +89,7 @@ public class CallList implements InCallPhoneListener {
             if (call.getState() == Call.State.INCOMING ||
                     call.getState() == Call.State.CALL_WAITING) {
                 onIncoming(call, call.getCannedSmsResponses());
+                call.setOutgoingCallState(false);
             } else {
                 onUpdate(call);
             }

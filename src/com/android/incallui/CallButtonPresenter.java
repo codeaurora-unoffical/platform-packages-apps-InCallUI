@@ -431,8 +431,15 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         //     (2) If the device doesn't have the concept of hold/swap, remove the button.
         final boolean showSwapOption = call.can(PhoneCapabilities.SWAP_CONFERENCE);
         final boolean showHoldOption = !showSwapOption && (enableHoldOption || supportHold);
-        ui.showHoldButton(showHoldOption);
-        ui.enableHold(enableHoldOption);
+
+        if (ui.getContext().getResources().getBoolean(
+                                                 R.bool.config_enable_enhance_video_call_ui)) {
+            ui.showHoldButton(false);
+            ui.enableHold(false);
+        } else {
+            ui.showHoldButton(showHoldOption);
+            ui.enableHold(enableHoldOption);
+        }
 
         boolean showRecordOption =
                 ((InCallActivity)((CallButtonFragment)ui).getActivity()).isCallRecorderEnabled();
@@ -465,6 +472,30 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         final boolean isVideoOverflowScenario = canVideoCall && showOverflowMenu;
         final boolean isOverflowScenario = !canVideoCall && showOverflowMenu;
 
+        boolean showBoth = false;
+        boolean showRx = false;
+        boolean showVo = false;
+        if (ui.getContext().getResources().getBoolean(
+                                                 R.bool.config_enable_enhance_video_call_ui)) {
+
+            if (getCurrentVideoState() == VideoProfile.VideoState.RX_ENABLED ||
+                       getCurrentVideoState() == VideoProfile.VideoState.AUDIO_ONLY) {
+                showBoth = true;
+            }
+            if (getCurrentVideoState() == VideoProfile.VideoState.BIDIRECTIONAL ||
+                       getCurrentVideoState() == VideoProfile.VideoState.AUDIO_ONLY) {
+                showRx = true;
+            }
+            if (getCurrentVideoState() == VideoProfile.VideoState.RX_ENABLED ||
+                       getCurrentVideoState() == VideoProfile.VideoState.TX_ENABLED ||
+                       getCurrentVideoState() == VideoProfile.VideoState.BIDIRECTIONAL) {
+                showVo = true;
+            }
+        }
+
+        final boolean isEnhanceUIEnabled = ui.getContext().getResources().getBoolean(
+                                             R.bool.config_enable_enhance_video_call_ui);
+
         if (isVideoOverflowScenario) {
             ui.showChangeToVideoButton(false);
             ui.showSwapButton(false);
@@ -476,11 +507,14 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
             ui.configureOverflowMenu(
                     showMergeOption,
                     showAddCallOption /* showAddMenuOption */,
-                    false /* showHoldMenuOption */,
+                    isEnhanceUIEnabled ? true : false /* showHoldMenuOption */,
                     showSwapOption,
-                    showAddParticipantOption,
+                    isEnhanceUIEnabled ? false : showAddParticipantOption,
                     showManageVideoCallConferenceOption,
-                    canVideoCall);
+                    isEnhanceUIEnabled ? false : canVideoCall,
+                    showBoth,
+                    showRx,
+                    showVo);
             ui.showOverflowButton(true);
         } else {
             if (isOverflowScenario) {
@@ -492,11 +526,14 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
                 ui.configureOverflowMenu(
                         showMergeOption,
                         showAddCallOption /* showAddMenuOption */,
-                        false /* showHoldMenuOption */,
+                        isEnhanceUIEnabled ? true : false /* showHoldMenuOption */,
                         false /* showSwapMenuOption */,
-                        showAddParticipantOption,
+                        isEnhanceUIEnabled ? false : showAddParticipantOption,
                         showManageVideoCallConferenceOption,
-                        false /* canVideoCall */);
+                        false /* canVideoCall */,
+                        showBoth,
+                        showRx,
+                        showVo);
             } else {
                 ui.showMergeButton(showMergeOption);
                 ui.showAddCallButton(showAddCallOption);
@@ -551,7 +588,8 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         void configureOverflowMenu(boolean showMergeMenuOption, boolean showAddMenuOption,
                 boolean showHoldMenuOption, boolean showSwapMenuOption,
                 boolean showAddParticipantOption, boolean showManageConferenceVideoCallOption,
-                boolean showModifyCallOption);
+                boolean showModifyCallOption,boolean showBothMenuOption, boolean showRXMenuOption,
+                boolean showVoMenuOption);
         Context getContext();
     }
 
