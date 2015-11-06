@@ -43,6 +43,7 @@ import android.widget.PopupMenu.OnDismissListener;
 import android.widget.PopupMenu.OnMenuItemClickListener;
 
 import com.android.contacts.common.util.MaterialColorMapUtils.MaterialPalette;
+import org.codeaurora.ims.qtiims.QtiImsInterfaceUtils;
 
 /**
  * Fragment for call control buttons
@@ -72,7 +73,10 @@ public class CallButtonFragment
         public static final int BUTTON_MERGE = 8;
         public static final int BUTTON_PAUSE_VIDEO = 9;
         public static final int BUTTON_MANAGE_VIDEO_CONFERENCE = 10;
-        public static final int BUTTON_COUNT = 11;
+        public static final int BUTTON_TRANSFER_BLIND = 11;
+        public static final int BUTTON_TRANSFER_ASSURED = 12;
+        public static final int BUTTON_TRANSFER_CONSULTATIVE = 13;
+        public static final int BUTTON_COUNT = 14;
     }
 
     private SparseIntArray mButtonVisibilityMap = new SparseIntArray(BUTTON_COUNT);
@@ -90,6 +94,9 @@ public class CallButtonFragment
     private ImageButton mOverflowButton;
     private ImageButton mManageVideoCallConferenceButton;
     private ImageButton mAddParticipantButton;
+    private ImageButton mBlindTransferButton;
+    private ImageButton mAssuredTransferButton;
+    private ImageButton mConsultativeTransferButton;
 
     private PopupMenu mAudioModePopup;
     private boolean mAudioModePopupVisible;
@@ -153,6 +160,12 @@ public class CallButtonFragment
         mPauseVideoButton.setOnClickListener(this);
         mAddParticipantButton = (ImageButton) parent.findViewById(R.id.addParticipant);
         mAddParticipantButton.setOnClickListener(this);
+        mBlindTransferButton = (ImageButton) parent.findViewById(R.id.blindTransfer);
+        mBlindTransferButton.setOnClickListener(this);
+        mAssuredTransferButton = (ImageButton) parent.findViewById(R.id.assuredTransfer);
+        mAssuredTransferButton.setOnClickListener(this);
+        mConsultativeTransferButton = (ImageButton) parent.findViewById(R.id.consultativeTransfer);
+        mConsultativeTransferButton.setOnClickListener(this);
         mOverflowButton = (ImageButton) parent.findViewById(R.id.overflowButton);
         mOverflowButton.setOnClickListener(this);
         mManageVideoCallConferenceButton = (ImageButton) parent.findViewById(
@@ -231,6 +244,16 @@ public class CallButtonFragment
             case R.id.manageVideoCallConferenceButton:
                 onManageVideoCallConferenceClicked();
                 break;
+            case R.id.blindTransfer:
+                getPresenter().callTransferClicked(QtiImsInterfaceUtils.QTI_IMS_BLIND_TRANSFER);
+                break;
+            case R.id.assuredTransfer:
+                getPresenter().callTransferClicked(QtiImsInterfaceUtils.QTI_IMS_ASSURED_TRANSFER);
+                break;
+            case R.id.consultativeTransfer:
+                getPresenter().callTransferClicked(
+                        QtiImsInterfaceUtils.QTI_IMS_CONSULTATIVE_TRANSFER);
+                break;
             default:
                 Log.wtf(this, "onClick: unexpected");
                 return;
@@ -268,6 +291,9 @@ public class CallButtonFragment
             mChangeToVideoButton,
             mAddCallButton,
             mMergeButton,
+            mBlindTransferButton,
+            mAssuredTransferButton,
+            mConsultativeTransferButton,
             mOverflowButton
         };
 
@@ -362,6 +388,9 @@ public class CallButtonFragment
         mOverflowButton.setEnabled(isEnabled);
         mManageVideoCallConferenceButton.setEnabled(isEnabled);
         mAddParticipantButton.setEnabled(isEnabled);
+        mBlindTransferButton.setEnabled(isEnabled);
+        mAssuredTransferButton.setEnabled(isEnabled);
+        mConsultativeTransferButton.setEnabled(isEnabled);
     }
 
     @Override
@@ -401,6 +430,12 @@ public class CallButtonFragment
                 return mPauseVideoButton;
             case BUTTON_MANAGE_VIDEO_CONFERENCE:
                 return mManageVideoCallConferenceButton;
+            case BUTTON_TRANSFER_BLIND:
+                return mBlindTransferButton;
+            case BUTTON_TRANSFER_ASSURED:
+                return mAssuredTransferButton;
+            case BUTTON_TRANSFER_CONSULTATIVE:
+                return mConsultativeTransferButton;
             default:
                 Log.w(this, "Invalid button id");
                 return null;
@@ -429,6 +464,22 @@ public class CallButtonFragment
 
     public void enableAddParticipant(boolean show) {
         mAddParticipantButton.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    public void enableCallTransfer(int enable) {
+        if ((enable & QtiImsInterfaceUtils.QTI_IMS_CONSULTATIVE_TRANSFER) != 0) {
+            showButton(BUTTON_TRANSFER_BLIND, true);
+            showButton(BUTTON_TRANSFER_ASSURED, true);
+            showButton(BUTTON_TRANSFER_CONSULTATIVE, true);
+        } else if ((enable & QtiImsInterfaceUtils.QTI_IMS_BLIND_TRANSFER) != 0) {
+            showButton(BUTTON_TRANSFER_BLIND, true);
+            showButton(BUTTON_TRANSFER_ASSURED, true);
+            showButton(BUTTON_TRANSFER_CONSULTATIVE, false);
+        } else {
+            showButton(BUTTON_TRANSFER_BLIND, false);
+            showButton(BUTTON_TRANSFER_ASSURED, false);
+            showButton(BUTTON_TRANSFER_CONSULTATIVE, false);
+        }
     }
 
     @Override
