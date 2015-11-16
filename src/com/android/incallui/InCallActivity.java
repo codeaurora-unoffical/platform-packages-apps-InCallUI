@@ -263,6 +263,13 @@ public class InCallActivity extends Activity {
 
         if (mDialpadFragment != null ) {
             mDialpadFragment.onDialerKeyUp(null);
+            if (!mDialpadFragment.isVisible()) {
+                final FragmentTransaction loadTransaction =
+                        mChildFragmentManager.beginTransaction();
+                loadTransaction.remove(mDialpadFragment);
+                loadTransaction.commit();
+                mDialpadFragment = null;
+            }
         }
 
         InCallPresenter.getInstance().onUiShowing(false);

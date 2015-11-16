@@ -324,6 +324,9 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
     }
 
     private void toggleFullScreen() {
+        if (InCallPresenter.getInstance().isDialpadVisible()) {
+            return;
+        }
         mIsFullScreen = !mIsFullScreen;
         InCallPresenter.getInstance().setFullScreenVideoState(mIsFullScreen);
     }
