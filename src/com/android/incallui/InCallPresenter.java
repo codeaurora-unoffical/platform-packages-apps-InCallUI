@@ -1395,4 +1395,11 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
     public void showDowngradeToast() {
         mInCallActivity.getCallCardFragment().showDowngradeToast();
     }
+
+    public boolean isDialpadVisible() {
+        if (mInCallActivity == null) {
+            return false;
+        }
+        return mInCallActivity.isDialpadVisible();
+    }
 }
