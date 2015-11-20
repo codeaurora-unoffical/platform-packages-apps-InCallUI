@@ -1021,7 +1021,6 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
             return;
         }
 
-        mPreviewSurfaceState = PreviewSurfaceState.CAPABILITIES_RECEIVED;
         ui.setPreviewSurfaceSize(width, height);
 
         // Configure the preview surface to the correct aspect ratio.
@@ -1030,6 +1029,13 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
             aspectRatio = (float) width / (float) height;
         }
         setPreviewSize(mDeviceOrientation, aspectRatio);
+
+        if (mPreviewSurfaceState == PreviewSurfaceState.NONE) {
+            Log.w(this, "Received camera capabilities when camera is closed");
+            return;
+        }
+
+        mPreviewSurfaceState = PreviewSurfaceState.CAPABILITIES_RECEIVED;
 
         // Check if the preview surface is ready yet; if it is, set it on the {@code VideoCall}.
         // If it not yet ready, it will be set when when creation completes.
