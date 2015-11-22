@@ -418,13 +418,12 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
      */
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
         mIsLandscape = getResources().getConfiguration().orientation
                 == Configuration.ORIENTATION_LANDSCAPE;
-
         Log.d(this, "onActivityCreated: IsLandscape=" + mIsLandscape);
         getPresenter().init(getActivity());
+
+        super.onActivityCreated(savedInstanceState);
     }
 
     /**
