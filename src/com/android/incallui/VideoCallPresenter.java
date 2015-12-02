@@ -1116,7 +1116,11 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
             Log.e(this, "onCallDataUsageChange: VideoCallUi is null");
             return;
         }
-        ui.setCallDataUsage(mContext, dataUsage);
+
+        if (mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_display_data_usage_toast)) {
+            ui.setCallDataUsage(mContext, dataUsage);
+        }
     }
 
     /**
