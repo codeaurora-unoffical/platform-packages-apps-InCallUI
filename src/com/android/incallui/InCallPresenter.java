@@ -1361,4 +1361,11 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
     public interface InCallEventListener {
         public void onFullScreenVideoStateChanged(boolean isFullScreenVideo);
     }
+
+    public boolean isDialpadVisible() {
+        if (mInCallActivity == null) {
+            return false;
+        }
+        return mInCallActivity.isDialpadVisible();
+    }
 }
