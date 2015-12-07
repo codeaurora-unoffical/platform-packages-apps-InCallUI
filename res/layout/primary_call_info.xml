@@ -68,7 +68,6 @@
             android:textColor="@color/incall_accent_color"
             android:textSize="@dimen/call_status_text_size"
             android:alpha="0.7"
-            android:singleLine="true"
             android:gravity="start"
             android:ellipsize="end" />
     </LinearLayout>
