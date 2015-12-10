@@ -994,6 +994,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
 
         call.setSessionModificationState(
                 Call.SessionModificationState.RECEIVED_UPGRADE_TO_VIDEO_REQUEST);
+        new VideoCallTonePlayer().playUpgradeToVideoRequestTone();
     }
 
     @Override
