@@ -602,6 +602,8 @@ public class InCallActivity extends Activity {
         boolean error = CallUtils.hasCallModifyFailed(call);
         int callType = CallUtils.getProposedCallType(call);
         if (!error) {
+            //Play beep tone
+            new VideoCallTonePlayer().playUpgradeToVideoRequestTone();
             String str = getResources().getString(R.string.accept_modify_call_request_prompt);
             if (callType == CallDetails.CALL_TYPE_VT) {
                 str = getResources().getString(R.string.upgrade_vt_prompt);
