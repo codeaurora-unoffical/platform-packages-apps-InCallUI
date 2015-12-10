@@ -1132,6 +1132,8 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         }
 
         mVideoCallHandler.removeMessages(EVENT_CLEAR_SESSION_MODIFY_REQUEST);
+
+        new VideoCallTonePlayer().playUpgradeToVideoRequestTone();
         call.setSessionModificationTo(videoState);
     }
 
