@@ -417,7 +417,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
                 " isVideoMode=" + isVideoMode());
 
         if (newState == InCallPresenter.InCallState.NO_CALLS) {
-            updateAudioMode(false);
+            updateAudioMode(false, Call.State.IDLE);
 
             if (isVideoMode()) {
                 exitVideoMode();
@@ -500,7 +500,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         updateCameraSelection(call);
 
         if (isVideoCall) {
-            enterVideoMode(call.getVideoCall(), call.getVideoState());
+            enterVideoMode(call);
         } else if (isVideoMode()) {
             exitVideoMode();
         }
@@ -565,13 +565,14 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
             // Terminate video mode if new primary call is not a video call
             // and we are currently in video mode.
             Log.d(this, "onPrimaryCallChanged: Exiting video mode...");
-            updateAudioMode(false);
+            updateAudioMode(false, (newPrimaryCall != null) ? newPrimaryCall.getState() :
+                    Call.State.IDLE);
             exitVideoMode();
         } else if (isVideoCall) {
             Log.d(this, "onPrimaryCallChanged: Entering video mode...");
 
             updateCameraSelection(newPrimaryCall);
-            enterVideoMode(newPrimaryCall.getVideoCall(), newPrimaryCall.getVideoState());
+            enterVideoMode(newPrimaryCall);
         }
     }
 
@@ -662,7 +663,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         }
 
         if (CallUtils.isVideoCall(call) && hasChanged) {
-            enterVideoMode(call.getVideoCall(), call.getVideoState());
+            enterVideoMode(call);
         }
     }
 
@@ -680,8 +681,11 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
      * Enters video mode by showing the video surfaces and making other adjustments (eg. audio).
      * TODO(vt): Need to adjust size and orientation of preview surface here.
      */
-    private void enterVideoMode(VideoCall videoCall, int newVideoState) {
+    private void enterVideoMode(Call call) {
+        VideoCall videoCall = call.getVideoCall();
+        int newVideoState = call.getVideoState();
         Log.d(this, "enterVideoMode videoCall= " + videoCall + " videoState: " + newVideoState);
+
         VideoCallUi ui = getUi();
         if (ui == null) {
             Log.e(this, "Error VideoCallUi is null so returning");
@@ -703,12 +707,12 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
             enableCamera(videoCall, isCameraRequired(newVideoState));
         }
         mCurrentVideoState = newVideoState;
-        updateAudioMode(true);
+        updateAudioMode(true, call.getState());
 
         mIsVideoMode = true;
     }
 
-    private void updateAudioMode(boolean enableSpeaker) {
+    private void updateAudioMode(boolean enableSpeaker, int state) {
         if (!isSpeakerEnabledForVideoCalls()) {
             Log.d(this, "Speaker is disabled. Can't update audio mode");
             return;
@@ -719,7 +723,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
             sPreVideoAudioMode != AudioModeProvider.AUDIO_MODE_INVALID;
 
         Log.d(this, "Is previous audio mode valid = " + isPrevAudioModeValid + " enableSpeaker is "
-            + enableSpeaker);
+            + enableSpeaker + " call state: " + state);
 
         // Set audio mode to previous mode if enableSpeaker is false.
         if (isPrevAudioModeValid && !enableSpeaker) {
@@ -729,6 +733,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         }
 
         int currentAudioMode = AudioModeProvider.getInstance().getAudioMode();
+        Log.d(this, "currentAudioMode: " + currentAudioMode);
 
         // Set audio mode to speaker if enableSpeaker is true and bluetooth or headset are not
         // connected and it's a video call.
@@ -737,8 +742,10 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
             !isPrevAudioModeValid && enableSpeaker) {
             sPreVideoAudioMode = currentAudioMode;
 
-            Log.d(this, "Routing audio to speaker");
-            telecomAdapter.setAudioRoute(AudioState.ROUTE_SPEAKER);
+            if (state != Call.State.INCOMING && state != Call.State.CALL_WAITING) {
+                Log.d(this, "Routing audio to speaker");
+                telecomAdapter.setAudioRoute(AudioState.ROUTE_SPEAKER);
+            }
         }
     }
 
