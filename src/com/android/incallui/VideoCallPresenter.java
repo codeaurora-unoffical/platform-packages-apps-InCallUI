@@ -916,8 +916,11 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
             return;
         }
 
-        // Display a video quality changed message on UI.
-        ui.showVideoQualityChanged(videoQuality);
+        if (mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_display_video_quality_toast)) {
+            // Display a video quality changed message on UI.
+            ui.showVideoQualityChanged(videoQuality);
+        }
     }
 
     /**
@@ -1011,7 +1014,10 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
             Log.e(this, "onCallSessionEvent: VideoCallUi is null");
             return;
         }
-        ui.displayCallSessionEvent(event);
+        if(mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_call_session_event_toast)) {
+            ui.displayCallSessionEvent(event);
+        }
     }
 
     /**
