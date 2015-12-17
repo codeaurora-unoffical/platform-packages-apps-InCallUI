@@ -503,6 +503,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
             // Terminate video mode if new primary call is not a video call
             // and we are currently in video mode.
             Log.d(this, "onPrimaryCallChanged: Exiting video mode...");
+            updateAudioMode(false);
             exitVideoMode();
         } else if (isVideoCall) {
             Log.d(this, "onPrimaryCallChanged: Entering video mode...");
