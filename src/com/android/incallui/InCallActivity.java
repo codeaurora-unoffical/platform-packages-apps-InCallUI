@@ -204,7 +204,7 @@ public class InCallActivity extends Activity {
             // in onResume() to ensure the hosting CallCardFragment has been inflated and is ready
             // to receive it.
             mShowDialpadRequested = icicle.getBoolean(SHOW_DIALPAD_EXTRA);
-            mAnimateDialpadOnShow = false;
+            mAnimateDialpadOnShow = mShowDialpadRequested;
             mDtmfText = icicle.getString(DIALPAD_TEXT_EXTRA);
         }
         if (isDsdaEnabled ) {
