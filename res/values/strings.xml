@@ -617,7 +617,7 @@
     <string name="sub_2">SUB 2</string>
 	<string name="change_video_status">Change Video Status</string>
 	<string name="change_video_message">wants to change the call into videocall.Do you want to send and receive video?</string>
-	<string name="change_voice_message">changes the call into voice call.</string>
+        <string name="change_voice_message">Video call changed to voice call.</string>
 	<string name="modify_call_prompt_yes">Yes</string>
 	<string name="modify_call_prompt_no">No</string>
 	<string name="connecting_for_modify">Connecting...</string>
