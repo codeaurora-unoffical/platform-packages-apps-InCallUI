@@ -1504,7 +1504,6 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
 
     public void showDowngradeToast(){
         String str = getResources().getString(R.string.change_voice_message);
-        str = mPrimaryName.getText() + " " + str;
         Toast.makeText(getActivity(), str,
                 Toast.LENGTH_SHORT).show();
     }
