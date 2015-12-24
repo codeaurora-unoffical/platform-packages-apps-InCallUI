@@ -518,15 +518,7 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
         Log.d(this, "centerDisplayView: IsLandscape= " + mIsLandscape + " Layout width: " +
                 params.width + " height: " + params.height + " spaceBesideCallCard: "
                 + spaceBesideCallCard);
-        if (mIsLandscape) {
-            float videoViewTranslation = params.width / 2
-                    - spaceBesideCallCard / 2;
-            if (isLayoutRtl) {
-                displayVideo.setTranslationX(-videoViewTranslation);
-            } else {
-                displayVideo.setTranslationX(videoViewTranslation);
-            }
-        } else {
+        if (!mIsLandscape) {
             float videoViewTranslation = params.height / 2
                     - spaceBesideCallCard / 2;
             displayVideo.setTranslationY(videoViewTranslation);
