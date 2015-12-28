@@ -87,6 +87,13 @@
         android:background="@android:color/white"
         android:src="@drawable/img_no_image_automirrored" />
 
+    <fragment android:name="com.android.incallui.VideoCallFragment"
+        android:id="@+id/videoCallFragment"
+        android:layout_alignParentTop="true"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <!-- Call recorder info -->
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -115,13 +122,6 @@
             android:visibility="invisible"
             android:singleLine="true"/>
     </RelativeLayout>
-
-    <fragment android:name="com.android.incallui.VideoCallFragment"
-        android:id="@+id/videoCallFragment"
-        android:layout_alignParentTop="true"
-        android:layout_gravity="top|center_horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
     <!-- Progress spinner, useful for indicating pending operations such as upgrade to video. -->
     <FrameLayout
