@@ -34,19 +34,6 @@
         android:clipChildren="false"
         android:clipToPadding="false" >
 
-        <ImageButton
-            android:id="@+id/moreMenuButton"
-            style="@style/InCallButton"
-            android:paddingTop="16dp"
-            android:paddingRight="16dp"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_gravity="right"
-            android:background="@drawable/overflow_thumbnail"
-            android:elevation="@dimen/primary_call_overflow_elevation"
-            android:rotation="90"
-            android:contentDescription="@string/onscreenMoreMenuText"/>
-
         <include
             layout="@layout/primary_call_info"
             android:layout_width="wrap_content"
@@ -78,17 +65,20 @@
             android:soundEffectsEnabled="false"
             android:background="@drawable/vb_normal"/>
 
-        <!-- SwitchCameraButton in-call UI -->
-        <ImageButton android:id="@+id/switchCamera"
-            android:paddingTop="24dp"
-            android:paddingLeft="24dp"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:visibility="invisible"
-            android:soundEffectsEnabled="false"
-            android:background="@drawable/ic_toolbar_video_switch"/>
-
     </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/moreMenuButton"
+        style="@style/InCallButton"
+        android:paddingTop="16dp"
+        android:paddingRight="16dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="right"
+        android:background="@drawable/overflow_thumbnail"
+        android:elevation="@dimen/primary_call_overflow_elevation"
+        android:rotation="90"
+        android:contentDescription="@string/onscreenMoreMenuText"/>
 
     <!-- Contact photo for primary call info -->
     <ImageView android:id="@+id/photo"
@@ -149,9 +139,40 @@
         android:layout_marginLeft="24dp"
         android:layout_width="30dp"
         android:layout_height="30dp"
+        android:layout_alignParentBottom="true"
         android:visibility="invisible"
         android:soundEffectsEnabled="false"
         android:background="@drawable/ic_toolbar_video_switch"/>
+
+    <!-- Call recorder info -->
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true">
+
+        <TextView android:id="@+id/recordingIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="24dp"
+            android:paddingBottom="119dp"
+            android:drawableRight="@drawable/ic_recording_indicator"
+            android:visibility="invisible" />
+
+        <TextView android:id="@+id/recordingTime"
+            android:text="@string/recording_time_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/recordingIcon"
+            android:layout_marginLeft="5dp"
+            android:paddingBottom="120dp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/incall_call_banner_text_color"
+            android:visibility="invisible"
+            android:singleLine="true"/>
+    </RelativeLayout>
+
 
     <!-- Placeholder for the dialpad which is replaced with the dialpad fragment when shown. -->
     <FrameLayout
