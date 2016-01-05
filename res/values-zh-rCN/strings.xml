@@ -171,4 +171,10 @@
     <string name="camera_off_description" msgid="5689494614359429889">"关闭摄像头"</string>
     <string name="child_number" msgid="7437330400723805538">"通过 <xliff:g id="CHILD_NUMBER">%s</xliff:g>"</string>
     <string name="note_sent" msgid="3548700178238244595">"已发送记事"</string>
+    <string name="recording_time_text">录音中</string>
+    <string name="display_rich_screen">显示增强屏显？</string>
+    <string name="rcs_missdnaddress_string">归属地：</string>
+    <string name="rcs_greeting_string">问候语：</string>
+    <string name="onscreenMoreMenuText">更多菜单</string>
+    <string name="rcs_greeting_string">问候语：</string>
 </resources>
