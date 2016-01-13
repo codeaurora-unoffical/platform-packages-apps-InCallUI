@@ -122,7 +122,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
     /**
      * The current context.
      */
-    private Context mContext;
+    private static Context mContext;
 
     /**
      * The call the video surfaces are currently related to
@@ -209,7 +209,6 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
     private static final int EVENT_CLEAR_SESSION_MODIFY_REQUEST = 0;
     private static final int EVENT_FULL_SCREEN = 1;
     private static final long AUTO_FULLSCREEN_DELAY_MS = 5000;
-
     /**
      * Initializes the presenter.
      *
@@ -220,6 +219,16 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         mMinimumVideoDimension = mContext.getResources().getDimension(
                 R.dimen.video_preview_small_dimension);
         mVideoCallHandler = new VideoCallHandler();
+    }
+
+
+
+    private static boolean isFrontCameraEnabled() {
+        if (mContext == null) {
+            return false;
+        } else {
+            return mContext.getResources().getBoolean(R.bool.config_enable_camera_front_facing);
+        }
     }
 
     /**
@@ -1338,6 +1347,9 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
     }
 
     private static int toCameraDirection(int videoState) {
+        if (isFrontCameraEnabled()) {
+            return Call.VideoSettings.CAMERA_DIRECTION_FRONT_FACING;
+        }
         return VideoProfile.VideoState.isTransmissionEnabled(videoState) &&
                 !VideoProfile.VideoState.isBidirectional(videoState)
                 ? Call.VideoSettings.CAMERA_DIRECTION_BACK_FACING
