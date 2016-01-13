@@ -1362,7 +1362,8 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             }
             return;
         }
-        if (Call.State.ACTIVE == state) {
+        if (Call.State.ACTIVE == state &&
+                getResources().getBoolean(R.bool.config_enable_volume_boost)) {
             mVBButton.setVisibility(View.VISIBLE);
         } else if (Call.State.DISCONNECTED == state || Call.State.IDLE == state) {
             if (!CallList.getInstance().hasAnyLiveCall()
