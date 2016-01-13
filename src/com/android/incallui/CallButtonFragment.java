@@ -421,8 +421,13 @@ public class CallButtonFragment
         items.add(res.getText(R.string.modify_call_option_vt_tx));
         itemToCallType.add(VideoProfile.VideoState.TX_ENABLED);
 
-        items.add(res.getText(R.string.modify_call_option_vt));
-        itemToCallType.add(VideoProfile.VideoState.BIDIRECTIONAL);
+        Call call = CallList.getInstance().getFirstCall();
+        if (call != null && !(call.isVideoCall(context) && call.isOutgoingCall())) {
+            //MO video call shoul have no vt button. Bidirection or not
+            //should be determined by the remote party.
+            items.add(res.getText(R.string.modify_call_option_vt));
+            itemToCallType.add(VideoProfile.VideoState.BIDIRECTIONAL);
+        }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getUi().getContext());
         builder.setTitle(R.string.modify_call_option_title);
