@@ -21,24 +21,39 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.BroadcastReceiver;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.ColorStateList;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.Trace;
 import android.os.Handler;
 import android.os.Looper;
+import android.content.ContentResolver;
+import android.media.AudioManager;
+import android.provider.Settings;
+import android.os.Message;
+import android.provider.Telephony.Sms;
 import android.telecom.DisconnectCause;
 import android.telecom.VideoProfile;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.view.Gravity;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
+import android.view.SurfaceView;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnLayoutChangeListener;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
@@ -53,9 +68,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import android.telecom.CallAudioState;
+
 import com.android.contacts.common.util.MaterialColorMapUtils.MaterialPalette;
 import com.android.contacts.common.widget.FloatingActionButtonController;
 import com.android.phone.common.animation.AnimUtils;
+
+import com.suntek.mway.rcs.client.api.basic.BasicApi;
+import com.suntek.mway.rcs.client.api.support.SupportApi;
+import com.suntek.rcs.ui.common.GifMovieView;
+import com.suntek.rcs.ui.common.RcsLog;
+import com.suntek.rcs.ui.common.RcsRichScreen;
 
 import java.util.List;
 
@@ -139,6 +162,9 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
     // Container view that houses the primary call information
     private ViewGroup mPrimaryCallInfo;
     private View mCallButtonsContainer;
+    private ImageButton mVbButton;
+    private AudioManager mAudioManager;
+    private Toast mVbNotify;
 
     // Secondary caller info
     private View mSecondaryCallInfo;
@@ -231,6 +257,19 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
      */
     private boolean mHasSecondaryCallInfo = false;
 
+    private static final int TTY_MODE_OFF = 0;
+    private static final int TTY_MODE_HCO = 2;
+
+    private static final String VOLUME_BOOST = "volume_boost";
+    /* Begin add for RCS */
+    private View mSendMessageView;
+    private RcsRichScreen mRcsRichScreen = null;
+    private boolean misEhanceScreenApkInstalled = false;
+    private boolean mIsRcsServiceInstalled = false;
+    private static final String ENHANCE_SCREEN_APK_NAME = "com.cmdm.rcs";
+    private static final String LOG_TAG = "RCS_UI";
+    /* End add for RCS */
+
     @Override
     public CallCardPresenter.CallCardUi getUi() {
         return this;
@@ -260,9 +299,15 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         getActivity().registerReceiver(recorderStateReceiver, filter);
 
         mInCallActivity = (InCallActivity) getActivity();
+        /* Begin add for RCS */
+        misEhanceScreenApkInstalled = isEnhanceScreenInstalled();
+        mIsRcsServiceInstalled = SupportApi.getInstance().isRcsSupported();
+        /* Begin add for RCS */
         if (mInCallActivity.isCallRecording()) {
             recorderHandler.sendEmptyMessage(MESSAGE_TIMER);
         }
+        mAudioManager = (AudioManager) getActivity()
+                .getSystemService(Context.AUDIO_SERVICE);
     }
 
     @Override
@@ -286,9 +331,19 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         Trace.beginSection(TAG + " onCreate");
         mTranslationOffset =
                 getResources().getDimensionPixelSize(R.dimen.call_card_anim_translate_y_offset);
-        final View view = inflater.inflate(R.layout.call_card_fragment, container, false);
-        Trace.endSection();
-        return view;
+        /* Begin add for RCS */
+        if(!isRcsAvailable()){
+            final View view = inflater.inflate(R.layout.call_card_fragment, container, false);
+            Trace.endSection();
+            return view;
+
+        } else {
+            final View rcsCallCardView = inflater.inflate(
+                    R.layout.rcs_call_card_content, container, false);
+            Trace.endSection();
+            return rcsCallCardView;
+        }
+        /* End add for RCS */
     }
 
     @Override
@@ -323,6 +378,29 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         mCallButtonsContainer = view.findViewById(R.id.callButtonFragment);
         mInCallMessageLabel = (TextView) view.findViewById(R.id.connectionServiceMessage);
         mProgressSpinner = view.findViewById(R.id.progressSpinner);
+
+        /* Begin add for RCS */
+        if (isRcsAvailable()) {
+            TextView rcsmissdnAddress = (TextView)view.findViewById(R.id.missdnaddress);
+            TextView rcsgreeting = (TextView)view.findViewById(R.id.greeting);
+            SurfaceView rcssurface = (SurfaceView)view.findViewById(R.id.surface);
+            ImageView rcsPhoto = (ImageView) view.findViewById(R.id.rcs_photo);
+            GifMovieView rcsGifMovieView = (GifMovieView) view.findViewById(R.id.incallgifview);
+            mRcsRichScreen = new RcsRichScreen(getActivity(),
+                rcsPhoto, rcsgreeting, rcsmissdnAddress, rcsGifMovieView, rcssurface);
+        }
+        if (mIsRcsServiceInstalled) {
+            mSendMessageView = view.findViewById(R.id.sendMessage);
+            mSendMessageView.setOnClickListener(new OnClickListener() {
+                public void onClick(View v) {
+                    getPresenter().sendSmsClicked();
+                }
+            });
+        } else {
+            mSendMessageView = view.findViewById(R.id.sendMessage);
+            mSendMessageView.setVisibility(View.GONE);
+        }
+        /* End add for RCS */
 
         mFloatingActionButtonContainer = view.findViewById(
                 R.id.floating_end_call_action_button_container);
@@ -368,6 +446,11 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         mCallSubject = (TextView) view.findViewById(R.id.callSubject);
         mRecordingTimeLabel = (TextView) view.findViewById(R.id.recordingTime);
         mRecordingIcon = (TextView) view.findViewById(R.id.recordingIcon);
+
+        mVbButton = (ImageButton) view.findViewById(R.id.volumeBoost);
+        if (null != mVbButton) {
+            mVbButton.setOnClickListener(mVbListener);
+        }
     }
 
     private void showCallRecordingElapsedTime() {
@@ -614,6 +697,17 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
 
         showInternetCallLabel(isSipCall);
 
+        /* Begin add for RCS */
+        if (mRcsRichScreen != null && isRcsAvailable()) {
+            String rcsnumber = null;
+            if(!nameIsNumber){
+                rcsnumber = number;
+            } else {
+                rcsnumber = name;
+            }
+            mRcsRichScreen.setNumber(rcsnumber);
+        }
+        /* End add for RCS */
         setDrawableToImageView(mPhoto, photo, isContactPhotoShown);
     }
 
@@ -751,6 +845,8 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
                 sessionModificationState, disconnectCause, connectionLabel, isGatewayCall, isWifi,
                 isConference);
 
+        updateVbByCall(state);
+
         Log.v(this, "setCallState " + callStateLabel.getCallStateLabel());
         Log.v(this, "AutoDismiss " + callStateLabel.isAutoDismissing());
         Log.v(this, "DisconnectCause " + disconnectCause.toString());
@@ -775,6 +871,11 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             }
             return;
         }
+        /* Begin add for RCS */
+        if (mRcsRichScreen != null && isRcsAvailable()) {
+           mRcsRichScreen.updateRichScreenByCallState(state,videoState);
+        }
+        /* End add for RCS */
 
         if (isSubjectShowing) {
             changeCallStateLabel(null);
@@ -800,6 +901,17 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             // needed because the pulse animation operates on the view alpha.
             mCallStateIcon.setAlpha(1.0f);
             mCallStateIcon.setImageDrawable(callStateIcon);
+
+            MaterialPalette themeColors = InCallPresenter.getInstance().getThemeColors();
+            if (themeColors != null) {
+                // Change the alpha value in the 32 bit color of sim card, because the color of
+                // call background changed with the color of sim card.
+                // Set the tint mode to SCREEN to avoid the slot number in the sim icon be covered.
+                int stateIconColor = (themeColors.mPrimaryColor & 0x00ffffff) | 0x7f000000;
+                mCallStateIcon.setImageTintMode(PorterDuff.Mode.SCREEN);
+                mCallStateIcon.setImageTintList(ColorStateList.valueOf(stateIconColor));
+                Log.d(this, "Need to set tint of call state icon to " + stateIconColor);
+            }
 
             if (state == Call.State.ACTIVE || state == Call.State.CONFERENCED
                     || TextUtils.isEmpty(callStateLabel.getCallStateLabel())) {
@@ -1357,7 +1469,9 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
                 updateFabPosition();
             }
         });
-
+        /* Begin add for RCS */
+        misEhanceScreenApkInstalled = isEnhanceScreenInstalled();
+        /* End add for RCS */
         updateColors();
     }
 
@@ -1443,4 +1557,136 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             v.setBottom(oldBottom);
         }
     }
+
+    private OnClickListener mVbListener = new OnClickListener() {
+        @Override
+        public void onClick(View arg0) {
+            if (isVbAvailable()) {
+                // Switch Volume Boost status
+                setVolumeBoost(!isVolumeBoostOn());
+            }
+
+            updateVbButton();
+            showVbNotify();
+        }
+    };
+
+    private boolean isVbAvailable() {
+        int mode = AudioModeProvider.getInstance().getAudioMode();
+        final Activity activity = getActivity();
+        final String PREFERRED_TTY_MODE = "preferred_tty_mode";
+
+        int settingsTtyMode;
+
+        if (activity != null) {
+            settingsTtyMode = Settings.Secure.getInt(activity.getContentResolver(),
+                                                 PREFERRED_TTY_MODE, TTY_MODE_OFF);
+        } else {
+            settingsTtyMode = TTY_MODE_OFF;
+        }
+
+        return (mode == CallAudioState.ROUTE_EARPIECE || mode == CallAudioState.ROUTE_SPEAKER
+                || settingsTtyMode == TTY_MODE_HCO);
+    }
+
+    private void updateVbButton() {
+        if (isVbAvailable()) {
+           if (isVolumeBoostOn()) {
+               mVbButton.setBackgroundResource(R.drawable.vb_active);
+           } else {
+               mVbButton.setBackgroundResource(R.drawable.vb_normal);
+           }
+        } else {
+            mVbButton.setBackgroundResource(R.drawable.vb_disable);
+        }
+    }
+
+    private void showVbNotify() {
+        if (mVbNotify != null) {
+            mVbNotify.cancel();
+        }
+
+        int resId = R.string.volume_boost_notify_unavailable;
+
+        if (isVbAvailable()) {
+            if (isVolumeBoostOn()) {
+                resId = R.string.volume_boost_notify_enabled;
+            } else {
+                resId = R.string.volume_boost_notify_disabled;
+            }
+        }
+
+        mVbNotify = Toast.makeText(getView().getContext(), resId, Toast.LENGTH_SHORT);
+        mVbNotify.setGravity(Gravity.CENTER, 0, 0);
+        mVbNotify.show();
+    }
+
+    private void updateVbByCall(int state) {
+        updateVbButton();
+
+        if (Call.State.ACTIVE == state) {
+            mVbButton.setVisibility(View.VISIBLE);
+        } else if (Call.State.DISCONNECTED == state) {
+            if (!CallList.getInstance().hasLiveCall()
+                    && isVolumeBoostOn()) {
+                mVbButton.setVisibility(View.INVISIBLE);
+
+                setVolumeBoost(false);
+            }
+        }
+    }
+
+    public void updateVbByAudioMode(int newMode) {
+        if (!(newMode == CallAudioState.ROUTE_EARPIECE
+                || newMode == CallAudioState.ROUTE_BLUETOOTH
+                || newMode == CallAudioState.ROUTE_WIRED_HEADSET
+                || newMode == CallAudioState.ROUTE_SPEAKER)) {
+            return;
+        }
+
+        if (mAudioManager != null && isVolumeBoostOn()) {
+            setVolumeBoost(false);
+        }
+
+        updateVbButton();
+    }
+
+    private void setVolumeBoost(boolean on){
+        if (on)
+            mAudioManager.setParameters(VOLUME_BOOST + "=on");
+        else
+            mAudioManager.setParameters(VOLUME_BOOST + "=off");
+    }
+
+    private boolean isVolumeBoostOn(){
+
+        return mAudioManager.getParameters(VOLUME_BOOST).contains("=on");
+    }
+
+    /* Begin add for RCS */
+    private boolean isRcsAvailable() {
+        return SupportApi.getInstance().isRcsSupported()
+                && isRcsOnLine() && misEhanceScreenApkInstalled;
+    }
+
+    private boolean isRcsOnLine() {
+        try {
+            return BasicApi.getInstance().isOnline();
+        } catch (Exception e) {
+            RcsLog.w("Exception:" + e);
+            return false;
+        }
+    }
+    private boolean isEnhanceScreenInstalled() {
+        boolean installed = false;
+        try {
+            ApplicationInfo info = getActivity().getPackageManager().getApplicationInfo(
+                ENHANCE_SCREEN_APK_NAME, PackageManager.GET_PROVIDERS);
+            installed = (info != null);
+        } catch (NameNotFoundException e) {
+            RcsLog.w("NameNotFoundException:" + e);
+        }
+        return installed;
+    }
+    /* End add for RCS */
 }

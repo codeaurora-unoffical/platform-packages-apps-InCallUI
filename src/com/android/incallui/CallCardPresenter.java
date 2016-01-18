@@ -46,6 +46,7 @@ import com.android.incallui.InCallPresenter.InCallState;
 import com.android.incallui.InCallPresenter.InCallStateListener;
 import com.android.incallui.InCallPresenter.IncomingCallListener;
 import com.android.incalluibind.ObjectFactory;
+import com.suntek.rcs.ui.common.utils.RcsSendSmsUtils;
 
 import java.lang.ref.WeakReference;
 
@@ -118,6 +119,11 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         });
     }
 
+    private boolean isGeocoderLocationNeeded(Call call) {
+          return call.getState() == Call.State.INCOMING ||
+                  call.getState() == Call.State.CONNECTING;
+    }
+
     public void init(Context context, Call call) {
         mContext = Preconditions.checkNotNull(context);
 
@@ -134,7 +140,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
 
             // start processing lookups right away.
             if (!call.isConferenceCall()) {
-                startContactInfoSearch(call, true, call.getState() == Call.State.INCOMING);
+                startContactInfoSearch(call, true, isGeocoderLocationNeeded(call));
             } else {
                 updateContactEntry(null, true);
             }
@@ -208,6 +214,23 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         } else if (newState == InCallState.INCALL) {
             primary = getCallToDisplay(callList, null, false);
             secondary = getCallToDisplay(callList, primary, true);
+            // During swap scenarios, two calls can be ACTIVE at the same time momentarily.
+            // In such cases secondary above will be null. To avoid flickering of secondary
+            // call view, assign the non primary call as secondary here.
+            if (secondary == null && primary != null) {
+                Call probableSecondary = null;
+                if (primary == mPrimary) {
+                    probableSecondary = mSecondary;
+                } else if (primary == mSecondary) {
+                    probableSecondary = mPrimary;
+                }
+                if (probableSecondary != null &&
+                        probableSecondary.getState() == Call.State.ACTIVE &&
+                        primary.getSubId() == probableSecondary.getSubId()) {
+                    Log.v(this, "Two calls ACTIVE");
+                    secondary = probableSecondary;
+                }
+            }
         }
 
         Log.d(this, "Primary call: " + primary);
@@ -243,7 +266,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
             CallList.getInstance().addCallUpdateListener(mPrimary.getId(), this);
 
             mPrimaryContactInfo = ContactInfoCache.buildCacheEntryFromCall(mContext, mPrimary,
-                    mPrimary.getState() == Call.State.INCOMING);
+                    isGeocoderLocationNeeded(mPrimary));
             updatePrimaryDisplayInfo();
             maybeStartSearch(mPrimary, true);
             maybeClearSessionModificationState(mPrimary);
@@ -522,7 +545,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
     private void maybeStartSearch(Call call, boolean isPrimary) {
         // no need to start search for conference calls which show generic info.
         if (call != null && !call.isConferenceCall()) {
-            startContactInfoSearch(call, isPrimary, call.getState() == Call.State.INCOMING);
+            startContactInfoSearch(call, isPrimary, isGeocoderLocationNeeded(call));
         }
     }
 
@@ -786,6 +809,19 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
     }
 
     /**
+     * Return the icon to represent the call provider
+     */
+    private Drawable getCallProviderIcon(Call call) {
+        PhoneAccount account = getAccountForCall(call);
+        TelecomManager mgr = InCallPresenter.getInstance().getTelecomManager();
+        if (account != null && mgr.getCallCapablePhoneAccounts().size() > 1) {
+            return account.getIcon().loadDrawable(mContext);
+        }
+        return null;
+    }
+
+
+    /**
      * Returns the label (line of text above the number/name) for any given call.
      * For example, "calling via [Account/Google Voice]" for outgoing calls.
      */
@@ -820,7 +856,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
             }
         }
 
-        return null;
+        return getCallProviderIcon(mPrimary);
     }
 
     private boolean hasOutgoingGatewayCall() {
@@ -1026,4 +1062,21 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         void sendAccessibilityAnnouncement();
         void showNoteSentToast();
     }
+
+    /* Begin add for RCS */
+    public void sendSmsClicked() {
+        String number;
+        if (mPrimary != null) {
+            number = mPrimary.getNumber();
+        } else {
+            number = null;
+        }
+        if (number == null) {
+            RcsSendSmsUtils.startSendSmsActivity(mContext);
+        } else {
+            RcsSendSmsUtils.startSendSmsActivity(mContext, new String[] { number });
+        }
+    }
+    /* End add for RCS */
+
 }
