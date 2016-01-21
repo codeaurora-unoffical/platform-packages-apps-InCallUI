@@ -797,7 +797,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             view.setImageDrawable(photo);
             AnimUtils.fadeIn(mElapsedTime, AnimUtils.DEFAULT_DURATION);
         } else {
-            InCallAnimationUtils.startCrossFade(view, current, photo);
+            view.setImageDrawable(photo);
             view.setVisibility(View.VISIBLE);
         }
     }
