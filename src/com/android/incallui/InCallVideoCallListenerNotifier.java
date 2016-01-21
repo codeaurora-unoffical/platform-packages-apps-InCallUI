@@ -145,6 +145,23 @@ public class InCallVideoCallListenerNotifier {
     }
 
     /**
+     * Inform VideoCallPresenter to stopPreview.
+     *
+     * @param call The call.
+     */
+    public void stopPreview() {
+        for (SessionModificationListener listener : mSessionModificationListeners) {
+            if (listener instanceof VideoCallPresenter) {
+                 VideoCallPresenter vcPresenter = (VideoCallPresenter) listener;
+                 VideoCallPresenter.VideoCallUi ui = vcPresenter.getUi();
+                 if (ui == null) return;
+                 //it will step into video call ui and stopPreview if needed
+                 ((VideoCallFragment)ui).stopPreview();
+                 break;
+            }
+        }
+    }
+    /**
      * Inform listeners of an unsuccessful response to a video request for a call.
      *
      * @param call The call.

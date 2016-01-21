@@ -58,7 +58,7 @@ public class InCallVideoCallListener extends VideoCall.Listener {
 
         boolean wasVideoCall = VideoProfile.VideoState.isVideo(previousVideoState);
         boolean isVideoCall = VideoProfile.VideoState.isVideo(newVideoState);
-
+        InCallVideoCallListenerNotifier.getInstance().stopPreview();
         // Check for upgrades to video and downgrades to audio.
         if (wasVideoCall && !isVideoCall) {
             InCallVideoCallListenerNotifier.getInstance().downgradeToAudio(mCall);

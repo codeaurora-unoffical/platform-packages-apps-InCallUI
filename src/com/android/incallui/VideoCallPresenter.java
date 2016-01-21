@@ -283,6 +283,9 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         if (ui == null || mVideoCall == null) {
             Log.w(this, "onSurfaceCreated: Error bad state VideoCallUi=" + ui + " mVideoCall="
                     + mVideoCall);
+            if (surface == VideoCallFragment.SURFACE_PREVIEW ) {
+                ((VideoCallFragment)ui).beginPreview();
+            }
             return;
         }
 
