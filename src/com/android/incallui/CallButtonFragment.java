@@ -84,6 +84,7 @@ public class CallButtonFragment
 
     private boolean mIsEnabled;
 
+    private int mSelectType = -1;
     @Override
     CallButtonPresenter createPresenter() {
         // TODO: find a cleaner way to include audio mode provider than having a singleton instance.
@@ -408,6 +409,18 @@ public class CallButtonFragment
             return;
         }
 
+	if (ui.getContext().getResources().getBoolean(
+                                                 R.bool.config_enable_enhance_video_call_ui)) {
+            // selCallType is set to -1 default, if the value is not updated, it is unexpected.
+            if (mSelectType != -1) {
+                Log.v(this, "Videocall: ModifyCall: upgrade/downgrade to "
+                           + fromCallType(mSelectType));
+                VideoProfile videoProfile = new VideoProfile(mSelectType);
+                getPresenter().changeToVideoClicked(videoProfile);
+            }
+            return;
+        }
+
         final ArrayList<CharSequence> items = new ArrayList<CharSequence>();
         final ArrayList<Integer> itemToCallType = new ArrayList<Integer>();
         final Resources res = ui.getContext().getResources();
@@ -517,6 +530,18 @@ public class CallButtonFragment
                     case R.id.overflow_modify_call_menu_item:
                         getPresenter().displayModifyCallOptions();
                         break;
+                    case R.id.overflow_both_call_menu_item:
+                        mSelectType = VideoProfile.VideoState.BIDIRECTIONAL;
+                        getPresenter().displayModifyCallOptions();
+                        break;
+                    case R.id.overflow_rx_call_menu_item:
+                        mSelectType = VideoProfile.VideoState.RX_ENABLED;
+                        getPresenter().displayModifyCallOptions();
+                        break;
+                    case R.id.overflow_vo_call_menu_item:
+                        mSelectType = VideoProfile.VideoState.AUDIO_ONLY;
+                        getPresenter().displayModifyCallOptions();
+                        break;
                     default:
                         Log.wtf(this, "onMenuItemClick: unexpected overflow menu click");
                         break;
@@ -535,7 +560,8 @@ public class CallButtonFragment
     public void configureOverflowMenu(boolean showMergeMenuOption, boolean showAddMenuOption,
             boolean showHoldMenuOption, boolean showSwapMenuOption,
             boolean showAddParticipantOption, boolean showManageConferenceVideoCallOption,
-            boolean showModifyCallOption) {
+            boolean showModifyCallOption,boolean showBothMenuOption, boolean showRXMenuOption,
+                boolean showVoMenuOption) {
         if (mOverflowPopup == null) {
             createOverflowMenu();
         }
@@ -551,6 +577,23 @@ public class CallButtonFragment
         menu.findItem(R.id.overflow_manage_conference_menu_item).setVisible(
             showManageConferenceVideoCallOption);
         menu.findItem(R.id.overflow_modify_call_menu_item).setVisible(showModifyCallOption);
+
+        menu.findItem(R.id.overflow_both_call_menu_item).setVisible(showBothMenuOption);
+        menu.findItem(R.id.overflow_rx_call_menu_item).setVisible(showRXMenuOption);
+        menu.findItem(R.id.overflow_vo_call_menu_item).setVisible(showVoMenuOption);
+        if (getPresenter().getCurrentVideoState() == VideoProfile.VideoState.RX_ENABLED) {
+            menu.findItem(R.id.overflow_both_call_menu_item).setTitle(
+                    R.string.overflowBothCallMenuItemText);
+        } else if (getPresenter().getCurrentVideoState() == VideoProfile.VideoState.BIDIRECTIONAL) {
+            menu.findItem(R.id.overflow_both_call_menu_item).setTitle(
+                    R.string.overflowRXCallMenuItemText);
+        } else if (getPresenter().getCurrentVideoState() == VideoProfile.VideoState.AUDIO_ONLY) {
+            menu.findItem(R.id.overflow_both_call_menu_item).setTitle(
+                    R.string.overflowBothCallMenuItemText_in_voicecall);
+            menu.findItem(R.id.overflow_both_call_menu_item).setTitle(
+                    R.string.overflowRXCallMenuItemText_in_voicecall);
+        }
+
         updateEndActiveAcceptMtMenu();
         mOverflowButton.setEnabled(menu.hasVisibleItems());
     }

@@ -134,6 +134,8 @@ public class AnswerFragment extends BaseFragment<AnswerPresenter, AnswerPresente
         final int handleDrawableResourceId;
         final boolean showOneWayVideoOptions = getResources().getBoolean(
                 R.bool.config_incoming_call_show_one_way_video_options);
+        final boolean isEnhanceUIEnabled = this.getResources().getBoolean(
+                R.bool.config_enable_enhance_video_call_ui);
         switch (targetSet) {
             case TARGET_SET_FOR_AUDIO_WITH_SMS:
                 targetResourceId = R.array.incoming_call_widget_audio_with_sms_targets;
@@ -144,9 +146,13 @@ public class AnswerFragment extends BaseFragment<AnswerPresenter, AnswerPresente
                 handleDrawableResourceId = R.drawable.ic_incall_audio_handle;
                 break;
             case TARGET_SET_FOR_VIDEO_WITHOUT_SMS:
-                targetResourceId = showOneWayVideoOptions ?
-                        R.array.incoming_call_widget_video_without_sms_targets
-                        :R.array.incoming_call_widget_video_without_sms_targets_and_one_way_video;
+                if (isEnhanceUIEnabled) {
+                    targetResourceId = R.array.enhance_incoming_call_widget_video_without_sms_targets;
+                } else {
+                    targetResourceId = showOneWayVideoOptions ?
+                            R.array.incoming_call_widget_video_without_sms_targets
+                            :R.array.incoming_call_widget_video_without_sms_targets_and_one_way_video;
+                }
                 targetDescriptionsResourceId =
                         R.array.incoming_call_widget_video_without_sms_target_descriptions;
                 directionDescriptionsResourceId =
@@ -154,9 +160,13 @@ public class AnswerFragment extends BaseFragment<AnswerPresenter, AnswerPresente
                 handleDrawableResourceId = R.drawable.ic_incall_video_handle;
                 break;
             case TARGET_SET_FOR_VIDEO_WITH_SMS:
-                targetResourceId = showOneWayVideoOptions ?
-                        R.array.incoming_call_widget_video_with_sms_targets
-                        :R.array.incoming_call_widget_video_with_sms_targets_without_one_way_video;
+                if (isEnhanceUIEnabled) {
+                    targetResourceId = R.array.enhance_incoming_call_widget_video_with_sms_targets;
+                } else {
+                    targetResourceId = showOneWayVideoOptions ?
+                            R.array.incoming_call_widget_video_with_sms_targets
+                            :R.array.incoming_call_widget_video_with_sms_targets_without_one_way_video;
+                }
                 targetDescriptionsResourceId =
                         R.array.incoming_call_widget_video_with_sms_target_descriptions;
                 directionDescriptionsResourceId =
@@ -164,7 +174,11 @@ public class AnswerFragment extends BaseFragment<AnswerPresenter, AnswerPresente
                 handleDrawableResourceId = R.drawable.ic_incall_video_handle;
                 break;
             case TARGET_SET_FOR_VIDEO_UPGRADE_REQUEST:
-                targetResourceId = R.array.incoming_call_widget_video_upgrade_request_targets;
+                if (isEnhanceUIEnabled) {
+                    targetResourceId = R.array.enhance_incoming_call_widget_video_upgrade_request_targets;
+                } else {
+                    targetResourceId = R.array.incoming_call_widget_video_upgrade_request_targets;
+                }
                 targetDescriptionsResourceId =
                         R.array.incoming_call_widget_video_upgrade_request_target_descriptions;
                 directionDescriptionsResourceId = R.array
@@ -172,8 +186,13 @@ public class AnswerFragment extends BaseFragment<AnswerPresenter, AnswerPresente
                 handleDrawableResourceId = R.drawable.ic_incall_video_handle;
                 break;
             case TARGET_SET_FOR_BIDIRECTIONAL_VIDEO_ACCEPT_REJECT_REQUEST:
-                targetResourceId =
-                    R.array.incoming_call_widget_bidirectional_video_accept_reject_request_targets;
+                if (isEnhanceUIEnabled) {
+                    targetResourceId =
+                        R.array.enhance_incoming_call_widget_bidirectional_video_accept_reject_request_targets;
+                } else {
+                    targetResourceId =
+                        R.array.incoming_call_widget_bidirectional_video_accept_reject_request_targets;
+                }
                 targetDescriptionsResourceId =
                         R.array.incoming_call_widget_video_upgrade_request_target_descriptions;
                 directionDescriptionsResourceId = R.array
@@ -181,8 +200,13 @@ public class AnswerFragment extends BaseFragment<AnswerPresenter, AnswerPresente
                 handleDrawableResourceId = R.drawable.ic_incall_video_handle;
                 break;
             case TARGET_SET_FOR_VIDEO_TRANSMIT_ACCEPT_REJECT_REQUEST:
-                targetResourceId =
-                    R.array.incoming_call_widget_video_transmit_accept_reject_request_targets;
+                if (isEnhanceUIEnabled) {
+                    targetResourceId =
+                        R.array.enhance_incoming_call_widget_video_transmit_accept_reject_request_targets;
+                } else {
+                    targetResourceId =
+                        R.array.incoming_call_widget_video_transmit_accept_reject_request_targets;
+                }
                 targetDescriptionsResourceId =
                         R.array.incoming_call_widget_video_transmit_request_target_descriptions;
                 directionDescriptionsResourceId = R.array
@@ -190,8 +214,13 @@ public class AnswerFragment extends BaseFragment<AnswerPresenter, AnswerPresente
                 handleDrawableResourceId = R.drawable.ic_incall_video_handle;
                 break;
             case TARGET_SET_FOR_VIDEO_RECEIVE_ACCEPT_REJECT_REQUEST:
-                targetResourceId =
-                    R.array.incoming_call_widget_video_receive_accept_reject_request_targets;
+                if (isEnhanceUIEnabled) {
+                    targetResourceId =
+                        R.array.enhance_incoming_call_widget_video_receive_accept_reject_request_targets;
+                } else {
+                    targetResourceId =
+                        R.array.incoming_call_widget_video_receive_accept_reject_request_targets;
+                }
                 targetDescriptionsResourceId =
                         R.array.incoming_call_widget_video_receive_request_target_descriptions;
                 directionDescriptionsResourceId = R.array
