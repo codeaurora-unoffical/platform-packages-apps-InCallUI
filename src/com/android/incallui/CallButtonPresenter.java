@@ -18,6 +18,7 @@ package com.android.incallui;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.telecom.AudioState;
 import android.telecom.InCallService.VideoCall;
 import android.telecom.PhoneCapabilities;
@@ -276,6 +277,22 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         return mCall.getVideoState();
     }
 
+    public void previewIfNeeded(VideoProfile videoProfile) {
+        int currentState = mCall.getVideoState();
+        int changeToState = videoProfile.getVideoState();
+        if (currentState == VideoProfile.VideoState.TX_ENABLED ||
+            currentState == VideoProfile.VideoState.BIDIRECTIONAL) {
+            return;
+        }
+        if (changeToState == VideoProfile.VideoState.RX_ENABLED ||
+            changeToState == VideoProfile.VideoState.AUDIO_ONLY) {
+            return;
+        }
+        Intent intent = new Intent(
+                VideoCallFragment.INTENT_ACTION_PREVIEW_BEFORE_VIDEO_CALL);
+        getUi().getContext().sendBroadcast(intent);
+    }
+
     public void changeToVideoClicked(VideoProfile videoProfile) {
         VideoCall videoCall = mCall.getVideoCall();
         if (videoCall == null) {
@@ -283,6 +300,7 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         }
 
         videoCall.sendSessionModifyRequest(videoProfile);
+        previewIfNeeded(videoProfile);
     }
 
     /**

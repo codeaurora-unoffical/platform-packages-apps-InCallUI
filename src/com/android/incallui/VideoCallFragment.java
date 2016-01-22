@@ -40,6 +40,15 @@ import android.telecom.Connection;
 import android.telecom.Connection.VideoProvider;
 import android.telecom.VideoProfile;
 import android.telecom.Connection;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.hardware.Camera;
+import android.hardware.Camera.CameraInfo;
+import android.hardware.camera2.CameraCharacteristics;
+import android.view.SurfaceView;
+import java.io.IOException;
 
 /**
  * Fragment containing video calling surfaces.
@@ -118,6 +127,12 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
      */
     private boolean mIsLandscape;
 
+    //begin for preview before video call
+    public static final String INTENT_ACTION_PREVIEW_BEFORE_VIDEO_CALL = "preview_before_video_call";
+    private boolean mIsPreviewing = false;
+    private Camera mCamera = null;
+    private BroadcastReceiver mPreviewReceiver = null;
+    //end for preview before video call
     /**
      * This class implements the zoom listener for zoom control
      */
@@ -558,6 +573,7 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
         if (sVideoSurfacesInUse) {
             inflateVideoCallViews();
         }
+        registerReciever();
     }
 
     @Override
@@ -607,6 +623,7 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
     public void onDestroyView() {
         super.onDestroyView();
         Log.d(this, "onDestroyView:");
+        unRegisterReciever();
     }
 
     /**
@@ -1196,5 +1213,68 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
     public void onZoomValueChanged(int index) {
         Log.d(this, "onZoomValueChanged: zoom index = " + index);
         getPresenter().setZoom(index);
+    }
+
+    public void registerReciever() {
+        unRegisterReciever();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(INTENT_ACTION_PREVIEW_BEFORE_VIDEO_CALL);
+        mPreviewReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d(this, intent.getAction());
+                if(INTENT_ACTION_PREVIEW_BEFORE_VIDEO_CALL.equals(intent.getAction())) {
+                    handlePreview();
+                } else {
+                    stopPreview();
+                }
+            }
+        };
+        getActivity().registerReceiver(mPreviewReceiver, filter);
+    }
+
+    public void unRegisterReciever() {
+        if (mPreviewReceiver != null) {
+            getActivity().unregisterReceiver(mPreviewReceiver);
+            mPreviewReceiver = null;
+        }
+    }
+
+    public void handlePreview() {
+        boolean bNewCreateVideoView = !sVideoSurfacesInUse;
+        showVideoTransmissionUi();
+        if(!bNewCreateVideoView) {
+            beginPreview();
+        }
+    }
+    public void stopPreview() {
+        if (mIsPreviewing) {
+            mCamera.setPreviewCallback(null);
+            mCamera.stopPreview();
+            mCamera.release();
+            mCamera = null;
+            mIsPreviewing = false;
+            hideVideoUi();
+        }
+    }
+    public void beginPreview() {
+        if(mIsPreviewing) {
+            return;
+        }
+        InCallCameraManager cameraManager = InCallPresenter.getInstance().
+                    getInCallCameraManager();
+        cameraManager.setUseFrontFacingCamera(true);
+        String cameraID  =cameraManager.getActiveCameraId();
+        try {
+            mCamera = Camera.open(Integer.parseInt(cameraID));
+            mCamera.setPreviewSurface(sPreviewSurface.getSurface());
+            mCamera.setDisplayOrientation(90);
+            mCamera.startPreview();
+            mIsPreviewing = true;
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+           e.printStackTrace();
+        }
     }
 }
