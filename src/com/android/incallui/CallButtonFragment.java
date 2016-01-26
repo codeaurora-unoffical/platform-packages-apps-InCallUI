@@ -590,8 +590,6 @@ public class CallButtonFragment
         } else if (getPresenter().getCurrentVideoState() == VideoProfile.VideoState.AUDIO_ONLY) {
             menu.findItem(R.id.overflow_both_call_menu_item).setTitle(
                     R.string.overflowBothCallMenuItemText_in_voicecall);
-            menu.findItem(R.id.overflow_both_call_menu_item).setTitle(
-                    R.string.overflowRXCallMenuItemText_in_voicecall);
         }
 
         updateEndActiveAcceptMtMenu();
