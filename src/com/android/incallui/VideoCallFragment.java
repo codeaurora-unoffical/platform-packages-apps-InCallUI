@@ -722,6 +722,14 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
     public void hideVideoUi() {
         inflateVideoUi(false);
         showZoomControl(false);
+        if (mVideoViews != null && getActivity().getResources().getBoolean(
+                com.android.internal.R.bool.config_regional_display_contact_photo_video_call_off)) {
+            ImageView imageView = (ImageView) mVideoViews
+            .findViewById(R.id.incomingVideoBack);
+            if (imageView != null) {
+                imageView.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     /**
