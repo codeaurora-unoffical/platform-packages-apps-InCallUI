@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.os.Handler;
+import android.os.Message;
 import android.telecom.AudioState;
 import android.telecom.CameraCapabilities;
 import android.telecom.Connection;
@@ -168,10 +169,32 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
      */
     private int mCurrentCallSubstate;
 
+    VideoCallHandler mVideoCallHandler;
+
+    private boolean mAutoFullScreenPending = false;
+
+    private class VideoCallHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            Log.d(this, "Message received: what = " + msg.what);
+            switch (msg.what) {
+                case EVENT_FULL_SCREEN:
+                    if (mAutoFullScreenPending) {
+                        Log.d(this, "Automatically put VT call to full screen");
+                        toggleFullScreen();
+                    }
+                    break;
+                default:
+                    Log.e(this, "Unknown message = " + msg.what);
+            }
+        }
+    };
 
     /** Handler which resets request state to NO_REQUEST after an interval. */
     private Handler mSessionModificationResetHandler;
     private static final long SESSION_MODIFICATION_RESET_DELAY_MS = 3000;
+    private static final int EVENT_FULL_SCREEN = 1;
+    private static final long AUTO_FULLSCREEN_DELAY_MS = 5000;
 
     /**
      * Initializes the presenter.
@@ -183,6 +206,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         mMinimumVideoDimension = mContext.getResources().getDimension(
                 R.dimen.video_preview_small_dimension);
         mSessionModificationResetHandler = new Handler();
+        mVideoCallHandler = new VideoCallHandler();
     }
 
     /**
@@ -337,6 +361,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
     }
 
     private void toggleFullScreen() {
+        mAutoFullScreenPending = false;
         if (InCallPresenter.getInstance().isDialpadVisible()) {
             return;
         }
@@ -396,21 +421,25 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
 
         // Determine the primary active call).
         Call primary = null;
+        // Introduced to handle exit full screen for incoming call if current call
+        // is in full screen.
+        Call currentCall = null;
         if (newState == InCallPresenter.InCallState.INCOMING) {
             // We don't want to replace active video call (primary call)
             // with a waiting call, since user may choose to ignore/decline the waiting call and
             // this should have no impact on current active video call, that is, we should not
             // change the camera or UI unless the waiting VT call becomes active.
             primary = callList.getActiveCall();
+            currentCall = callList.getIncomingCall();
             if (!CallUtils.isActiveVideoCall(primary)) {
                 primary = callList.getIncomingCall();
             }
         } else if (newState == InCallPresenter.InCallState.OUTGOING) {
-            primary = callList.getOutgoingCall();
+            currentCall = primary = callList.getOutgoingCall();
         } else if (newState == InCallPresenter.InCallState.PENDING_OUTGOING) {
-            primary = callList.getPendingOutgoingCall();
+            currentCall = primary = callList.getPendingOutgoingCall();
         } else if (newState == InCallPresenter.InCallState.INCALL) {
-            primary = callList.getActiveCall();
+            currentCall = primary = callList.getActiveCall();
         }
 
         final boolean primaryChanged = !Objects.equals(mPrimaryCall, primary);
@@ -423,6 +452,32 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
             updateVideoCall(primary);
         }
         updateCallCache(primary);
+
+        mayBeAutoEnterFullScreen(currentCall);
+    }
+
+    private void mayBeAutoEnterFullScreen(Call call) {
+        Log.d(this, "mayBeAutoEnterFullScreen call = " + call + " isFullScreen: " + mIsFullScreen);
+        mAutoFullScreenPending = false;
+
+        // Exit full screen if we receive incoming call on top of full screen Video call.
+        // Exit full screen if call is downdraded to VT-TX as user cannot exit full screen.
+        if (call != null && (!VideoProfile.VideoState.isReceptionEnabled(call.getVideoState()) ||
+                call.getState() == Call.State.INCOMING) && mIsFullScreen) {
+            toggleFullScreen();
+            return;
+        }
+
+        if (call == null || (call.getState() != Call.State.ACTIVE ||
+                !CallUtils.isVideoCall(call) || mIsFullScreen ||
+                !VideoProfile.VideoState.isReceptionEnabled(call.getVideoState()))) {
+            return;
+        }
+
+        // If current call is VT or VT-RX post event to make full screen automatically.
+        mAutoFullScreenPending = true;
+        Message msg = mVideoCallHandler.obtainMessage(EVENT_FULL_SCREEN);
+        mVideoCallHandler.sendMessageDelayed(msg, AUTO_FULLSCREEN_DELAY_MS);
     }
 
     private void checkForVideoStateChange(Call call) {
