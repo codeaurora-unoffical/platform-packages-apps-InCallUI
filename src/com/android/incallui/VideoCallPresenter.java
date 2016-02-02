@@ -502,6 +502,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         if (isVideoCall) {
             enterVideoMode(call);
         } else if (isVideoMode()) {
+            InCallPresenter.getInstance().showDowngradeToast();
             exitVideoMode();
         }
     }

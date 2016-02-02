@@ -619,4 +619,5 @@
     <string name="video_quality_low">Low</string>
     <!-- Video quality Unknown -->
     <string name="video_quality_unknown">Unknown</string>
+    <string name="change_voice_message">Video call changed to voice call.</string>
 </resources>
