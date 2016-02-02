@@ -1311,4 +1311,10 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         }
         return mInCallActivity.isDialpadVisible();
     }
+
+    public void showDowngradeToast() {
+        if (mInCallActivity != null && mInCallActivity.getCallCardFragment() != null) {
+            mInCallActivity.getCallCardFragment().showDowngradeToast();
+        }
+    }
 }

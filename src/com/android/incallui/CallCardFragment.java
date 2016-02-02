@@ -46,6 +46,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.contacts.common.widget.FloatingActionButtonController;
 import com.android.phone.common.animation.AnimUtils;
@@ -1004,5 +1005,11 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             v.setTop(oldTop);
             v.setBottom(oldBottom);
         }
+    }
+
+    public void showDowngradeToast(){
+        String str = getResources().getString(R.string.change_voice_message);
+        Toast.makeText(getActivity(), str,
+                Toast.LENGTH_SHORT).show();
     }
 }
