@@ -35,13 +35,15 @@
     <string name="notification_action_answer_more">More</string>
     <!-- Dtermine whether emergency calls should be marked. -->
     <bool name="mark_emergency_call">false</bool>
-    <!-- Condition to check if home location should be enabled or not. -->
-    <bool name="enable_home_location">false</bool>
-    <!-- Flag to display home location on status bar-->
-    <bool name="display_home_location_on_statusbar">false</bool>
     <!--
     customize the default value to control Clear-Code feature,
     default value is false, true is for LatamOpenAMX
     -->
     <bool name="def_incallui_clearcode_enabled">false</bool>
+    <!-- Config to show/hide Video quality toast -->
+    <bool name="config_display_video_quality_toast">true</bool>
+    <!-- Config to show/hide call session event toast like player start/stop -->
+    <bool name="config_call_session_event_toast">true</bool>
+    <!-- Config to show/hide data usage toast -->
+    <bool name="config_display_data_usage_toast">true</bool>
 </resources>

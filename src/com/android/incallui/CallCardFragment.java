@@ -757,8 +757,13 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
     public void setSecondaryInfoVisible(final boolean visible) {
         boolean wasVisible = mSecondaryCallInfo.isShown();
         final boolean isVisible = visible && mHasSecondaryCallInfo;
+        // If hide request is coming when InCallUI is in background, force the view to hide.
+        final boolean needForceHide = !isVisible &&
+                mSecondaryCallInfo.getVisibility() == View.VISIBLE &&
+                !InCallPresenter.getInstance().isShowingInCallUi();
         Log.v(this, "setSecondaryInfoVisible: wasVisible = " + wasVisible + " isVisible = "
-                + isVisible);
+                + isVisible + " isFg = " + InCallPresenter.getInstance().isShowingInCallUi()
+                + " view visibility = " + mSecondaryCallInfo.getVisibility());
 
         // If we are showing the secondary info, we need to show it before animating so that its
         // height will be determined on layout.
@@ -767,7 +772,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         }
 
         // If secondary info visibility hasn't changed, don't animate. Return.
-        if (wasVisible == isVisible) {
+        if (wasVisible == isVisible && !needForceHide) {
             return;
         }
 
@@ -1624,7 +1629,8 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
     private void updateVbByCall(int state) {
         updateVbButton();
 
-        if (Call.State.ACTIVE == state) {
+        if (Call.State.ACTIVE == state &&
+                getResources().getBoolean(R.bool.config_enable_volume_boost)) {
             mVbButton.setVisibility(View.VISIBLE);
         } else if (Call.State.DISCONNECTED == state) {
             if (!CallList.getInstance().hasLiveCall()
