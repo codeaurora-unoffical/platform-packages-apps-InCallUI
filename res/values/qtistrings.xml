@@ -148,5 +148,8 @@
     <string name="qti_ims_onscreenAssuredTransfer">Assured Transfer</string>
     <!-- Text for the onscreen "consultative transfer" button -->
     <string name="qti_ims_onscreenConsultativeTransfer">Consultative Transfer</string>
-
+    <!-- Text for operator specific emergency number -->
+    <string name="emergency_call_dialog_number_for_display_operator">Emergency number</string>
+    <!-- Customize operator emergency number -->
+    <string name="config_sos_number" translatable="false">"xyz"</string>
 </resources>
