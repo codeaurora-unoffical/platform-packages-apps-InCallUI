@@ -24,6 +24,8 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.PhoneLookup;
@@ -32,6 +34,7 @@ import android.text.TextUtils;
 
 import com.android.contacts.common.util.PhoneNumberHelper;
 import com.android.contacts.common.util.TelephonyManagerUtils;
+import com.android.internal.telephony.IExtTelephony;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -363,6 +366,10 @@ public class CallerInfoAsyncQuery {
                         String.valueOf(PhoneNumberHelper.isUriNumber(info.phoneNumber)))
                 .build();
 
+        IExtTelephony mExtTelephony =
+            IExtTelephony.Stub.asInterface(ServiceManager.getService("extphone"));
+        boolean isEmergencyNumber = false;
+
         if (DBG) {
             Log.d(LOG_TAG, "==> contactRef: " + sanitizeUriToString(contactRef));
         }
@@ -376,8 +383,16 @@ public class CallerInfoAsyncQuery {
         cw.cookie = cookie;
         cw.number = info.phoneNumber;
 
+        try {
+            isEmergencyNumber = mExtTelephony.isLocalEmergencyNumber(info.phoneNumber);
+        } catch (RemoteException ex) {
+            Log.e(LOG_TAG, "Exception : " + ex);
+        } catch (NullPointerException ex) {
+            Log.e(LOG_TAG, "Exception : " + ex);
+        }
+
         // check to see if these are recognized numbers, and use shortcuts if we can.
-        if (PhoneNumberUtils.isLocalEmergencyNumber(context, info.phoneNumber)) {
+        if (isEmergencyNumber) {
             cw.event = EVENT_EMERGENCY_NUMBER;
         } else if (info.isVoiceMailNumber()) {
             cw.event = EVENT_VOICEMAIL_NUMBER;

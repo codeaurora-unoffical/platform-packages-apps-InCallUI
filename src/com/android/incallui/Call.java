@@ -18,6 +18,7 @@ package com.android.incallui;
 
 import com.android.contacts.common.CallUtil;
 import com.android.contacts.common.testing.NeededForTesting;
+import com.android.internal.telephony.IExtTelephony;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -28,6 +29,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.Trace;
 import android.os.RemoteException;
 import android.telecom.Connection;
@@ -783,8 +786,16 @@ public class Call {
      */
     private void updateEmergencyCallState() {
         Uri handle = mTelecommCall.getDetails().getHandle();
-        mIsEmergencyCall = PhoneNumberUtils.isEmergencyNumber(
+        IExtTelephony mExtTelephony =
+            IExtTelephony.Stub.asInterface(ServiceManager.getService("extphone"));
+        try {
+            mIsEmergencyCall = mExtTelephony.isEmergencyNumber(
                 handle == null ? "" : handle.getSchemeSpecificPart());
+        } catch (RemoteException ex) {
+            Log.e(this, "Exception : " + ex);
+        } catch (NullPointerException ex) {
+            Log.e(this, "Exception : " + ex);
+        }
     }
 
     public void setModifyToVideoState(int newVideoState) {
