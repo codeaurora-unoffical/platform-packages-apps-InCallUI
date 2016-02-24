@@ -33,10 +33,10 @@ import com.android.incallui.InCallPresenter.InCallState;
 import com.android.incallui.InCallPresenter.InCallStateListener;
 import com.android.incallui.InCallPresenter.IncomingCallListener;
 import com.android.incallui.InCallPresenter.InCallDetailsListener;
-import org.codeaurora.ims.qtiims.QtiImsInterfaceUtils;
+import org.codeaurora.ims.utils.QtiImsExtUtils;
 
 import java.util.Objects;
-import org.codeaurora.QtiVideoCallConstants;
+import org.codeaurora.ims.QtiCallConstants;
 
 /**
  * Logic for call buttons.
@@ -353,13 +353,13 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
     public void callTransferClicked(int type) {
         String number = null;
         Context mContext = getUi().getContext();
-        if (type != QtiImsInterfaceUtils.QTI_IMS_CONSULTATIVE_TRANSFER) {
+        if (type != QtiImsExtUtils.QTI_IMS_CONSULTATIVE_TRANSFER) {
             /**
              * Since there are no editor options available to provide a number during
              * blind or assured transfer, for now, making use of the existing
              * call deflection editor to provide the required number.
              */
-            number = QtiImsInterfaceUtils.getCallDeflectNumber(mContext.getContentResolver());
+            number = QtiImsExtUtils.getCallDeflectNumber(mContext.getContentResolver());
             if (number == null) {
                  QtiCallUtils.displayToast(mContext, R.string.qti_ims_transfer_num_error);
                 return;
@@ -428,7 +428,7 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
 
         final boolean showMute = call.can(android.telecom.Call.Details.CAPABILITY_MUTE);
         final boolean showAddParticipant = call.can(
-                QtiVideoCallConstants.CAPABILITY_ADD_PARTICIPANT);
+                QtiCallConstants.CAPABILITY_ADD_PARTICIPANT);
 
         boolean showRxTx = false;
         boolean showRx = false;
@@ -472,7 +472,7 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         ui.showButton(BUTTON_PAUSE_VIDEO, isVideo && !useExt);
         ui.showButton(BUTTON_DIALPAD, !isVideo || useExt);
         ui.showButton(BUTTON_MERGE, showMerge);
-        ui.enableAddParticipant(showAddParticipant);
+        ui.showButton(BUTTON_ADD_PARTICIPANT, showAddParticipant);
         ui.showButton(BUTTON_RECORD, showRecord);
         if (ui.getContext().getResources().getBoolean(
                 R.bool.config_enable_enhance_video_call_ui)) {
@@ -480,9 +480,7 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
             ui.showButton(BUTTON_RXTX_VIDEO_CALL, showRxTx);
             ui.showButton(BUTTON_RX_VIDEO_CALL, showRx);
             ui.showButton(BUTTON_VO_VIDEO_CALL, showVolte);
-            ui.enableAddParticipant(false);
-        } else {
-            ui.enableAddParticipant(showAddParticipant);
+            ui.showButton(BUTTON_ADD_PARTICIPANT, false);
         }
         ui.enableCallTransfer(showCallTransfer);
         if (showCallTransfer != 0) {
@@ -529,7 +527,6 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         void setHold(boolean on);
         void setCameraSwitched(boolean isBackFacingCamera);
         void setVideoPaused(boolean isPaused);
-        void enableAddParticipant(boolean show);
         void setAudio(int mode);
         void setSupportedAudio(int mask);
         void displayDialpad(boolean on, boolean animate);
