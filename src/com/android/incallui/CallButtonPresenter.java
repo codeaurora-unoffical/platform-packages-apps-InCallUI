@@ -25,7 +25,9 @@ import android.telecom.InCallService.VideoCall;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.VideoProfile;
+import android.widget.Toast;
 
+import com.android.dialer.util.DialerUtils;
 import com.android.incallui.AudioModeProvider.AudioModeListener;
 import com.android.incallui.InCallCameraManager.Listener;
 import com.android.incallui.InCallPresenter.CanAddCallListener;
@@ -437,12 +439,14 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
                 R.bool.config_enable_enhance_video_call_ui)) {
             Log.v(this, "Video State is " + mCall.getVideoState());
             if (mCall.getVideoState() == VideoProfile.STATE_RX_ENABLED ||
-                    mCall.getVideoState() == VideoProfile.STATE_AUDIO_ONLY) {
+                    (mCall.getVideoState() == VideoProfile.STATE_AUDIO_ONLY &&
+                     DialerUtils.getVTCapability(call.getNumber()))) {
                 showRxTx = true;
                 Log.v(this, "showRxTx is true");
             }
             if (mCall.getVideoState() == VideoProfile.STATE_BIDIRECTIONAL ||
-                    mCall.getVideoState() == VideoProfile.STATE_AUDIO_ONLY) {
+                    (mCall.getVideoState() == VideoProfile.STATE_AUDIO_ONLY &&
+                     DialerUtils.getVTCapability(call.getNumber()))) {
                 showRx = true;
                 Log.v(this, "showRx is true");
             }
@@ -451,6 +455,12 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
                     mCall.getVideoState() == VideoProfile.STATE_BIDIRECTIONAL) {
                 showVolte = true;
                 Log.v(this, "showVolte is true");
+            }
+            if (mCall.getVideoState() == VideoProfile.STATE_AUDIO_ONLY &&
+                !DialerUtils.getVTCapability(call.getNumber())) {
+                Context context = getUi().getContext();
+                Toast.makeText(context,context.getString(R.string.toast_video_call_upgrade),
+                        Toast.LENGTH_SHORT).show();
             }
         }
 
