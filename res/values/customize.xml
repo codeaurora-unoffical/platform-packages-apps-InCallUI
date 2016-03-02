@@ -63,5 +63,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
     <!-- When set to true, this config enables enhance videocall ui -->
     <bool name="config_enable_enhance_video_call_ui">false</bool>
+    <bool name="config_preview_before_transmission_enable">false</bool>
 
 </resources>

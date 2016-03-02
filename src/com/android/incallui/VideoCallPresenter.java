@@ -289,10 +289,12 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         Log.d(this, "onSurfaceCreated presenter=" + this);
 
         final VideoCallUi ui = getUi();
+        boolean mIsPreviewBeforeEnable = mContext.getResources().getBoolean(
+                R.bool.config_preview_before_transmission_enable);
         if (ui == null || mVideoCall == null) {
             Log.w(this, "onSurfaceCreated: Error bad state VideoCallUi=" + ui + " mVideoCall="
                     + mVideoCall);
-            if (surface == VideoCallFragment.SURFACE_PREVIEW ) {
+            if (mIsPreviewBeforeEnable && (surface == VideoCallFragment.SURFACE_PREVIEW)) {
                 ((VideoCallFragment)ui).beginPreview();
             }
             return;

@@ -300,7 +300,10 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         }
 
         videoCall.sendSessionModifyRequest(videoProfile);
-        previewIfNeeded(videoProfile);
+        if (getUi().getContext().getResources().getBoolean(
+                    R.bool.config_preview_before_transmission_enable)) {
+            previewIfNeeded(videoProfile);
+        }
     }
 
     /**

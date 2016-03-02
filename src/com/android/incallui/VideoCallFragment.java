@@ -132,6 +132,7 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
     private boolean mIsPreviewing = false;
     private Camera mCamera = null;
     private BroadcastReceiver mPreviewReceiver = null;
+    private boolean mIsPreviewBeforeEnable;
     //end for preview before video call
     /**
      * This class implements the zoom listener for zoom control
@@ -425,6 +426,8 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mIsActivityRestart = sVideoSurfacesInUse;
+        mIsPreviewBeforeEnable = getResources().getBoolean(
+                R.bool.config_preview_before_transmission_enable);
     }
 
     /**
@@ -573,7 +576,7 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
         if (sVideoSurfacesInUse) {
             inflateVideoCallViews();
         }
-        registerReciever();
+        if (mIsPreviewBeforeEnable) registerReciever();
     }
 
     @Override
@@ -623,7 +626,7 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
     public void onDestroyView() {
         super.onDestroyView();
         Log.d(this, "onDestroyView:");
-        unRegisterReciever();
+        if (mIsPreviewBeforeEnable) unRegisterReciever();
     }
 
     /**
