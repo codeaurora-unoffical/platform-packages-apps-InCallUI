@@ -125,8 +125,15 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
     }
 
     private boolean isGeocoderLocationNeeded(Call call) {
-          return call.getState() == Call.State.INCOMING ||
-                  call.getState() == Call.State.CONNECTING;
+        Log.d(this, "isGeocoderLocationNeeded getState() = " + call.getState());
+        if (call.getState() == Call.State.INCOMING ||
+                call.getState() == Call.State.CALL_WAITING ||
+                call.getState() == Call.State.DIALING ||
+                call.getState() == Call.State.CONNECTING ||
+                call.getState() == Call.State.SELECT_PHONE_ACCOUNT) {
+            return true;
+        };
+        return false;
     }
 
     public void init(Context context, Call call) {
