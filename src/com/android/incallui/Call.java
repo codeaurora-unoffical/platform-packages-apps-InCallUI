@@ -780,7 +780,7 @@ public class Call {
                 handle == null ? "" : handle.getSchemeSpecificPart());
     }
 
-    private void setModifyToVideoState(int newVideoState) {
+    public void setModifyToVideoState(int newVideoState) {
         mModifyToVideoState = newVideoState;
     }
 
@@ -862,7 +862,8 @@ public class Call {
         }
 
         return String.format(Locale.US, "[%s, %s, %s, children:%s, parent:%s, conferenceable:%s, " +
-                "videoState:%s, mSessionModificationState:%d, VideoSettings:%s, mIsActivSub:%b]",
+                "videoState:%s, modifyToVideoState:%s, mSessionModificationState:%d," +
+                " VideoSettings:%s, mIsActivSub:%b]",
                 mId,
                 State.toString(getState()),
                 android.telecom.Call.Details
@@ -871,6 +872,7 @@ public class Call {
                 getParentId(),
                 this.mTelecommCall.getConferenceableCalls(),
                 VideoProfile.videoStateToString(mTelecommCall.getDetails().getVideoState()),
+                VideoProfile.videoStateToString(mModifyToVideoState),
                 mSessionModificationState,
                 getVideoSettings(), mIsActiveSub);
     }
