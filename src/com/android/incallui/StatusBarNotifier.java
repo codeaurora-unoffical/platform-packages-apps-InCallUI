@@ -169,9 +169,12 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener,
     }
 
     private void showNotification(final Call call) {
-        final boolean isIncoming = (call.getState() == Call.State.INCOMING ||
-                call.getState() == Call.State.CALL_WAITING);
-
+        final boolean isGeocoderLocationNeeded = (call.getState() == Call.State.INCOMING ||
+                call.getState() == Call.State.CALL_WAITING ||
+                call.getState() == Call.State.DIALING ||
+                call.getState() == Call.State.CONNECTING ||
+                call.getState() == Call.State.SELECT_PHONE_ACCOUNT);
+        Log.d(this, "showNotification isGeocoderLocationNeeded = " + isGeocoderLocationNeeded);
         if (!TextUtils.isEmpty(mCallId)) {
             CallList.getInstance().removeCallUpdateListener(mCallId, this);
         }
@@ -183,7 +186,7 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener,
         // This callback will always get called immediately and synchronously with whatever data
         // it has available, and may make a subsequent call later (same thread) if it had to
         // call into the contacts provider for more data.
-        mContactInfoCache.findInfo(call, isIncoming, new ContactInfoCacheCallback() {
+        mContactInfoCache.findInfo(call, isGeocoderLocationNeeded, new ContactInfoCacheCallback() {
             @Override
             public void onContactInfoComplete(String callId, ContactCacheEntry entry) {
                 Call call = CallList.getInstance().getCallById(callId);
