@@ -548,9 +548,40 @@ public class VideoCallFragment extends BaseFragment<VideoCallPresenter,
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(this, "onStart:");
+
+        if (getPresenter() != null) {
+            getPresenter().onFragmentUiShowing(true);
+        } else {
+            Log.e(this, "onStart: Presenter is null");
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(this, "onResume:");
+
+        if (getPresenter() != null) {
+            getPresenter().validateAndOpenCamera();
+        } else {
+            Log.e(this, "onResume: Presenter is null");
+        }
+    }
+
+    @Override
     public void onStop() {
         super.onStop();
         Log.d(this, "onStop:");
+
+        if (getPresenter() != null) {
+            getPresenter().onFragmentUiShowing(false);
+        } else {
+            Log.e(this, "onStop: Presenter is null");
+        }
+
     }
 
     @Override

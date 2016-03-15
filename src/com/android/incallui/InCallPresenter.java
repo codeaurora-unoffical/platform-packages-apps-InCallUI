@@ -587,7 +587,6 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         Call call = mCallList.getIncomingCall();
         if (call != null) {
             TelecomAdapter.getInstance().answerCall(call.getId(), videoState);
-            showInCall(false, false/* newOutgoingCall */);
         }
     }
 
@@ -1367,5 +1366,11 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
             return false;
         }
         return mInCallActivity.isDialpadVisible();
+    }
+
+    public void showDowngradeToast() {
+        if (mInCallActivity != null && mInCallActivity.getCallCardFragment() != null) {
+            mInCallActivity.getCallCardFragment().showDowngradeToast();
+        }
     }
 }
