@@ -125,8 +125,15 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
     }
 
     private boolean isGeocoderLocationNeeded(Call call) {
-          return call.getState() == Call.State.INCOMING ||
-                  call.getState() == Call.State.CONNECTING;
+        Log.d(this, "isGeocoderLocationNeeded getState() = " + call.getState());
+        if (call.getState() == Call.State.INCOMING ||
+                call.getState() == Call.State.CALL_WAITING ||
+                call.getState() == Call.State.DIALING ||
+                call.getState() == Call.State.CONNECTING ||
+                call.getState() == Call.State.SELECT_PHONE_ACCOUNT) {
+            return true;
+        };
+        return false;
     }
 
     public void init(Context context, Call call) {
@@ -219,20 +226,14 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         } else if (newState == InCallState.INCALL) {
             primary = getCallToDisplay(callList, null, false);
             secondary = getCallToDisplay(callList, primary, true);
-            // During swap scenarios, two calls can be ACTIVE at the same time momentarily.
+            // During some scenarios, two calls can be ACTIVE at the same time momentarily.
             // In such cases secondary above will be null. To avoid flickering of secondary
-            // call view, assign the non primary call as secondary here.
+            // call view, assign the second ACTIVE call as secondary here.
             if (secondary == null && primary != null) {
-                Call probableSecondary = null;
-                if (primary == mPrimary) {
-                    probableSecondary = mSecondary;
-                } else if (primary == mSecondary) {
-                    probableSecondary = mPrimary;
-                }
-                if (probableSecondary != null &&
-                        probableSecondary.getState() == Call.State.ACTIVE &&
-                        primary.getSubId() == probableSecondary.getSubId()) {
-                    Log.v(this, "Two calls ACTIVE");
+                Call probableSecondary = callList.getCallWithState(
+                        Call.State.ACTIVE, 1, primary.getSubId());
+                if (probableSecondary != null && probableSecondary != primary) {
+                    Log.d(this, "Two calls ACTIVE");
                     secondary = probableSecondary;
                 }
             }
