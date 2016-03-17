@@ -436,7 +436,7 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         boolean showRx = false;
         boolean showVolte = false;
         if (ui.getContext().getResources().getBoolean(
-                R.bool.config_enable_enhance_video_call_ui)) {
+                R.bool.config_enable_enhance_video_call_ui) && showUpgradeToVideo) {
             Log.v(this, "Video State is " + mCall.getVideoState());
             if (mCall.getVideoState() == VideoProfile.STATE_RX_ENABLED ||
                     (mCall.getVideoState() == VideoProfile.STATE_AUDIO_ONLY &&
