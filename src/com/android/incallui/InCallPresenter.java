@@ -26,6 +26,7 @@ import android.content.ActivityNotFoundException;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.telecom.DisconnectCause;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneCapabilities;
@@ -99,6 +100,7 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
     private PowerManager mPowerManager;
     private PowerManager.WakeLock mWakeLock = null;
     private static boolean mIsScreenOff = false;
+    private boolean mDurationSettingOverridden = false;
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -1507,4 +1509,21 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         }
         return mInCallActivity.isDialpadVisible();
     }
+
+    public void disableCallDurationPopup() {
+        if (Settings.System.getInt(mContext.getContentResolver(), "show_call_duration", 1) == 1) {
+            Log.d(this, "Disable call duration pop up during merge");
+            Settings.System.putInt(mContext.getContentResolver(), "show_call_duration", 0);
+            mDurationSettingOverridden = true;
+        }
+    }
+
+    public void enableCallDurationPopup() {
+        if (mDurationSettingOverridden) {
+            Log.d(this, "enable call duration pop up");
+            Settings.System.putInt(mContext.getContentResolver(), "show_call_duration", 1);
+            mDurationSettingOverridden = false;
+        }
+    }
+
 }
