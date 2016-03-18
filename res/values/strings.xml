@@ -512,4 +512,7 @@
     <string name="overflowBothCallMenuItemText">Video Call, show me</string>
     <string name="overflowRXCallMenuItemText">Video Call, hide me</string>
     <string name="overflowVOCallMenuItemText">Voice Call</string>
+    <string name="toast_video_call_upgrade">cannot accept video calls at this time!</string>
+
+    <string name="toast_video_call_downgrade_to_voice_call">Video calling is currently available only over high speed LTE and Wi-Fi networks</string>
 </resources>
