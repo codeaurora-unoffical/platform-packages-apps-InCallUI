@@ -231,6 +231,9 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
 
     public void mergeClicked() {
         TelecomAdapter.getInstance().merge(mCall.getId());
+        //Ensure call duration pop ups are not displayed during
+        //merging calls for conference
+        InCallPresenter.getInstance().disableCallDurationPopup();
     }
 
     public void addParticipantClicked() {

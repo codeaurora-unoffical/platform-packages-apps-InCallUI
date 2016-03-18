@@ -540,6 +540,8 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
                         canManageConference,
                         false /* isSipCall */,
                         isForwarded);
+                //If call duration pop ups are disabled during merge, enable them again
+                InCallPresenter.getInstance().enableCallDurationPopup();
             } else {
                 String name = getNameForCall(mPrimaryContactInfo);
                 String number = getNumberForCall(mPrimaryContactInfo);

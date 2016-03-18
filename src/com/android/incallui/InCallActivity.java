@@ -876,6 +876,8 @@ public class InCallActivity extends Activity {
                 // Attempt to add a call to conference call failed
                 // ("Conference call failed")
                 errorMessageResId = R.string.incall_error_supp_service_conference;
+                //If call duration pop ups are disabled during merge, enable them again
+                InCallPresenter.getInstance().enableCallDurationPopup();
                 break;
 
             case REJECT:
