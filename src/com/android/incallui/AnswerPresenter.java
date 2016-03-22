@@ -71,6 +71,8 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
     private String mDeflectToNumber = null;
     private int mDeflectPhoneId = 0;
 
+    private static final int INVALID_PHONEID = -1;
+
     /* Service connection bound to IQtiImsExt */
     private ServiceConnection mConnection = new ServiceConnection() {
 
@@ -402,7 +404,7 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
 
     // get active phoneId, for which call is visible to user
     private int getActivePhoneId() {
-        int phoneId = -1;
+        int phoneId = INVALID_PHONEID;
         if (InCallServiceImpl.isDsdaEnabled()) {
             int subId = mCalls.getActiveSubId();
             phoneId = mCalls.getPhoneId(subId);
@@ -486,8 +488,9 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
     public void rejectCallWithMessage(String message) {
         int phoneId = getActivePhoneId();
         Log.i(this, "sendTextToDefaultActivity()...phoneId:" + phoneId);
-        TelecomAdapter.getInstance().rejectCall(mCall[phoneId].getId(), true, message);
-
+        if (phoneId != INVALID_PHONEID) {
+            TelecomAdapter.getInstance().rejectCall(mCall[phoneId].getId(), true, message);
+        }
         onDismissDialog();
     }
 
