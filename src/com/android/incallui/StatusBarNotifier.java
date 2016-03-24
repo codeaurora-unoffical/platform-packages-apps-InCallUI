@@ -380,7 +380,9 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener,
             String contactNumberDisplayed = TextUtils.isEmpty(contactInfo.number) ?
                     "" : contactInfo.number.toString();
             String location_info = GeoUtil.getGeocodedLocationFor(mContext, contactNumberDisplayed);
-            contactNumberDisplayed =  contactNumberDisplayed + " " + location_info;
+            if (!TextUtils.isEmpty(location_info)){
+                contactNumberDisplayed =  contactNumberDisplayed + " " + location_info;
+            }
             return TextUtils.isEmpty(contactNumberDisplayed) ? null
                     : BidiFormatter.getInstance().unicodeWrap(
                     contactNumberDisplayed, TextDirectionHeuristics.LTR);
