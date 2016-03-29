@@ -440,17 +440,17 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         boolean showRx = false;
         boolean showVolte = false;
         if (ui.getContext().getResources().getBoolean(
-                R.bool.config_enable_enhance_video_call_ui) && showUpgradeToVideo) {
+                R.bool.config_enable_enhance_video_call_ui)) {
             Log.v(this, "Video State is " + mCall.getVideoState());
             if (mCall.getVideoState() == VideoProfile.STATE_RX_ENABLED ||
                     (mCall.getVideoState() == VideoProfile.STATE_AUDIO_ONLY &&
-                     DialerUtils.getVTCapability(call.getNumber()))) {
+                    QtiCallUtils.hasVideoCapabilities(call))) {
                 showRxTx = true;
                 Log.v(this, "showRxTx is true");
             }
             if (mCall.getVideoState() == VideoProfile.STATE_BIDIRECTIONAL ||
                     (mCall.getVideoState() == VideoProfile.STATE_AUDIO_ONLY &&
-                     DialerUtils.getVTCapability(call.getNumber()))) {
+                    QtiCallUtils.hasVideoCapabilities(call))) {
                 showRx = true;
                 Log.v(this, "showRx is true");
             }
@@ -461,7 +461,7 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
                 Log.v(this, "showVolte is true");
             }
             if (mCall.getVideoState() == VideoProfile.STATE_AUDIO_ONLY &&
-                !DialerUtils.getVTCapability(call.getNumber())) {
+                !QtiCallUtils.hasVideoCapabilities(call)) {
                 Context context = getUi().getContext();
                 Toast.makeText(context,context.getString(R.string.toast_video_call_upgrade),
                         Toast.LENGTH_SHORT).show();
