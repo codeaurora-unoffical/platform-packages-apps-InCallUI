@@ -198,7 +198,13 @@ public class Call {
 
                 /* When disconnecting, reset the globals variables */
                 mImsServiceBound = false;
-                mContext.unbindService(mConnection);
+                try {
+                    mContext.unbindService(mConnection);
+                } catch (Exception ex) {
+                    Log.e(this, "stopQtiImsInterface: Error (exception) occurred "
+                            + "while trying to unbind QTI IMS ServiceConnection.");
+                    ex.printStackTrace();
+                }
                 mContext = null;
             } else {
                 Log.d(this, "stopQtiImsInterface: Service Bound - " + mImsServiceBound +
