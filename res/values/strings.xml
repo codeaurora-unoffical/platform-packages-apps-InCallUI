@@ -517,4 +517,5 @@
     <string name="vowifi_call_quality_good">Good Voice quality</string>
     <string name="vowifi_call_quality_fair">Fair Voice quality</string>
     <string name="vowifi_call_quality_poor">Poor Voice quality</string>
+    <string name="too_many_recipients">The maximum allowed participants in a 4G conference call are 6.</string>
 </resources>
