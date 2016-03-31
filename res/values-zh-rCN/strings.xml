@@ -190,4 +190,5 @@
     <string name="modify_call_option_vt_rx">视频接收</string>
     <string name="modify_call_option_vt_tx">视频发送</string>
     <string name="modify_call_option_voice">仅限语音</string>
+    <string name="too_many_recipients">4G会议电话的参与人数上限为6人。</string>
 </resources>

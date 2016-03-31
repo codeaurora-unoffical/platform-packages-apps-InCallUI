@@ -515,4 +515,5 @@
     <string name="toast_video_call_upgrade">cannot accept video calls at this time!</string>
 
     <string name="toast_video_call_downgrade_to_voice_call">Video calling is currently available only over high speed LTE and Wi-Fi networks</string>
+    <string name="too_many_recipients">The maximum allowed participants in a 4G conference call are 6.</string>
 </resources>
