@@ -455,12 +455,27 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         }
 
         final boolean primaryChanged = !Objects.equals(mPrimaryCall, primary);
-        Log.d(this, "onStateChange primaryChanged=" + primaryChanged);
-        Log.d(this, "onStateChange primary= " + primary);
-        Log.d(this, "onStateChange mPrimaryCall = " + mPrimaryCall);
+        Log.d(this, "onStateChange primaryChanged= " + primaryChanged + ", primary= "
+                + primary + ", mPrimaryCall= " + mPrimaryCall);
         if (primaryChanged) {
             onPrimaryCallChanged(primary);
         } else if (mPrimaryCall != null) {
+            final boolean hasVideoStateChanged = mCurrentVideoState != primary.getVideoState();
+            boolean isDisplayToastOfDowngradeVoiceCall = mContext.getResources()
+                    .getBoolean(R.bool.config_regional_display_toast_of_downgrade_voice_call);
+            Log.d(this, "onStateChange hasVideoStateChanged= " + hasVideoStateChanged
+                    + ", isDisplayToastOfDowngradeVoiceCall= "
+                    + isDisplayToastOfDowngradeVoiceCall);
+            if (isDisplayToastOfDowngradeVoiceCall
+                    && (!(oldState == InCallPresenter.InCallState.INCOMING
+                    || oldState == InCallPresenter.InCallState.OUTGOING))
+                    && newState == InCallPresenter.InCallState.INCALL
+                    && hasVideoStateChanged && !CallUtils.isVideoCall(primary)) {
+                Log.d(this, "onStateChange Display Toast Of DowngradeVoiceCall");
+                Toast.makeText(mContext,
+                        R.string.toast_video_call_downgrade_to_voice_call,
+                        Toast.LENGTH_SHORT).show();
+            }
             updateVideoCall(primary);
         }
         updateCallCache(primary);
@@ -574,6 +589,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         } else if (isVideoCall) {
             Log.d(this, "onPrimaryCallChanged: Entering video mode...");
 
+            checkForOrientationAllowedChange(newPrimaryCall);
             updateCameraSelection(newPrimaryCall);
             enterVideoMode(newPrimaryCall);
         }
