@@ -246,12 +246,14 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
     }
 
     public void addCallClicked() {
-        // Automatically mute the current call
-        mAutomaticallyMuted = true;
-        mPreviousMuteState = AudioModeProvider.getInstance().getMute();
-        // Simulate a click on the mute button
-        muteClicked(true);
-
+        if (getUi().getContext().getResources().getBoolean(
+                R.bool.config_mute_mic_during_addcall)) {
+            // Automatically mute the current call
+            mAutomaticallyMuted = true;
+            mPreviousMuteState = AudioModeProvider.getInstance().getMute();
+            // Simulate a click on the mute button
+            muteClicked(true);
+        }
         TelecomAdapter.getInstance().addCall();
     }
 
