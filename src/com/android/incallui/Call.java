@@ -815,10 +815,8 @@ public class Call {
     }
 
     public void triggerCalcBaseChronometerTime() {
-        if (mBaseChronometerTime <= 0) {
-            mBaseChronometerTime = getConnectTimeMillis() - System.currentTimeMillis()
-                    + SystemClock.elapsedRealtime();
-        }
+        mBaseChronometerTime = getConnectTimeMillis() - System.currentTimeMillis()
+                + SystemClock.elapsedRealtime();
     }
 
     public long getCallDuration() {
