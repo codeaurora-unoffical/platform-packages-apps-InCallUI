@@ -417,8 +417,28 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
 
         final boolean useExt = QtiCallUtils.useExt(ui.getContext());
         final boolean showAddCall = TelecomAdapter.getInstance().canAddCall();
-        final boolean showMerge = call.can(
-                android.telecom.Call.Details.CAPABILITY_MERGE_CONFERENCE);
+
+        final Call backgroundCall = CallList.getInstance().getBackgroundCall();
+        final boolean showMerge;
+        final boolean isConferenceCallLimited = ui.getContext().getResources().getBoolean(
+                R.bool.config_enable_video_conference_call_limit);
+        if (!isConferenceCallLimited) {
+            showMerge = call.can(android.telecom.Call.Details.CAPABILITY_MERGE_CONFERENCE);
+        } else {
+            final int maxSupport = ui.getContext().getResources().getInteger(
+                R.integer.conference_call_max_support_num);
+            Call conferenceCall =  (backgroundCall != null && backgroundCall.isConferenceCall()) ?
+                backgroundCall : (call != null && call.isConferenceCall()) ? call : null;
+            boolean hasVideoCall = CallUtils.isVideoCall(backgroundCall) ||
+                CallUtils.isVideoCall(call);
+            if (conferenceCall != null && hasVideoCall) {
+                showMerge = conferenceCall.getChildCallIds().size() >= maxSupport ? false : true;
+                Log.v(this, "exist conference size = " + conferenceCall.getChildCallIds().size());
+            } else {
+                showMerge = call.can(android.telecom.Call.Details.CAPABILITY_MERGE_CONFERENCE);
+            }
+        }
+
         final int callState = call.getState();
         final boolean showUpgradeToVideo = (!isVideo || useExt) &&
                 (QtiCallUtils.hasVideoCapabilities(call) ||

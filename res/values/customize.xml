@@ -40,4 +40,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <!-- the international_idp array index that to be reconverted,
        -1:none-->
     <integer name="check_idp_reconvert_idx" translatable="false">-1</integer>
+
+    <integer name="conference_call_max_support_num">4</integer>
 </resources>
