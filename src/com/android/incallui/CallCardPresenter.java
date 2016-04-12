@@ -26,7 +26,6 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.telecom.DisconnectCause;
@@ -83,7 +82,6 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
     private CallTimer mCallTimer;
     private Context mContext;
     private TelecomManager mTelecomManager;
-    private long mBaseChronometerTime = 0;
 
     public static class ContactLookupCallback implements ContactInfoCacheCallback {
         private final WeakReference<CallCardPresenter> mCallCardPresenter;
@@ -243,13 +241,11 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         // Start/stop timers.
         if (mPrimary != null && mPrimary.getState() == Call.State.ACTIVE) {
             Log.d(this, "Starting the calltime timer");
-            mBaseChronometerTime = mPrimary.getConnectTimeMillis() - System.currentTimeMillis()
-                    + SystemClock.elapsedRealtime();
+            mPrimary.triggerCalcBaseChronometerTime();
             mCallTimer.start(CALL_TIME_UPDATE_INTERVAL_MS);
         } else {
             Log.d(this, "Canceling the calltime timer");
             mCallTimer.cancel();
-            mBaseChronometerTime = 0;
             ui.setPrimaryCallElapsedTime(false, null);
         }
 
@@ -390,10 +386,8 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
                 ui.setPrimaryCallElapsedTime(false, null);
             }
             mCallTimer.cancel();
-            mBaseChronometerTime = 0;
-        } else if (mBaseChronometerTime > 0) {
-            final long duration = SystemClock.elapsedRealtime() - mBaseChronometerTime;
-            ui.setPrimaryCallElapsedTime(true, DateUtils.formatElapsedTime(duration / 1000));
+        } else {
+            ui.setPrimaryCallElapsedTime(true, Long.toString(mPrimary.getCallDuration()) );
         }
     }
 
