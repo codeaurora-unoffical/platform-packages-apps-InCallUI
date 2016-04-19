@@ -706,6 +706,7 @@
     <string name="overflowBothCallMenuItemText_in_voicecall"></string>
     <string name="overflowRXCallMenuItemText_in_voicecall"></string>
     <string name="overflowVOCallMenuItemText"></string>
+    <string name="emergency_call_string_with_number_for_display">Emergency</string>
 
 
 </resources>
