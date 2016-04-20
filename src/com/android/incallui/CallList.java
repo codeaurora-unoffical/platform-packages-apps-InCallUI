@@ -834,7 +834,7 @@ public class CallList {
             try {
                 if ((call.getState() == state) && ((ph == null) ||
                         (ph != null && (ph.getId() != null) &&
-                        (ph.getId().contains("sip") ||
+                        ((ph.getId().contains("sip") || ph.getId().contains("@")) ||
                         Integer.parseInt(ph.getId()) == subId)))) {
                     if (position >= positionToFind) {
                         retval = call;
