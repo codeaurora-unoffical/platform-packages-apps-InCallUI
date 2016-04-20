@@ -385,6 +385,10 @@ public class InCallActivity extends Activity implements FragmentDisplayManager {
         return mIsVisible;
     }
 
+    /* package */ boolean isManageConferenceVisible() {
+        return (mConferenceManagerFragment != null && mConferenceManagerFragment.isVisible());
+    }
+
     private boolean hasPendingDialogs() {
         return mDialog != null || (mAnswerFragment != null && mAnswerFragment.hasPendingDialogs())
                 || InCallCsRedialHandler.getInstance().hasPendingDialogs();
