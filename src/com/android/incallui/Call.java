@@ -22,6 +22,7 @@ import com.android.incallui.CallList.Listener;
 import android.content.Context;
 import android.hardware.camera2.CameraCharacteristics;
 import android.net.Uri;
+import android.os.SystemClock;
 import android.telecom.CallProperties;
 import android.telecom.DisconnectCause;
 import android.telecom.PhoneCapabilities;
@@ -249,6 +250,8 @@ public final class Call {
     private int mModifyToVideoState = VideoProfile.VideoState.AUDIO_ONLY;
 
     private InCallVideoCallListener mVideoCallListener;
+
+    private long mBaseChronometerTime = 0;
 
     public Call(android.telecom.Call telecommCall) {
         mTelecommCall = telecommCall;
@@ -582,6 +585,15 @@ public final class Call {
 
     public int getSessionModificationState() {
         return mSessionModificationState;
+    }
+
+    public void triggerCalcBaseChronometerTime() {
+        mBaseChronometerTime = getConnectTimeMillis() - System.currentTimeMillis()
+                    + SystemClock.elapsedRealtime();
+    }
+
+    public long getCallDuration() {
+        return SystemClock.elapsedRealtime() - mBaseChronometerTime;
     }
 
     @Override
