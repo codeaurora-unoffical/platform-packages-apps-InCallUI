@@ -37,4 +37,6 @@
     <!-- When set to false,this config disable volume boost function when calling-->
     <bool name="config_enable_volume_boost">true</bool>
     <bool name="config_regional_display_toast_of_downgrade_voice_call">false</bool>
+
+    <bool name="config_enable_video_conference_call_limit">false</bool>
 </resources>

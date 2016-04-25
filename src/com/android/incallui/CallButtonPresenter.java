@@ -417,8 +417,28 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
 
         final boolean useExt = QtiCallUtils.useExt(ui.getContext());
         final boolean showAddCall = TelecomAdapter.getInstance().canAddCall();
-        final boolean showMerge = call.can(
-                android.telecom.Call.Details.CAPABILITY_MERGE_CONFERENCE);
+
+        final Call backgroundCall = CallList.getInstance().getBackgroundCall();
+        final boolean showMerge;
+        final boolean isConferenceCallLimited = ui.getContext().getResources().getBoolean(
+                R.bool.config_enable_video_conference_call_limit);
+        if (!isConferenceCallLimited) {
+            showMerge = call.can(android.telecom.Call.Details.CAPABILITY_MERGE_CONFERENCE);
+        } else {
+            final int maxSupport = ui.getContext().getResources().getInteger(
+                R.integer.conference_call_max_support_num);
+            Call conferenceCall =  (backgroundCall != null && backgroundCall.isConferenceCall()) ?
+                backgroundCall : (call != null && call.isConferenceCall()) ? call : null;
+            boolean hasVideoCall = CallUtils.isVideoCall(backgroundCall) ||
+                CallUtils.isVideoCall(call);
+            if (conferenceCall != null && hasVideoCall) {
+                showMerge = conferenceCall.getChildCallIds().size() >= maxSupport ? false : true;
+                Log.v(this, "exist conference size = " + conferenceCall.getChildCallIds().size());
+            } else {
+                showMerge = call.can(android.telecom.Call.Details.CAPABILITY_MERGE_CONFERENCE);
+            }
+        }
+
         final int callState = call.getState();
         final boolean showUpgradeToVideo = (!isVideo || useExt) &&
                 (QtiCallUtils.hasVideoCapabilities(call) ||
@@ -440,17 +460,17 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         boolean showRx = false;
         boolean showVolte = false;
         if (ui.getContext().getResources().getBoolean(
-                R.bool.config_enable_enhance_video_call_ui) && showUpgradeToVideo) {
+                R.bool.config_enable_enhance_video_call_ui)) {
             Log.v(this, "Video State is " + mCall.getVideoState());
             if (mCall.getVideoState() == VideoProfile.STATE_RX_ENABLED ||
                     (mCall.getVideoState() == VideoProfile.STATE_AUDIO_ONLY &&
-                     DialerUtils.getVTCapability(call.getNumber()))) {
+                    QtiCallUtils.hasVideoCapabilities(call))) {
                 showRxTx = true;
                 Log.v(this, "showRxTx is true");
             }
             if (mCall.getVideoState() == VideoProfile.STATE_BIDIRECTIONAL ||
                     (mCall.getVideoState() == VideoProfile.STATE_AUDIO_ONLY &&
-                     DialerUtils.getVTCapability(call.getNumber()))) {
+                    QtiCallUtils.hasVideoCapabilities(call))) {
                 showRx = true;
                 Log.v(this, "showRx is true");
             }
@@ -461,7 +481,7 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
                 Log.v(this, "showVolte is true");
             }
             if (mCall.getVideoState() == VideoProfile.STATE_AUDIO_ONLY &&
-                !DialerUtils.getVTCapability(call.getNumber())) {
+                !QtiCallUtils.hasVideoCapabilities(call)) {
                 Context context = getUi().getContext();
                 Toast.makeText(context,context.getString(R.string.toast_video_call_upgrade),
                         Toast.LENGTH_SHORT).show();

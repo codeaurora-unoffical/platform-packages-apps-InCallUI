@@ -44,4 +44,5 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <!-- Determine whether emergency calls should be marked. -->
     <bool name="config_emergency_display" translatable="false">false</bool>
 
+    <integer name="conference_call_max_support_num">4</integer>
 </resources>

@@ -373,7 +373,7 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener,
      * Returns the main string to use in the notification.
      */
     private String getContentTitle(ContactCacheEntry contactInfo, Call call) {
-        if (call.isConferenceCall() && call.hasProperty(Details.PROPERTY_GENERIC_CONFERENCE)) {
+        if (call.isConferenceCall() || call.hasProperty(Details.PROPERTY_GENERIC_CONFERENCE)) {
             return mContext.getResources().getString(R.string.card_title_conf_call);
         }
         if (TextUtils.isEmpty(contactInfo.name)) {
@@ -691,7 +691,7 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener,
      * @param sessionModificationState The new session modification state.
      */
     @Override
-    public void onSessionModificationStateChange(int sessionModificationState) {
+    public void onSessionModificationStateChange(Call call, int sessionModificationState) {
         if (sessionModificationState == Call.SessionModificationState.NO_REQUEST) {
             if (mCallId != null) {
                 CallList.getInstance().removeCallUpdateListener(mCallId, this);
