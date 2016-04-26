@@ -33,4 +33,6 @@
     <!-- configuration to mute mic during add call -->
     <bool name="config_mute_mic_during_addcall">true</bool>
     <bool name="mark_emergency_call">false</bool>
+    <!-- enable_call_record -->
+    <bool name="enable_call_record">false</bool>
 </resources>
