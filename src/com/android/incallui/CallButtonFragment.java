@@ -925,6 +925,8 @@ public class CallButtonFragment
     }
 
     private class OverflowMenu extends PopupMenu {
+        CallButtonPresenter.CallButtonUi ui = getUi();
+
         public OverflowMenu(Context context, View anchor) {
             super(context, anchor);
         }
@@ -940,11 +942,12 @@ public class CallButtonFragment
             boolean startEnabled = !isRecording && isRecordEnabled;
             boolean stopEnabled = isRecording && isRecordEnabled;
 
-            startRecord.setVisible(startEnabled);
-            startRecord.setEnabled(startEnabled);
-            stopRecord.setVisible(stopEnabled);
-            stopRecord.setEnabled(stopEnabled);
-
+            if (ui.getContext().getResources().getBoolean(R.bool.enable_call_record)) {
+                startRecord.setVisible(startEnabled);
+                startRecord.setEnabled(startEnabled);
+                stopRecord.setVisible(stopEnabled);
+                stopRecord.setEnabled(stopEnabled);
+            }
             super.show();
         }
     }
