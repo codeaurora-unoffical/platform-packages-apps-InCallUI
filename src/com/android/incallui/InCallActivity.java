@@ -851,6 +851,7 @@ public class InCallActivity extends Activity implements FragmentDisplayManager {
             mAnswerFragment.dismissPendingDialogs();
         }
         InCallCsRedialHandler.getInstance().dismissPendingDialogs();
+        InCallLowBatteryListener.getInstance().dismissPendingDialogs();
     }
 
     /**
