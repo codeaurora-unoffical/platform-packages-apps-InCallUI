@@ -416,6 +416,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
 
     private void updatePrimaryCallState() {
         if (getUi() != null && mPrimary != null) {
+            boolean isConfCall = mPrimary.isConferenceCall() || mPrimary.isIncomingConfCall();
             getUi().setCallState(
                     mPrimary.getState(),
                     mPrimary.getVideoState(),
@@ -425,7 +426,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
                     getCallStateIcon(),
                     getGatewayNumber(),
                     mPrimary.hasProperty(Details.PROPERTY_WIFI),
-                    mPrimary.isConferenceCall());
+                    isConfCall);
 
             maybeShowHdAudioIcon();
             setCallbackNumber();

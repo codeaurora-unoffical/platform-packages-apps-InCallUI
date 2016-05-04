@@ -829,6 +829,14 @@ public class Call {
                 extras.getInt(QtiImsExtUtils.QTI_IMS_TRANSFER_EXTRA_KEY, 0);
     }
 
+    public boolean isIncomingConfCall() {
+        Bundle extras = getExtras();
+        boolean incomingConf = (extras == null)? false :
+                extras.getBoolean(QtiImsExtUtils.QTI_IMS_INCOMING_CONF_EXTRA_KEY, false);
+        Log.d(this, "isIncomingConfCall = " + incomingConf);
+        return incomingConf;
+    }
+
     public boolean startQtiImsInterface(Context context) {
         return mQtiImsInterfaceImpl.startQtiImsInterface(context);
     }
