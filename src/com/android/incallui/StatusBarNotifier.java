@@ -514,7 +514,9 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener,
         }
 
         if (isIncomingOrWaiting) {
-            if (call.hasProperty(Details.PROPERTY_WIFI)) {
+            if (call.isIncomingConfCall()) {
+                resId = R.string.notification_incoming_conf_call;
+            } else if (call.hasProperty(Details.PROPERTY_WIFI)) {
                 resId = R.string.notification_incoming_call_wifi;
             } else {
                 resId = R.string.notification_incoming_call;
