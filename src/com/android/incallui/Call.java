@@ -248,7 +248,6 @@ public final class Call {
     private final List<String> mChildCallIds = new ArrayList<>();
     private final VideoSettings mVideoSettings = new VideoSettings();
     private int mModifyToVideoState = VideoProfile.VideoState.AUDIO_ONLY;
-    private boolean mIsOutgoingCall = true;
 
     private InCallVideoCallListener mVideoCallListener;
 
@@ -259,19 +258,10 @@ public final class Call {
         mId = ID_PREFIX + Integer.toString(sIdCounter++);
         updateFromTelecommCall();
         mTelecommCall.addListener(mTelecommCallListener);
-        mIsOutgoingCall = true;
     }
 
     public android.telecom.Call getTelecommCall() {
         return mTelecommCall;
-    }
-
-    public boolean isOutgoingCall() {
-        return mIsOutgoingCall;
-    }
-
-    public void setOutgoingCallState(boolean isMOCall) {
-        mIsOutgoingCall = isMOCall;
     }
 
     /**
