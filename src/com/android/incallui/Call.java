@@ -199,7 +199,13 @@ public class Call {
 
                 /* When disconnecting, reset the globals variables */
                 mImsServiceBound = false;
-                mContext.unbindService(mConnection);
+                try {
+                    mContext.unbindService(mConnection);
+                } catch (Exception ex) {
+                    Log.e(this, "stopQtiImsInterface: Error (exception) occurred "
+                            + "while trying to unbind QTI IMS ServiceConnection.");
+                    ex.printStackTrace();
+                }
                 mContext = null;
             } else {
                 Log.d(this, "stopQtiImsInterface: Service Bound - " + mImsServiceBound +
@@ -827,6 +833,14 @@ public class Call {
         Bundle extras = getExtras();
         return (extras == null)? 0 :
                 extras.getInt(QtiImsExtUtils.QTI_IMS_TRANSFER_EXTRA_KEY, 0);
+    }
+
+    public boolean isIncomingConfCall() {
+        Bundle extras = getExtras();
+        boolean incomingConf = (extras == null)? false :
+                extras.getBoolean(QtiImsExtUtils.QTI_IMS_INCOMING_CONF_EXTRA_KEY, false);
+        Log.d(this, "isIncomingConfCall = " + incomingConf);
+        return incomingConf;
     }
 
     public boolean startQtiImsInterface(Context context) {

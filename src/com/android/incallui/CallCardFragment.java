@@ -1161,6 +1161,17 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             case Call.State.CALL_WAITING:
                 if (isWifi && hasSuggestedLabel) {
                     callStateLabel = label;
+                } else if (isConference) {
+                    if (isAccount) {
+                        callStateLabel = context.getString(
+                                R.string.incoming_conf_via_template, label);
+                    } else if (VideoProfile.isTransmissionEnabled(videoState) ||
+                            VideoProfile.isReceptionEnabled(videoState)) {
+                        callStateLabel = context.getString(
+                                R.string.card_title_incoming_video_conf_call);
+                    } else {
+                        callStateLabel = context.getString(R.string.card_title_incoming_conf_call);
+                    }
                 } else if (isAccount) {
                     callStateLabel = context.getString(R.string.incoming_via_template, label);
                 } else if (VideoProfile.isTransmissionEnabled(videoState) ||
