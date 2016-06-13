@@ -232,4 +232,14 @@ final class TelecomAdapter implements InCallServiceListener {
         // Default to true if we are not connected to telecom.
         return mInCallService == null ? true : mInCallService.canAddCall();
     }
+
+    void continueCallWithVideoState(Call call, int videoState) {
+        android.telecom.Call telecomCall = getTelecommCallById(call.getId());
+        if (telecomCall != null) {
+            //TODO enable later once dependant changes are merged
+            //telecomCall.continueCallWithVideoState(videoState);
+        } else {
+            Log.e(this, "error continueCallWithVideoState, call not in call list " + call.getId());
+        }
+    }
 }
