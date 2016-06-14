@@ -516,4 +516,9 @@
 
     <string name="toast_video_call_downgrade_to_voice_call">Video calling is currently available only over high speed LTE and Wi-Fi networks</string>
     <string name="too_many_recipients">The maximum allowed participants in a 4G conference call are 6.</string>
+
+    <!-- VoWifi call quality indicators -->
+    <string name="vowifi_call_quality_good">Good Voice quality</string>
+    <string name="vowifi_call_quality_fair">Fair Voice quality</string>
+    <string name="vowifi_call_quality_poor">Poor Voice quality</string>
 </resources>
