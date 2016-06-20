@@ -236,8 +236,7 @@ final class TelecomAdapter implements InCallServiceListener {
     void continueCallWithVideoState(Call call, int videoState) {
         android.telecom.Call telecomCall = getTelecommCallById(call.getId());
         if (telecomCall != null) {
-            //TODO enable later once dependant changes are merged
-            //telecomCall.continueCallWithVideoState(videoState);
+            telecomCall.continueCallWithVideoState(videoState);
         } else {
             Log.e(this, "error continueCallWithVideoState, call not in call list " + call.getId());
         }
