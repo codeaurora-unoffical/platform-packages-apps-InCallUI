@@ -847,10 +847,16 @@ public class InCallActivity extends Activity implements FragmentDisplayManager {
             mDialog.dismiss();
             mDialog = null;
         }
+        SelectPhoneAccountDialogFragment dialogFragment = (SelectPhoneAccountDialogFragment)
+                getFragmentManager().findFragmentByTag(TAG_SELECT_ACCT_FRAGMENT);
+        if (dialogFragment != null) {
+            dialogFragment.dismiss();
+        }
         if (mAnswerFragment != null) {
             mAnswerFragment.dismissPendingDialogs();
         }
         InCallCsRedialHandler.getInstance().dismissPendingDialogs();
+        InCallLowBatteryListener.getInstance().dismissPendingDialogs();
     }
 
     /**

@@ -35,6 +35,7 @@ import com.android.incallui.InCallPresenter.InCallState;
 import com.android.incallui.InCallPresenter.InCallStateListener;
 import com.android.incallui.InCallPresenter.IncomingCallListener;
 import com.android.incallui.InCallPresenter.InCallDetailsListener;
+import com.android.internal.telephony.CarrierAppUtils;
 import org.codeaurora.ims.utils.QtiImsExtUtils;
 
 import java.util.Objects;
@@ -53,6 +54,7 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
     private Call mCall;
     private boolean mAutomaticallyMuted = false;
     private boolean mPreviousMuteState = false;
+    private static final int MAX_PARTICIPANTS_LIMIT = 6;
 
     public CallButtonPresenter() {
     }
@@ -240,6 +242,24 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
     }
 
     public void mergeClicked() {
+        if (getUi().getContext().getResources().getBoolean(
+                R.bool.add_multi_participants_enabled)){
+            int participantsCount = 0;
+            if (mCall.isConferenceCall()) {
+                participantsCount = mCall.getChildCallIds().size();
+            } else {
+                Call backgroundCall = CallList.getInstance().getBackgroundCall();
+                if (backgroundCall != null && backgroundCall.isConferenceCall()) {
+                    participantsCount = backgroundCall.getChildCallIds().size();
+                }
+            }
+            Log.i(this, "Number of participantsCount is " + participantsCount);
+            if (participantsCount >= MAX_PARTICIPANTS_LIMIT) {
+                Toast.makeText(getUi().getContext(),
+                        R.string.too_many_recipients, Toast.LENGTH_SHORT).show();
+                return;
+            }
+         }
         TelecomAdapter.getInstance().merge(mCall.getId());
         InCallAudioManager.getInstance().onMergeClicked();
     }
@@ -254,11 +274,15 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
     }
 
     public void addCallClicked() {
-        // Automatically mute the current call
-        mAutomaticallyMuted = true;
-        mPreviousMuteState = AudioModeProvider.getInstance().getMute();
-        // Simulate a click on the mute button
-        muteClicked(true);
+        CarrierAppUtils.CARRIER carrier = CarrierAppUtils.getCarrierId();
+        if (carrier != null && (CarrierAppUtils.CARRIER.TELEPHONY_CARRIER_ONE
+                != carrier)) {
+            // Automatically mute the current call
+            mAutomaticallyMuted = true;
+            mPreviousMuteState = AudioModeProvider.getInstance().getMute();
+            // Simulate a click on the mute button
+            muteClicked(true);
+        }
         TelecomAdapter.getInstance().addCall();
     }
 
@@ -302,6 +326,11 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         } else if (CallUtils.isVideoCall(currVideoState)) {
             //if call is a video call, send audio only modify request
             changeToVoiceClicked();
+        }
+        if (QtiCallUtils.useCustomVideoUi(context)) {
+            InCallAudioManager.getInstance().onModifyCallClicked(mCall,
+                    CallUtils.isVideoCall(currVideoState) ?
+                    VideoProfile.STATE_AUDIO_ONLY : VideoProfile.STATE_BIDIRECTIONAL);
         }
     }
 
