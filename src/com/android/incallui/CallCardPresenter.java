@@ -383,7 +383,8 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
             }
             mCallTimer.cancel();
         } else {
-            ui.setPrimaryCallElapsedTime(true, Long.toString(mPrimary.getCallDuration()) );
+            ui.setPrimaryCallElapsedTime(true,
+                    DateUtils.formatElapsedTime(mPrimary.getCallDuration() / 1000) );
         }
     }
 
