@@ -31,6 +31,8 @@
 
     <bool name="config_regional_number_patterns_video_call">false</bool>
 
+    <bool name="enable_call_record">true</bool>
+
     <!-- When set to true, this config enables enhance videocall ui -->
     <bool name="config_enable_enhance_video_call_ui">false</bool>
 
