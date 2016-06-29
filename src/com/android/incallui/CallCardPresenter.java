@@ -35,6 +35,7 @@ import android.telecom.StatusHints;
 import android.telecom.TelecomManager;
 import android.telecom.VideoProfile;
 import android.telephony.PhoneNumberUtils;
+import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
 import android.view.accessibility.AccessibilityManager;
 
@@ -809,7 +810,8 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         PhoneAccount account = getAccountForCall(call);
         TelecomManager mgr = InCallPresenter.getInstance().getTelecomManager();
         if (account != null && account.getIcon()!= null &&
-                mgr.getCallCapablePhoneAccounts().size() > 1) {
+                mgr.getCallCapablePhoneAccounts().size() > 1 &&
+                SubscriptionManager.from(mContext).getActiveSubscriptionInfoCount() > 1) {
             return account.getIcon().loadDrawable(mContext);
         }
         return null;
