@@ -478,10 +478,8 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         }
 
         final int callState = call.getState();
-        final boolean showUpgradeToVideo = (!isVideo || useExt || useCustomVideoUi) &&
-                (QtiCallUtils.hasVideoCapabilities(call) ||
-                QtiCallUtils.hasVoiceCapabilities(call)) &&
-                (callState == Call.State.ACTIVE || callState == Call.State.ONHOLD);
+        final boolean showUpgradeToVideo = QtiCallUtils.isSessionModificationAllowed(call,
+                ui.getContext());
 
         final boolean showRecord = (callState == Call.State.ACTIVE
                 || callState == Call.State.ONHOLD) && !call.isEmergencyCall();
@@ -545,7 +543,9 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         ui.showButton(BUTTON_DIALPAD, !isVideo || useExt || useCustomVideoUi);
         ui.showButton(BUTTON_MERGE, showMerge);
         ui.showButton(BUTTON_ADD_PARTICIPANT, showAddParticipant);
-        ui.showButton(BUTTON_RECORD, showRecord);
+        if (ui.getContext().getResources().getBoolean(R.bool.enable_call_record)) {
+            ui.showButton(BUTTON_RECORD, showRecord);
+        }
         if (ui.getContext().getResources().getBoolean(
                 R.bool.config_enable_enhance_video_call_ui)) {
             Log.v(this, "Add three new buttons");
