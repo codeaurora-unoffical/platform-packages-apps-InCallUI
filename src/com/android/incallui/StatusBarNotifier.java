@@ -69,6 +69,7 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener,
     private final NotificationManager mNotificationManager;
     private int mCurrentNotification = NOTIFICATION_NONE;
     private int mCallState = Call.State.INVALID;
+    private int mVideoState = VideoProfile.STATE_AUDIO_ONLY;
     private int mSavedIcon = 0;
     private String mSavedContent = null;
     private Bitmap mSavedLargeIcon;
@@ -238,7 +239,7 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener,
         }
 
         if (!checkForChangeAndSaveData(iconResId, content, largeIcon, contentTitle, state,
-                notificationType)) {
+                call.getVideoState(), notificationType)) {
             return;
         }
 
@@ -333,7 +334,7 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener,
      * we do not issue a new notification for the exact same data.
      */
     private boolean checkForChangeAndSaveData(int icon, String content, Bitmap largeIcon,
-            String contentTitle, int state, int notificationType) {
+            String contentTitle, int state, int videoState, int notificationType) {
 
         // The two are different:
         // if new title is not null, it should be different from saved version OR
@@ -344,8 +345,8 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener,
 
         // any change means we are definitely updating
         boolean retval = (mSavedIcon != icon) || !Objects.equals(mSavedContent, content) ||
-                (mCallState != state) || (mSavedLargeIcon != largeIcon) ||
-                contentTitleChanged;
+                (mCallState != state) || (mVideoState != videoState) ||
+                (mSavedLargeIcon != largeIcon) || contentTitleChanged;
 
         // If we aren't showing a notification right now or the notification type is changing,
         // definitely do an update.
@@ -359,6 +360,7 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener,
         mSavedIcon = icon;
         mSavedContent = content;
         mCallState = state;
+        mVideoState = videoState;
         mSavedLargeIcon = largeIcon;
         mSavedContentTitle = contentTitle;
 
