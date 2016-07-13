@@ -651,7 +651,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
      * Checks for a change to the video call and changes it if required.
      */
     private void checkForVideoCallChange(Call call) {
-        final VideoCall videoCall = call.getTelecommCall().getVideoCall();
+        final VideoCall videoCall = call.getVideoCall();
         Log.d(this, "checkForVideoCallChange: videoCall=" + videoCall + " mVideoCall="
                 + mVideoCall);
         if (!Objects.equals(videoCall, mVideoCall)) {
@@ -666,7 +666,7 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
      * @param videoCall The new video call.
      */
     private void changeVideoCall(Call call) {
-        final VideoCall videoCall = call.getTelecommCall().getVideoCall();
+        final VideoCall videoCall = call.getVideoCall();
         Log.d(this, "changeVideoCall to videoCall=" + videoCall + " mVideoCall=" + mVideoCall);
         // Null out the surfaces on the previous video call.
         if (mVideoCall != null) {
@@ -683,8 +683,21 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
             return;
         }
 
-        if (CallUtils.isVideoCall(call) && hasChanged) {
+        if (!CallUtils.isVideoCall(call)) {
+            Log.d(this, "Not a video call.Ignore.");
+            return;
+        }
+
+        if (hasChanged) {
             enterVideoMode(call);
+        } else if (mPreviewSurfaceState == PreviewSurfaceState.CAMERA_SET) {
+            // After conference merge, video call associated with conference call
+            // changes. Sometimes during merge, enable camera is called via older video call object
+            // and camera capabilities are not propagated to UI causing camera to get stuck.
+            // To fix those cases, requery camera caps when video call is changed
+            // and camera caps are not yet received.
+            Log.d(this, "changeVideoCall: Query camera caps");
+            videoCall.requestCameraCapabilities();
         }
     }
 
