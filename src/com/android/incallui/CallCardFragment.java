@@ -199,6 +199,8 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
 
     private MaterialPalette mCurrentThemeColors;
 
+    private boolean isNeedBlock = true;
+
     /**
      * Call state label to set when an auto-dismissing call state label is dismissed.
      */
@@ -765,6 +767,15 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         Log.v(this, "setSecondaryInfoVisible: wasVisible = " + wasVisible + " isVisible = "
                 + isVisible + " isFg = " + InCallPresenter.getInstance().isShowingInCallUi()
                 + " view visibility = " + mSecondaryCallInfo.getVisibility());
+
+        if( ! (wasVisible || visible) ) {
+            if(!isNeedBlock) {
+                updateFabPosition();
+                isNeedBlock = true;
+            }
+        } else {
+            isNeedBlock = false;
+        }
 
         // If we are showing the secondary info, we need to show it before animating so that its
         // height will be determined on layout.
