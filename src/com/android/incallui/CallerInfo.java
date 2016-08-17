@@ -348,10 +348,9 @@ public class CallerInfo {
             name = context.getString(
                 R.string.emergency_call_dialog_number_for_display_operator);
         } else {
-            name = context.getString(R.string.emergency_call_dialog_number_for_display) + " "
-                + number;
+            name = context.getString(R.string.emergency_call_dialog_number_for_display);
         }
-        phoneNumber = null;
+        phoneNumber = number;
 
         photoResource = R.drawable.img_phone;
         mIsEmergency = true;
