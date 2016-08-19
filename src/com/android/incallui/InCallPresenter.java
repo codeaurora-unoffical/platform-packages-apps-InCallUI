@@ -1342,15 +1342,13 @@ public class InCallPresenter implements CallList.Listener,
                 (mInCallState == InCallState.WAITING_FOR_ACCOUNT) && (mCallList.hasLiveCall() ||
                 (mCallList.getBackgroundCall() != null));
 
-        // Show Call UI when user tries to dial second Video call when UE is under low battery so
-        // that user can take informed decision to contiue as video call or convert to voice call
-        if (mCallList.getActiveCall() != null || mCallList.getBackgroundCall() != null) {
-            if (InCallState.PENDING_OUTGOING == newState) {
-                Call call = mCallList.getPendingOutgoingCall();
-                showCallUi |= CallUtils.isVideoCall(call) &&
-                        InCallLowBatteryListener.getInstance().isLowBattery(
-                        call.getTelecommCall().getDetails()) && mainUiNotVisible;
-            }
+        // Show Call UI when there is a pending outgoing video call when UE is under low battery so
+        // that user can take informed decision to continue as video call or convert to voice call.
+        if (InCallState.PENDING_OUTGOING == newState) {
+            Call call = mCallList.getPendingOutgoingCall();
+            showCallUi |= CallUtils.isVideoCall(call) &&
+                    InCallLowBatteryListener.getInstance().isLowBattery(
+                    call.getTelecommCall().getDetails()) && mainUiNotVisible;
         }
 
         // The only time that we have an instance of mInCallActivity and it isn't started is
