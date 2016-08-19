@@ -1359,7 +1359,7 @@ public class InCallPresenter implements CallList.Listener,
 
         // Show Call UI when user tries to dial second Video call when UE is under low battery so
         // that user can take informed decision to contiue as video call or convert to voice call
-        if (CallUtils.isVideoCall(mCallList.getActiveCall())) {
+        if (mCallList.getActiveCall() != null || mCallList.getBackgroundCall() != null) {
             if (InCallState.PENDING_OUTGOING == newState) {
                 Call call = mCallList.getPendingOutgoingCall();
                 showCallUi |= CallUtils.isVideoCall(call) &&

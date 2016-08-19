@@ -142,8 +142,13 @@ public class InCallLowBatteryListener implements CallList.Listener, InCallDetail
         Log.d(this, "onDisconnect call: " + call);
         updateCallInMap(call);
 
-        //if low battery dialog is visible to user, dismiss it
-        dismissPendingDialogs();
+        if (mPrimaryCallTracker.getPrimaryCall() == null) {
+            /* primarycall is null may signal the possibility that there is only a single call and
+               is getting disconnected. So, try to dismiss low battery alert dialogue (if any). This
+               is to handle unintentional dismiss for add VT call use-cases wherein low battery
+               alert dialog is waiting for user input and the held call is remotely disconnected */
+            dismissPendingDialogs();
+        }
     }
 
     /**
