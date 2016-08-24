@@ -440,8 +440,9 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         final boolean showUpgradeToVideo = QtiCallUtils.isSessionModificationAllowed(call,
                 ui.getContext());
 
+        final boolean isEmergencyCall = call.isEmergencyCall();
         final boolean showRecord = (callState == Call.State.ACTIVE
-                || callState == Call.State.ONHOLD) && !call.isEmergencyCall();
+                || callState == Call.State.ONHOLD) && !isEmergencyCall;
 
         final boolean showMute = call.can(android.telecom.Call.Details.CAPABILITY_MUTE);
         boolean showAddParticipant = call.can(
@@ -475,7 +476,7 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
             }
         }
 
-        final int showCallTransfer = call.getTransferCapabilities();
+        final int showCallTransfer = isEmergencyCall? 0 : call.getTransferCapabilities();
 
         ui.showButton(BUTTON_AUDIO, true);
         ui.showButton(BUTTON_SWAP, showSwap);
