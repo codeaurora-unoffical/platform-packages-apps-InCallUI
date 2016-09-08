@@ -46,6 +46,7 @@ import android.provider.Telephony.Sms;
 import android.telecom.DisconnectCause;
 import android.telecom.VideoProfile;
 import android.telephony.PhoneNumberUtils;
+import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.Gravity;
@@ -1293,6 +1294,11 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
      */
     @Override
     public void showHdAudioIndicator(boolean visible) {
+        int subId = CallList.getInstance().getActiveSubId();
+        if (SubscriptionManager.getResourcesForSubId(getContext(), subId)
+                .getBoolean(R.bool.config_show_hd2)) {
+            mHdAudioIcon.setImageResource(R.drawable.ic_hd2_24dp);
+        }
         mHdAudioIcon.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
