@@ -362,6 +362,7 @@ public class CallButtonFragment
             final RippleDrawable btnCompoundDrawable = compoundBackgroundDrawable(themeColors);
             layers.setDrawableByLayerId(R.id.compoundBackgroundItem, btnCompoundDrawable);
             button.setChecked(isChecked);
+            button.requestLayout();
         }
 
         ImageButton[] normalButtons = {
