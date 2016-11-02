@@ -500,6 +500,11 @@ public class VideoCallPresenter extends Presenter<VideoCallPresenter.VideoCallUi
         getUi().adjustPreviewLocation(isVisible /* shiftUp */, height);
     }
 
+    @Override
+    public void onAnswerViewGrab(boolean isGrabbed) {
+        // No-op - required for RcsCallPresenter.
+    }
+
     private void checkForVideoStateChange(Call call) {
         boolean isVideoCall = CallUtils.isVideoCall(call);
         boolean hasVideoStateChanged = mCurrentVideoState != call.getVideoState();

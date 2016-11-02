@@ -153,4 +153,25 @@
 
     <string name="emergency_call_dialog_number_for_display_operator">Emergency number</string>
     <string name="config_sos_number" translatable="false">"xyz"</string>
+
+    <!-- Enrich call strings -->
+    <string name="notification_incoming_enrich_call_high_priority">Incoming urgent call</string>
+    <string name="notification_incoming_enrich_call_normal_priority">Incoming rich call</string>
+    <string name="notification_on_hold_enrich_call_high_priority">Urgent call on hold</string>
+    <string name="notification_on_hold_enrich_call_normal_priority">Rich call on hold</string>
+    <string name="notification_dialing_enrich_call_high_priority">Dialing urgent call</string>
+    <string name="notification_dialing_enrich_call_normal_priority">Dialing rich call</string>
+    <string name="notification_ongoing_enrich_call_high_priority">Ongoing urgent call</string>
+    <string name="notification_ongoing_enrich_call_normal_priority">Ongoing rich call</string>
+    <string name="normal_enrich_call">RICH CALL</string>
+    <string name="urgent_enrich_call">URGENT CALL</string>
+    <string name="enrich_call_failed">ENRICH CALL FAILED</string>
+    <string name="can_not_launch_image_application">Can not find any application to show shared image</string>
+    <string name="can_not_launch_maps_application">Can not find any application to show maps location</string>
+    <string name="enrich_call_permission">Access Enriched call</string>
+    <string name="access_permission_message">Require access to read file storage to show rich call shared image in calling screen.
+    By pressing yes, you will be asked to allow the access to read file storage. By pressing allow you can see rich call shared image
+    in your calling screen.<b><u>It is is highly recommended that you allow the permission to get rich call user experience.</u></b></string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

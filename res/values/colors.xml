@@ -108,4 +108,11 @@
 
     <!-- Ripple color used over light backgrounds. -->
     <color name="ripple_light">#40000000</color>
+
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="urgentCallBackground">#f40707</color>
+    <color name="normalCallBackground">#0ab5e0</color>
+    <color name="enrichDetailsBackground">#FFFFFF</color>
 </resources>
