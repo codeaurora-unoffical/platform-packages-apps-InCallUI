@@ -355,6 +355,8 @@ public class InCallMessageController implements InCallSubstateListener, VideoEve
                 return R.string.session_modify_cause_downgrade_thermal_mitigation;
             case QtiCallConstants.CAUSE_CODE_SESSION_MODIFY_DOWNGRADE_LIPSYNC:
                 return R.string.session_modify_cause_downgrade_lipsync;
+            case QtiCallConstants.CAUSE_CODE_SESSION_MODIFY_DOWNGRADE_GENERIC:
+                return R.string.session_modify_cause_downgrade_generic;
             case QtiCallConstants.CAUSE_CODE_SESSION_MODIFY_DOWNGRADE_GENERIC_ERROR:
             default:
                 return R.string.session_modify_cause_downgrade_generic_error;
