@@ -18,6 +18,7 @@ package com.android.incallui;
 
 import android.app.ActivityManager.TaskDescription;
 import android.app.FragmentManager;
+import android.app.StatusBarManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +31,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.telecom.DisconnectCause;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
@@ -73,6 +75,11 @@ public class InCallPresenter implements CallList.Listener,
 
     private static final String EXTRA_FIRST_TIME_SHOWN =
             "com.android.incallui.intent.extra.FIRST_TIME_SHOWN";
+
+    // value for subsidy lock resticted state
+    private static final int DEVICE_LOCKED = 101;
+    private static final int AP_LOCKED = 102;
+    private static final String SUBSIDY_STATUS = "subsidy_status";
 
     private static final Bundle EMPTY_EXTRAS = new Bundle();
 
@@ -969,6 +976,13 @@ public class InCallPresenter implements CallList.Listener,
         Log.d(this, "IsChangingConfigurations=" + mIsChangingConfigurations);
     }
 
+    private boolean isSubsidyRestricted() {
+        int subsidyStatus = Settings.Secure.getInt(mContext
+                .getContentResolver(), SUBSIDY_STATUS, 0);
+        boolean subsidyLocked = (subsidyStatus == AP_LOCKED)
+                || (subsidyStatus == DEVICE_LOCKED);
+        return subsidyLocked;
+    }
 
     /**
      * Called when the activity goes in/out of the foreground.
@@ -982,6 +996,18 @@ public class InCallPresenter implements CallList.Listener,
 
         if (mProximitySensor != null) {
             mProximitySensor.onInCallShowing(showing);
+        }
+
+        if (isSubsidyRestricted()) {
+            if (showing) {
+                ((StatusBarManager) mContext
+                        .getSystemService(Context.STATUS_BAR_SERVICE))
+                        .disable(StatusBarManager.DISABLE_EXPAND);
+            } else {
+                ((StatusBarManager) mContext
+                        .getSystemService(Context.STATUS_BAR_SERVICE))
+                        .disable(StatusBarManager.DISABLE_NONE);
+            }
         }
 
         Intent broadcastIntent = ObjectFactory.getUiReadyBroadcastIntent(mContext);
