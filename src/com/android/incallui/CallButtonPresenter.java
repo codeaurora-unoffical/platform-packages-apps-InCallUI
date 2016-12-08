@@ -303,7 +303,8 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         int currVideoState = mCall.getVideoState();
         int currUnpausedVideoState = CallUtils.getUnPausedVideoState(currVideoState);
 
-        if (VideoProfile.isAudioOnly(currVideoState)) {
+        if (VideoProfile.isAudioOnly(currVideoState) &&
+                !InCallLowBatteryListener.getInstance().onChangeToVideoCall(mCall)) {
             //if is a audio call, send bidirectional modify request
             currUnpausedVideoState |= VideoProfile.STATE_BIDIRECTIONAL;
 
@@ -314,6 +315,7 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
             //if call is a video call, send audio only modify request
             changeToVoiceClicked();
         }
+
         if (QtiCallUtils.useCustomVideoUi(context)) {
             InCallAudioManager.getInstance().onModifyCallClicked(mCall,
                     CallUtils.isVideoCall(currVideoState) ?
