@@ -369,7 +369,8 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
             updateExtraButtonRow();
 
             if (ui instanceof ImsCallButtonFragment){
-                ((ImsCallButtonFragment)ui).handleUpdateModifyButtons(CallUtils.getCallType(call));
+                ((ImsCallButtonFragment)ui).handleUpdateModifyButtons(CallUtils.getCallType(call),
+                        canModifyCall);
             }
         } else {
             ui.enableAddParticipant(false);

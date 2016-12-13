@@ -156,9 +156,6 @@ public class ImsCallButtonFragment extends CallButtonFragment {
         Log.d(this, "handleClickModifyButton mVTOn = " + mVTOn);
         getPresenter().modifyWithCallType(mVTOn);
         //mVTOn = !mVTOn;
-        mImsModify.setEnabled(false);
-        mModifyDrawable.setEnabled(false);
-        mModifyText.setEnabled(false);
         Toast.makeText(getView().getContext(), R.string.ims_connecting ,Toast.LENGTH_SHORT).show();
     }
     
@@ -168,8 +165,9 @@ public class ImsCallButtonFragment extends CallButtonFragment {
     }
     
     
-    public void handleUpdateModifyButtons(int callType) {
-        Log.d(this, "enter handleUpdateModifyButtons callType = " + callType);
+    public void handleUpdateModifyButtons(final int callType, final boolean canModifyCall) {
+        Log.d(this, "enter handleUpdateModifyButtons callType = " + callType +
+                " canModifyCall = " + canModifyCall);
         switch (callType) {
             case CallDetails.CALL_TYPE_VT_TX:
                 break;
@@ -178,23 +176,27 @@ public class ImsCallButtonFragment extends CallButtonFragment {
             case CallDetails.CALL_TYPE_VT:
                 mModifyText.setText(R.string.ims_modify_volte);
                 mModifyDrawable.setImageResource(R.drawable.ims_voicecall_view);
-                mModifyDrawable.setEnabled(true);
-                mImsModify.setEnabled(true);
-                mModifyText.setEnabled(true);
+                mModifyDrawable.setEnabled(canModifyCall);
+                mImsModify.setEnabled(canModifyCall);
+                mModifyText.setEnabled(canModifyCall);
+                mImsModify.setVisibility(canModifyCall ? View.VISIBLE : View.GONE);
                 mImsSwitch.setEnabled(true);
                 mSwitchDrawable.setEnabled(true);
                 mSwitchText.setEnabled(true);
+                mImsSwitch.setVisibility(View.VISIBLE);
                 mVTOn = true;
                 break;
             case CallDetails.CALL_TYPE_VOICE:
                 mModifyText.setText(R.string.ims_modify_vt);
                 mModifyDrawable.setImageResource(R.drawable.ims_videocall_view);
-                mModifyDrawable.setEnabled(true);
-                mImsModify.setEnabled(true);
-                mModifyText.setEnabled(true);
+                mModifyDrawable.setEnabled(canModifyCall);
+                mImsModify.setEnabled(canModifyCall);
+                mModifyText.setEnabled(canModifyCall);
+                mImsModify.setVisibility(canModifyCall ? View.VISIBLE : View.GONE);
                 mImsSwitch.setEnabled(false);
                 mSwitchDrawable.setEnabled(false);
                 mSwitchText.setEnabled(false);
+                mImsSwitch.setVisibility(View.GONE);
                 mVTOn = false;
                 break;
 
