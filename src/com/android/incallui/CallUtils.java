@@ -28,6 +28,7 @@
 
 package com.android.incallui;
 
+import android.os.SystemProperties;
 import com.android.services.telephony.common.Call;
 import com.android.services.telephony.common.CallDetails;
 import com.google.common.base.Preconditions;
@@ -113,4 +114,7 @@ public class CallUtils {
                 || isImsCall(callList.getDisconnectedCall());
     }
 
+    public static boolean is4GConferenceSupported() {
+        return SystemProperties.getBoolean("persist.radio.calls.on.ims", false);
+    }
 }

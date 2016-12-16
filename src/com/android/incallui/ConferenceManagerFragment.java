@@ -44,7 +44,7 @@ public class ConferenceManagerFragment
     private ViewGroup[] mConferenceCallList;
     private Chronometer mConferenceTime;
 
-    private View mAddParticipants;
+    private View mAddParticipants = null;
     @Override
     ConferenceManagerPresenter createPresenter() {
         // having a singleton instance.
@@ -100,8 +100,9 @@ public class ConferenceManagerFragment
             }
         });
 
-        if (isImsUI) {
+        if (isImsUI && CallUtils.is4GConferenceSupported()) {
             mAddParticipants = parent.findViewById(R.id.addParticipantGroup);
+            mAddParticipants.setVisibility(View.VISIBLE);
             mAddParticipants.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
