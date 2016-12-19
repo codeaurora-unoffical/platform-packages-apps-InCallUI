@@ -169,9 +169,9 @@
     <string name="can_not_launch_image_application">Can not find any application to show shared image</string>
     <string name="can_not_launch_maps_application">Can not find any application to show maps location</string>
     <string name="enrich_call_permission">Access Enriched call</string>
-    <string name="access_permission_message">Require access to read file storage to show rich call shared image in calling screen.
-    By pressing yes, you will be asked to allow the access to read file storage. By pressing allow you can see rich call shared image
-    in your calling screen.<b><u>It is is highly recommended that you allow the permission to get rich call user experience.</u></b></string>
+    <string name="access_permission_message">Phone App requires access to photos,
+    media &amp; files on your device to enable Rich Calling. To continue, tap  \'YES\'
+    below &amp;  \'ALLOW\' on the next screen.</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
 </resources>
