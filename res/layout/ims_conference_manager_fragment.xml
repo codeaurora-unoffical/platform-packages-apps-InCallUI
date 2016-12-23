@@ -141,6 +141,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 android:layout_width="match_parent"
                 android:layout_height="64dp"
                 android:paddingStart="16dp"
+                android:visibility="gone"
                 android:gravity="center_vertical">
                 <ImageView
                     android:id="@+id/addParticipantIcon"
