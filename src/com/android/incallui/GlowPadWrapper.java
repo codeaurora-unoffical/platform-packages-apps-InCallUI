@@ -104,9 +104,9 @@ public class GlowPadWrapper extends GlowPadView implements GlowPadView.OnTrigger
         if (mTargetTriggered) {
             mTargetTriggered = false;
         } else {
-            InCallPresenter.getInstance().notifyAnswerViewGrabChanged(false);
             startPing();
         }
+        InCallPresenter.getInstance().notifyAnswerViewGrabChanged(false);
     }
 
     @Override

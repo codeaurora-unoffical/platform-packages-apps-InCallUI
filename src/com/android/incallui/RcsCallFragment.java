@@ -194,7 +194,7 @@ public class RcsCallFragment extends
         mIsDataAvailable = false;
 
         //EnrichCall Subject View update
-        if (data.getSubject() != null && TextUtils.isEmpty(data.getSubject())) {
+        if (TextUtils.isEmpty(data.getSubject())) {
             mSubject.setVisibility(View.GONE);
         } else {
             mIsDataAvailable = true;
@@ -296,14 +296,14 @@ public class RcsCallFragment extends
     @Override
     public void showEnrichCallDetail() {
         if (!(mEnrichDetailLayout.getVisibility() == View.VISIBLE)) {
-            animate(mEnrichDetailLayout, mExpandCollapseBtn, mRingAnimView, true);
+            expandCollapse(mEnrichDetailLayout, mExpandCollapseBtn, mRingAnimView, true);
         }
     }
 
     @Override
     public void hideEnrichCallDetail() {
         if (mEnrichDetailLayout.getVisibility() == View.VISIBLE) {
-            animate(mEnrichDetailLayout, mExpandCollapseBtn, mRingAnimView, false);
+            expandCollapse(mEnrichDetailLayout, mExpandCollapseBtn, mRingAnimView, false);
         }
     }
 
@@ -311,6 +311,37 @@ public class RcsCallFragment extends
         Log.d(this, "updateLocationImage ");
         mMapView.setTag(new double[]{lat, lon});
         getPresenter().updateImageFromBytes(arr, mMapViewListener);
+    }
+
+    /**
+    * Hide and show RCS content detailed view
+    *
+    * Additionally if detailed view is hidden ring animation will be shown.
+    *
+    * @param view   parent view
+    * @param buttonView  expand/collapse button view
+    * @param ringView  view to show ring animation on expand/collapse button
+    * @param show  hide/show detailed view with animation
+    */
+    private void expandCollapse(final View view, final ImageView buttonView,
+            final ImageView ringView, boolean show) {
+        /* Show a hide animation if view is visible or when the show variable is false */
+        if (view.getVisibility() == View.VISIBLE || !show) {
+            view.setVisibility(View.GONE);
+            buttonView.setImageResource(R.drawable.ic_rcs_expand);
+            if ((ringView != null) && mIsDataAvailable) {
+                Animation pulse = AnimationUtils.loadAnimation(getActivity(),
+                        R.anim.pulse);
+                ringView.startAnimation(pulse);
+            }
+        } else {
+            view.setVisibility(View.VISIBLE);
+            if (ringView != null) {
+                ringView.clearAnimation();
+                ringView.setVisibility(View.GONE);
+            }
+        }
+
     }
 
     /**
