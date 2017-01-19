@@ -55,7 +55,7 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
     private static final int APP_LOCKED = 102;
     private static final String SUBSIDY_STATUS = "subsidy_status";
     private static final String SUBSIDY_LOCK_SYSTEM_PROPERY
-            = "persist.radio.subsidylock";
+            = "ro.radio.subsidylock";
 
     private Call mCall;
     private boolean mAutomaticallyMuted = false;
