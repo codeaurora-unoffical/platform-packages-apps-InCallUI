@@ -39,7 +39,9 @@ public class CallUtils {
         return callType == CallDetails.CALL_TYPE_VT ||
                 callType == CallDetails.CALL_TYPE_VT_TX ||
                 callType == CallDetails.CALL_TYPE_VT_RX ||
-                callType == CallDetails.CALL_TYPE_VT_NODIR;
+                callType == CallDetails.CALL_TYPE_VT_NODIR ||
+                callType == CallDetails.CALL_TYPE_VT_PAUSE ||
+                callType == CallDetails.CALL_TYPE_VT_RESUME;
     }
 
     public static int getCallType(Call call) {
@@ -116,5 +118,24 @@ public class CallUtils {
 
     public static boolean is4GConferenceSupported() {
         return SystemProperties.getBoolean("persist.radio.calls.on.ims", false);
+    }
+
+    public static boolean isVideoPaused(Call call) {
+        return call != null
+                && call.getCallDetails().getVideoPauseState()
+                == CallDetails.VIDEO_PAUSE_STATE_PAUSED;
+    }
+
+    public static boolean areCallsSame(Call call1, Call call2) {
+        if (call1 == null && call2 == null) {
+            return true;
+        } else if (call1 == null || call2 == null) {
+            return false;
+        }
+        return (call1.getCallId() == call2.getCallId());
+    }
+
+    public static boolean canVideoPause(Call call) {
+        return isVideoCall(call) &&  call.getState() == Call.State.ACTIVE;
     }
 }
