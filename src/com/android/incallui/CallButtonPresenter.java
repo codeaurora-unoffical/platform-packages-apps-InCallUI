@@ -20,8 +20,6 @@ import static com.android.incallui.CallButtonFragment.Buttons.*;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.SystemProperties;
-import android.provider.Settings;
 import android.telecom.CallAudioState;
 import android.telecom.InCallService.VideoCall;
 import android.telecom.PhoneAccount;
@@ -50,12 +48,6 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
 
     private static final String KEY_AUTOMATICALLY_MUTED = "incall_key_automatically_muted";
     private static final String KEY_PREVIOUS_MUTE_STATE = "incall_key_previous_mute_state";
-
-    // subsidy lock lock screen status
-    private static final int APP_LOCKED = 102;
-    private static final String SUBSIDY_STATUS = "subsidy_status";
-    private static final String SUBSIDY_LOCK_SYSTEM_PROPERY
-            = "ro.radio.subsidylock";
 
     private Call mCall;
     private boolean mAutomaticallyMuted = false;
@@ -418,17 +410,6 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         updateButtonsState(call);
     }
 
-    private boolean isSubSidyLockFeatureEnabled() {
-        return SystemProperties.getInt(SUBSIDY_LOCK_SYSTEM_PROPERY, 0) == 1;
-    }
-
-    private boolean isSubsidyLocked(){
-        boolean subsidyLocked = Settings.Secure.getInt(
-                getUi().getContext().getContentResolver(),
-                SUBSIDY_STATUS, -1) == APP_LOCKED;// not in NONE state
-        return isSubSidyLockFeatureEnabled() && subsidyLocked;
-    }
-
     /**
      * Updates the buttons applicable for the UI.
      *
@@ -454,8 +435,6 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         final boolean useExt = QtiCallUtils.useExt(ui.getContext());
         final boolean useCustomVideoUi =
                 QtiCallUtils.useCustomVideoUi(ui.getContext());
-        boolean subsidyLocked = isSubsidyLocked();
-        boolean isEmergencyCall = call.isEmergencyCall();
         final boolean showAddCall = TelecomAdapter.getInstance().canAddCall();
         final boolean showMerge = call.can(
                 android.telecom.Call.Details.CAPABILITY_MERGE_CONFERENCE);
@@ -501,12 +480,11 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         final int showCallTransfer = call.getTransferCapabilities();
 
         ui.showButton(BUTTON_AUDIO, true);
-        ui.showButton(BUTTON_SWAP, showSwap && (!subsidyLocked || (isEmergencyCall && showSwap)));
-        ui.showButton(BUTTON_HOLD, showHold && (!subsidyLocked || (isEmergencyCall && showHold)));
+        ui.showButton(BUTTON_SWAP, showSwap);
+        ui.showButton(BUTTON_HOLD, showHold);
         ui.setHold(isCallOnHold);
         ui.showButton(BUTTON_MUTE, showMute);
-        ui.showButton(BUTTON_ADD_CALL, showAddCall &&
-                (!subsidyLocked || (isEmergencyCall && showAddCall)));
+        ui.showButton(BUTTON_ADD_CALL, showAddCall);
         if (ui.getContext().getResources().getBoolean(
                 R.bool.config_enable_enhance_video_call_ui)) {
             ui.showButton(BUTTON_UPGRADE_TO_VIDEO, false);
@@ -516,10 +494,8 @@ public class CallButtonPresenter extends Presenter<CallButtonPresenter.CallButto
         ui.showButton(BUTTON_SWITCH_CAMERA, isVideo);
         ui.showButton(BUTTON_PAUSE_VIDEO, isVideo && !useExt && !useCustomVideoUi);
         ui.showButton(BUTTON_DIALPAD, !isVideo || useExt || useCustomVideoUi);
-        ui.showButton(BUTTON_MERGE, showMerge && (!subsidyLocked
-                || (isEmergencyCall && showMerge)));
-        ui.showButton(BUTTON_ADD_PARTICIPANT, showAddParticipant &&
-                (!subsidyLocked || (isEmergencyCall && showAddParticipant)));
+        ui.showButton(BUTTON_MERGE, showMerge);
+        ui.showButton(BUTTON_ADD_PARTICIPANT, showAddParticipant);
         if (ui.getContext().getResources().getBoolean(R.bool.enable_call_record)) {
             ui.showButton(BUTTON_RECORD, showRecord);
         }
