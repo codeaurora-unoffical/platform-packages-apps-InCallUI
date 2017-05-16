@@ -319,8 +319,15 @@ public class InCallActivity extends Activity {
             return;
         }
 
-        // Nothing special to do.  Fall back to the default behavior.
-        super.onBackPressed();
+        if (CallUtils.hasImsCall(CallList.getInstance())) {
+            // If there is an IMS call present, dont finish the activity.
+            // Just move to background. This is to prevent surface from getting destroyed.
+            Log.d(this, "onBackPressed: not finishing due to ims call.");
+            moveTaskToBack(true);
+        } else {
+            // Nothing special to do.  Fall back to the default behavior.
+            super.onBackPressed();
+        }
     }
 
     @Override
